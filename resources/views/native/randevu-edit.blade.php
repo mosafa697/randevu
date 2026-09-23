@@ -30,6 +30,17 @@
         <native:text class="text-sm text-theme-destructive">{{ $errors['occurs_on'] }}</native:text>
     @endif
 
+    <native:text class="text-sm font-semibold text-theme-on-surface">{{ __('randevu.period_label') }}</native:text>
+
+    <native:row class="w-full gap-2">
+        <native:checkbox :label="__('randevu.period_years')" native:model="show_years" />
+        <native:checkbox :label="__('randevu.period_months')" native:model="show_months" />
+        <native:checkbox :label="__('randevu.period_days')" native:model="show_days" />
+    </native:row>
+    @if(!empty($errors['period_units']))
+        <native:text class="text-sm text-theme-destructive">{{ $errors['period_units'] }}</native:text>
+    @endif
+
     <native:outlined-text-input :label="__('randevu.note_label')" native:model="note" multiline :min-lines="2" />
     @if(!empty($errors['note']))
         <native:text class="text-sm text-theme-destructive">{{ $errors['note'] }}</native:text>

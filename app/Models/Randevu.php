@@ -16,13 +16,16 @@ use Illuminate\Support\Carbon;
  */
 class Randevu extends Model
 {
-    protected $fillable = ['title', 'occurs_on', 'note', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in'];
+    protected $fillable = ['title', 'occurs_on', 'note', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in', 'show_years', 'show_months', 'show_days'];
 
     protected $casts = [
         'occurs_on' => 'date',
         'hijri_year' => 'integer',
         'hijri_month' => 'integer',
         'hijri_day' => 'integer',
+        'show_years' => 'boolean',
+        'show_months' => 'boolean',
+        'show_days' => 'boolean',
     ];
 
     public static function rules(): array
@@ -35,7 +38,16 @@ class Randevu extends Model
             'hijri_month' => 'nullable|integer|min:1|max:12',
             'hijri_day' => 'nullable|integer|min:1|max:30',
             'entered_in' => 'required|in:gregorian,hijri',
+            'show_years' => 'boolean',
+            'show_months' => 'boolean',
+            'show_days' => 'boolean',
         ];
+    }
+
+    /** At least one distance unit must stay on. */
+    public static function hasAnyUnit(bool $years, bool $months, bool $days): bool
+    {
+        return $years || $months || $days;
     }
 
     /**
@@ -85,9 +97,10 @@ class Randevu extends Model
         return $this->occurs_on->isToday();
     }
 
+    /** Distance phrase rendered in this randevu's own chosen units. */
     public function relativePhrase(): string
     {
-        return RandevuTime::phrase($this->occurs_on);
+        return RandevuTime::phraseFor($this->occurs_on, $this->show_years, $this->show_months, $this->show_days);
     }
 
     /** Hijri display label, e.g. "12 ربيع الثاني 1448". Null when unknown. */

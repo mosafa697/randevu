@@ -6,7 +6,7 @@
     @endif
 
     @foreach($memories as $item)
-        <native:pressable @navigate="'/edit/'.$item['id']" class="w-full p-3 rounded-2xl bg-theme-surface">
+        <native:pressable @navigate="'/details/'.$item['id']" class="w-full p-3 rounded-2xl bg-theme-surface">
             <native:column class="w-full gap-1">
                 <native:row class="w-full items-center justify-between">
                     <native:text class="text-base font-semibold text-theme-on-surface">{{ $item['title'] }}</native:text>

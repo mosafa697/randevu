@@ -72,6 +72,26 @@ return [
         'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
     ],
 
+    // Details screen
+    'details_title' => 'التفاصيل',
+    'details_missing' => 'الميعاد ده مش موجود.',
+    'gregorian_label' => 'ميلادي',
+    'hijri_label' => 'هجري',
+    'exact_label' => 'بالظبط',
+    'kind_appointment' => 'ميعاد',
+    'kind_memory' => 'ذكرى',
+    'edit_cta' => 'عدّل',
+
+    // Per-appointment distance units
+    'period_label' => 'إظهار المدة بـ',
+    'period_days' => 'أيام',
+    'period_months' => 'شهور',
+    'period_years' => 'سنين',
+    'period_units_required' => 'لازم تختار وحدة واحدة على الأقل.',
+    'combined_future' => 'بعد :parts',
+    'combined_past' => 'من :parts',
+    'combined_separator' => '، ',
+
     // Settings
     'language_label' => 'اللغة',
     'current_arabic' => 'اللغة الحالية: العربية',

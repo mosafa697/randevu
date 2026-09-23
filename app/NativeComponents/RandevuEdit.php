@@ -38,6 +38,12 @@ class RandevuEdit extends NativeComponent
 
     public string $h_year = '';
 
+    public bool $show_years = true;
+
+    public bool $show_months = true;
+
+    public bool $show_days = true;
+
     /** @var list<string> */
     public array $dayOptions = [];
 
@@ -69,6 +75,9 @@ class RandevuEdit extends NativeComponent
         $this->title = $randevu->title;
         $this->note = (string) ($randevu->note ?? '');
         $this->calendar_mode = $randevu->entered_in === 'hijri' ? 'hijri' : 'gregorian';
+        $this->show_years = (bool) $randevu->show_years;
+        $this->show_months = (bool) $randevu->show_months;
+        $this->show_days = (bool) $randevu->show_days;
         $this->dayOptions = RandevuCreate::dayOptions();
         $this->monthOptions = RandevuTime::monthNames();
         $this->yearOptions = RandevuCreate::yearOptions();
@@ -166,12 +175,19 @@ class RandevuEdit extends NativeComponent
             'occurs_on' => $dates['occurs_on'] ?? null,
             'note' => $this->note ?: null,
             'entered_in' => $this->calendar_mode,
+            'show_years' => $this->show_years,
+            'show_months' => $this->show_months,
+            'show_days' => $this->show_days,
         ], Randevu::rules());
 
-        if ($validator->fails()) {
+        if ($validator->fails() || ! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days)) {
             $this->errors = collect($validator->errors()->messages())
                 ->mapWithKeys(fn ($msgs, $field) => [$field => (string) $msgs[0]])
                 ->all();
+
+            if (! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days)) {
+                $this->errors['period_units'] = __('randevu.period_units_required');
+            }
 
             return;
         }
@@ -186,6 +202,9 @@ class RandevuEdit extends NativeComponent
             'hijri_month' => $dates['hijri_month'],
             'hijri_day' => $dates['hijri_day'],
             'entered_in' => $this->calendar_mode,
+            'show_years' => $this->show_years,
+            'show_months' => $this->show_months,
+            'show_days' => $this->show_days,
         ]);
 
         $this->replace('/');
