@@ -34,6 +34,14 @@ Android-first NativePHP Mobile v4 app. Users track future appointments and past 
 - Forms keep old values on validation failure (public props persist), show per-field `$errors`.
 - Verify Blade with the TRUE native precompile (`NativeTagPrecompiler::setActive(true)` + `compileString` + `php -l`): `view:cache` bypasses the precompiler and gives false confidence. Always `view:clear` after so the device recompiles fresh.
 
+## Attractive theme (grab attention, stay readable)
+
+- Brand lives in ONE place: publish once with `php artisan vendor:publish --tag=native-ui-config`, then edit `config/native-ui.php` (`light` block; `dark` auto-derives by luminance inversion — override only what needs tuning).
+- Pick a distinctive `primary` (brand color) + `accent` for highlights, badges, and the Today callout. Reference ONLY semantic tokens in Blade (`bg-theme-surface`, `text-theme-on-surface`, `border-theme-outline`) — never raw palettes like `bg-slate-800`, or dark mode breaks.
+- Keep every `on-*` color at 4.5:1 contrast against its surface (WCAG AA); the shipped defaults meet it, re-check any customized pair.
+- Attention hierarchy per screen: one hero element (big title/phrase), one accent action (primary button or badge), everything else muted (`on-surface-variant`). Cards get `rounded-2xl` + surface fill; sections separated by `divider`, not extra boxes.
+- Verify every palette change in Jump in BOTH light and dark mode before merging.
+
 ## Storage
 
 - SQLite only, per-device = per-user. No server DB, no credentials in app. `SESSION/CACHE=file`, `QUEUE=sync`.

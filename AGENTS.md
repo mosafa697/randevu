@@ -4,8 +4,9 @@ Android-first NativePHP Mobile v4 + Laravel 13 app. Local SQLite per device, no 
 
 ## Skills (read these first)
 
-- `.opencode/skills/randevu/SKILL.md` — domain, relative-time rules, file map, EDGE UI conventions.
-- `.opencode/skills/gh-issues/SKILL.md` — issue claim protocol (assign + `ready`→`in-progress`, one branch per issue).
+- `.opencode/skills/randevu/SKILL.md` — domain, relative-time rules, file map, EDGE UI conventions, theme rules.
+- `.opencode/skills/gh-issues/SKILL.md` — task-by-task lifecycle: refine → plan → claim → implement → review → test → branch from `main` + PR. One task at a time.
+- `.opencode/skills/nativephp-clean/SKILL.md` — clean NativePHP v4 code; docs-first protocol (verify APIs in latest docs + vendor source).
 
 ## Workflow
 
