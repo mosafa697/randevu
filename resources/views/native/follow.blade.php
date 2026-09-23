@@ -10,10 +10,10 @@
     @if(count($today) > 0)
         <native:text class="text-lg font-bold text-theme-on-background">Today</native:text>
         @foreach($today as $item)
-            <native:pressable @navigate="'/edit/'.$item['id']" class="w-full p-3 rounded-lg bg-theme-surface">
+            <native:pressable @navigate="'/edit/'.$item['id']" class="w-full p-3 rounded-2xl bg-theme-surface">
                 <native:row class="w-full items-center justify-between">
                     <native:text class="text-base font-semibold text-theme-on-surface">{{ $item['title'] }}</native:text>
-                    <native:badge label="Today" />
+                    <native:badge label="Today" variant="accent" />
                 </native:row>
                 <native:text class="text-sm text-theme-on-surface-variant">{{ $item['absolute'] }} · {{ $item['phrase'] }}</native:text>
                 @if(!empty($item['hijri']))
@@ -29,7 +29,7 @@
     @if(count($upcoming) > 0)
         <native:text class="text-lg font-bold text-theme-on-background">Coming up</native:text>
         @foreach($upcoming as $item)
-            <native:pressable @navigate="'/edit/'.$item['id']" class="w-full p-3 rounded-lg bg-theme-surface">
+            <native:pressable @navigate="'/edit/'.$item['id']" class="w-full p-3 rounded-2xl bg-theme-surface">
                 <native:column class="w-full gap-1">
                     <native:row class="w-full items-center justify-between">
                         <native:text class="text-base font-semibold text-theme-on-surface">{{ $item['title'] }}</native:text>
@@ -50,7 +50,7 @@
     @if(count($memories) > 0)
         <native:text class="text-lg font-bold text-theme-on-background">Memories</native:text>
         @foreach($memories as $item)
-            <native:pressable @navigate="'/edit/'.$item['id']" class="w-full p-3 rounded-lg bg-theme-surface">
+            <native:pressable @navigate="'/edit/'.$item['id']" class="w-full p-3 rounded-2xl bg-theme-surface">
                 <native:column class="w-full gap-1">
                     <native:row class="w-full items-center justify-between">
                         <native:text class="text-base font-semibold text-theme-on-surface">{{ $item['title'] }}</native:text>
