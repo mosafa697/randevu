@@ -8,14 +8,14 @@ return [
     'settings_title' => 'Settings',
     'tab_follow' => 'Follow',
     'tab_new' => 'New',
+    'tab_memories' => 'Memories',
+    'memories_title' => 'Memories',
     'tab_settings' => 'Settings',
 
     // Follow sections
     'today' => 'Today',
     'upcoming' => 'Coming up',
     'memories' => 'Memories',
-    'empty_title' => 'No randevus yet',
-    'empty_body' => 'Add your first appointment or memory to follow it from today.',
     'empty_cta' => 'Add your first randevu',
 
     // Buttons

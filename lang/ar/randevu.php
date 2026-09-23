@@ -8,14 +8,14 @@ return [
     'settings_title' => 'الإعدادات',
     'tab_follow' => 'المواعيد',
     'tab_new' => 'جديد',
+    'tab_memories' => 'ذكريات',
+    'memories_title' => 'ذكريات',
     'tab_settings' => 'الإعدادات',
 
     // Follow sections
     'today' => 'النهاردة',
     'upcoming' => 'اللي جاي',
     'memories' => 'ذكريات',
-    'empty_title' => 'مفيش مواعيد لسه',
-    'empty_body' => 'ضيف أول ميعاد أو ذكرى عشان تتابعها من النهاردة.',
     'empty_cta' => 'ضيف أول ميعاد',
 
     // Buttons

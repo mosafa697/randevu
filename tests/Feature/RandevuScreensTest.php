@@ -16,14 +16,15 @@ class RandevuScreensTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_follow_shows_arabic_empty_state_by_default(): void
+    public function test_follow_empty_state_shows_only_add_button(): void
     {
         Native::test(Follow::class)
-            ->assertSee('مفيش مواعيد لسه')
-            ->assertSee('ضيف أول ميعاد');
+            ->assertSee('ضيف أول ميعاد')
+            ->assertDontSee('مفيش مواعيد لسه')
+            ->assertDontSee('عشان تتابعها');
     }
 
-    public function test_follow_sections_english_when_switched(): void
+    public function test_follow_lists_appointments_only_english(): void
     {
         Setting::set('locale', 'en');
 
@@ -33,17 +34,16 @@ class RandevuScreensTest extends TestCase
 
         Native::test(Follow::class)
             ->assertSee('Today')
-            ->assertSee('Coming up')
-            ->assertSee('Memories')
             ->assertSee('Dentist')
             ->assertSee('Trip')
-            ->assertSee('Graduation')
             ->assertSee('In 3 days')
-            ->assertSee('2 days ago')
-            ->assertSee('Bring card');
+            ->assertSee('Bring card')
+            ->assertDontSee('Graduation')
+            ->assertDontSee('Coming up')
+            ->assertDontSee('Memories');
     }
 
-    public function test_follow_sections_arabic_by_default(): void
+    public function test_follow_lists_appointments_only_arabic(): void
     {
         Randevu::create(['title' => 'Dentist', 'occurs_on' => today()]);
         Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDays(3)]);
@@ -51,10 +51,28 @@ class RandevuScreensTest extends TestCase
 
         Native::test(Follow::class)
             ->assertSee('النهاردة')
-            ->assertSee('اللي جاي')
-            ->assertSee('ذكريات')
             ->assertSee('بعد 3 أيام')
-            ->assertSee('من يومين');
+            ->assertDontSee('Graduation')
+            ->assertDontSee('اللي جاي');
+    }
+
+    public function test_memories_screen_lists_memories_newest_first(): void
+    {
+        Randevu::create(['title' => 'Old', 'occurs_on' => today()->subDays(10)]);
+        Randevu::create(['title' => 'Recent', 'occurs_on' => today()->subDays(2)]);
+        Randevu::create(['title' => 'Future', 'occurs_on' => today()->addDays(2)]);
+
+        Native::visit('/memories')
+            ->assertSee('Recent')
+            ->assertSee('Old')
+            ->assertDontSee('Future');
+    }
+
+    public function test_memories_empty_state_shows_only_add_button(): void
+    {
+        Native::visit('/memories')
+            ->assertSee('ضيف أول ميعاد')
+            ->assertDontSee('مفيش مواعيد لسه');
     }
 
     public function test_create_rejects_invalid_input_and_keeps_values(): void
@@ -190,7 +208,7 @@ class RandevuScreensTest extends TestCase
         $this->assertSame('en', Setting::get('locale'));
 
         // A fresh mount picks up the stored language without restart.
-        Native::test(Follow::class)->assertSee('No randevus yet');
+        Native::test(Follow::class)->assertSee('Add your first randevu');
 
         $screen->call('useArabic')->assertSet('locale', 'ar');
         $this->assertSame('ar', Setting::get('locale'));
