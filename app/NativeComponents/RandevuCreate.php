@@ -3,6 +3,7 @@
 namespace App\NativeComponents;
 
 use App\Models\Randevu;
+use App\NativeComponents\Concerns\AppliesLocale;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Support\Facades\Validator;
@@ -11,6 +12,7 @@ use Native\Mobile\Edge\NativeComponent;
 
 class RandevuCreate extends NativeComponent
 {
+    use AppliesLocale;
     public string $title = '';
 
     public string $note = '';
@@ -52,10 +54,11 @@ class RandevuCreate extends NativeComponent
 
     public function mount(): void
     {
+        $this->applyLocale();
         $today = now();
         $this->fillDateOptions();
         $this->day = (string) $today->day;
-        $this->month = $today->format('F');
+        $this->month = RandevuTime::monthNames()[$today->month - 1];
         $this->year = (string) $today->year;
         [$hy, $hm, $hd] = RandevuHijri::fromGregorian($today->year, $today->month, $today->day);
         $this->h_day = (string) $hd;
@@ -65,7 +68,7 @@ class RandevuCreate extends NativeComponent
 
     public function navTitle(): string
     {
-        return 'New randevu';
+        return __('randevu.create_title');
     }
 
     /** @return list<string> */
@@ -85,7 +88,7 @@ class RandevuCreate extends NativeComponent
     protected function fillDateOptions(): void
     {
         $this->dayOptions = self::dayOptions();
-        $this->monthOptions = RandevuTime::MONTH_NAMES;
+        $this->monthOptions = RandevuTime::monthNames();
         $this->yearOptions = self::yearOptions();
         $this->hDayOptions = array_map(strval(...), range(1, 30));
         $this->hMonthOptions = RandevuHijri::MONTH_NAMES;
