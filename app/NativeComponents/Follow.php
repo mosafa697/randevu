@@ -22,6 +22,11 @@ class Follow extends NativeComponent
         $this->refresh();
     }
 
+    public function navTitle(): string
+    {
+        return 'Randevu';
+    }
+
     public function refresh(): void
     {
         $this->today = Randevu::today()->orderBy('title')->get()->map(fn (Randevu $r) => $this->present($r))->all();

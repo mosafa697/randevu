@@ -1,8 +1,6 @@
 <native:column class="w-full h-full p-4 gap-4 bg-theme-background">
-    <native:row class="w-full items-center justify-between">
+    <native:row class="w-full">
         <native:button label="Back" @navigate.back />
-        <native:text class="text-xl font-bold text-theme-on-background">Edit randevu</native:text>
-        <native:text class="text-sm text-theme-on-background"> </native:text>
     </native:row>
 
     <native:outlined-text-input label="Title" native:model="title" />

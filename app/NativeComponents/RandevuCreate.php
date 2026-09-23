@@ -23,6 +23,11 @@ class RandevuCreate extends NativeComponent
         $this->occurs_on = now()->toDateString();
     }
 
+    public function navTitle(): string
+    {
+        return 'New randevu';
+    }
+
     public function save(): void
     {
         $validator = Validator::make([

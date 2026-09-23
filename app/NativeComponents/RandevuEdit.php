@@ -79,6 +79,11 @@ class RandevuEdit extends NativeComponent
         $this->replace('/');
     }
 
+    public function navTitle(): string
+    {
+        return 'Edit randevu';
+    }
+
     private function findOrFail(): Randevu
     {
         return Randevu::findOrFail($this->randevuId);

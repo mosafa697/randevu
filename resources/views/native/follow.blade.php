@@ -1,9 +1,4 @@
 <native:column class="w-full h-full p-4 gap-4 bg-theme-background">
-    <native:row class="w-full items-center justify-between">
-        <native:text class="text-2xl font-bold text-theme-on-background">Randevu</native:text>
-        <native:button label="+ New" @navigate="'/create'" />
-    </native:row>
-
     @if(count($today) === 0 && count($upcoming) === 0 && count($memories) === 0)
         <native:column class="w-full items-center gap-2 p-6">
             <native:text class="text-lg font-semibold text-center text-theme-on-background">No randevus yet</native:text>
