@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -15,10 +16,13 @@ use Illuminate\Support\Carbon;
  */
 class Randevu extends Model
 {
-    protected $fillable = ['title', 'occurs_on', 'note'];
+    protected $fillable = ['title', 'occurs_on', 'note', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in'];
 
     protected $casts = [
         'occurs_on' => 'date',
+        'hijri_year' => 'integer',
+        'hijri_month' => 'integer',
+        'hijri_day' => 'integer',
     ];
 
     public static function rules(): array
@@ -27,7 +31,25 @@ class Randevu extends Model
             'title' => 'required|string|max:255',
             'occurs_on' => 'required|date',
             'note' => 'nullable|string|max:2000',
+            'hijri_year' => 'nullable|integer|min:1',
+            'hijri_month' => 'nullable|integer|min:1|max:12',
+            'hijri_day' => 'nullable|integer|min:1|max:30',
+            'entered_in' => 'required|in:gregorian,hijri',
         ];
+    }
+
+    /**
+     * Fill both calendars from a Gregorian date. Gregorian stays the source
+     * of truth; Hijri is stored alongside for display and entry.
+     *
+     * @return array{hijri_year: int, hijri_month: int, hijri_day: int}
+     */
+    public static function hijriTriple(string $gregorianDate): array
+    {
+        $parts = array_map(intval(...), explode('-', $gregorianDate));
+        [$year, $month, $day] = RandevuHijri::fromGregorian($parts[0], $parts[1], $parts[2]);
+
+        return ['hijri_year' => $year, 'hijri_month' => $month, 'hijri_day' => $day];
     }
 
     /** @param Builder<Randevu> $query */
@@ -66,6 +88,16 @@ class Randevu extends Model
     public function relativePhrase(): string
     {
         return RandevuTime::phrase($this->occurs_on);
+    }
+
+    /** Hijri display label, e.g. "12 ربيع الثاني 1448". Null when unknown. */
+    public function hijriLabel(): ?string
+    {
+        if ($this->hijri_year === null || $this->hijri_month === null || $this->hijri_day === null) {
+            return null;
+        }
+
+        return RandevuHijri::format($this->hijri_year, $this->hijri_month, $this->hijri_day);
     }
 
     public function exactDayCount(): int

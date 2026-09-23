@@ -42,6 +42,7 @@ class Follow extends NativeComponent
             'title' => $randevu->title,
             'occurs_on' => $randevu->occurs_on->toDateString(),
             'absolute' => $randevu->occurs_on->format('d M Y'),
+            'hijri' => $randevu->hijriLabel(),
             'phrase' => $randevu->relativePhrase(),
             'days' => $randevu->exactDayCount(),
             'note' => $randevu->note,
