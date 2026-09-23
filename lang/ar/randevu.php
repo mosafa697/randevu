@@ -1,0 +1,81 @@
+<?php
+
+return [
+    // Navigation + tabs
+    'follow_title' => 'المواعيد',
+    'create_title' => 'ميعاد جديد',
+    'edit_title' => 'تعديل الميعاد',
+    'settings_title' => 'الإعدادات',
+    'tab_follow' => 'المواعيد',
+    'tab_new' => 'جديد',
+    'tab_settings' => 'الإعدادات',
+
+    // Follow sections
+    'today' => 'النهاردة',
+    'upcoming' => 'اللي جاي',
+    'memories' => 'ذكريات',
+    'empty_title' => 'مفيش مواعيد لسه',
+    'empty_body' => 'ضيف أول ميعاد أو ذكرى عشان تتابعها من النهاردة.',
+    'empty_cta' => 'ضيف أول ميعاد',
+
+    // Buttons
+    'new' => '+ جديد',
+    'back' => 'رجوع',
+    'save' => 'احفظ الميعاد',
+    'save_changes' => 'احفظ التعديل',
+    'delete' => 'امسح',
+    'keep' => 'خليه',
+    'delete_confirm' => 'تمسح الميعاد ده؟',
+
+    // Form
+    'title_label' => 'العنوان',
+    'title_placeholder' => 'دكتور، عيد ميلاد…',
+    'note_label' => 'ملاحظة (اختياري)',
+    'note_placeholder' => 'فين، مع مين…',
+    'day_label' => 'اليوم',
+    'month_label' => 'الشهر',
+    'year_label' => 'السنة',
+    'mode_gregorian' => 'ميلادي',
+    'mode_hijri' => 'هجري',
+    'form_hint' => 'النهاردة أو بعد كده يبقى ميعاد، وقبل كده يبقى ذكرى.',
+
+    // Relative phrases (Egyptian)
+    'phrase_today' => 'النهاردة',
+    'phrase_tomorrow' => 'بكرة',
+    'phrase_yesterday' => 'امبارح',
+    'in_days' => 'بعد :count :unit',
+    'days_ago' => 'من :count :unit',
+    'in_months' => 'بعد :count :unit',
+    'months_ago' => 'من :count :unit',
+    'in_years' => 'بعد :count :unit',
+    'years_ago' => 'من :count :unit',
+    'exact_future' => 'كمان :count :unit',
+    'exact_past' => 'من :count :unit',
+
+    // Unit nouns by count shape
+    'day_one' => 'يوم',
+    'day_two' => 'يومين',
+    'day_few' => 'أيام',
+    'day_many' => 'يوم',
+    'month_one' => 'شهر',
+    'month_two' => 'شهرين',
+    'month_few' => 'شهور',
+    'month_many' => 'شهر',
+    'year_one' => 'سنة',
+    'year_two' => 'سنتين',
+    'year_few' => 'سنين',
+    'year_many' => 'سنة',
+
+    // Gregorian months (Egyptian usage)
+    'months' => [
+        'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+    ],
+
+    // Settings
+    'language_label' => 'اللغة',
+    'current_arabic' => 'اللغة الحالية: العربية',
+    'current_english' => 'Current language: English',
+    'lang_arabic' => 'العربية',
+    'lang_english' => 'English',
+];

@@ -3,11 +3,15 @@
 namespace App\NativeComponents;
 
 use App\Models\Randevu;
+use App\NativeComponents\Concerns\AppliesLocale;
+use App\Services\RandevuTime;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
 
 class Follow extends NativeComponent
 {
+    use AppliesLocale;
+
     /** @var array<int,array<string,mixed>> */
     public array $upcoming = [];
 
@@ -19,12 +23,13 @@ class Follow extends NativeComponent
 
     public function mount(): void
     {
+        $this->applyLocale();
         $this->refresh();
     }
 
     public function navTitle(): string
     {
-        return 'Randevu';
+        return __('randevu.follow_title');
     }
 
     public function refresh(): void
@@ -41,10 +46,10 @@ class Follow extends NativeComponent
             'id' => $randevu->id,
             'title' => $randevu->title,
             'occurs_on' => $randevu->occurs_on->toDateString(),
-            'absolute' => $randevu->occurs_on->format('d M Y'),
+            'absolute' => RandevuTime::absolute($randevu->occurs_on),
             'hijri' => $randevu->hijriLabel(),
             'phrase' => $randevu->relativePhrase(),
-            'days' => $randevu->exactDayCount(),
+            'exact' => RandevuTime::exactSuffix($randevu->exactDayCount()),
             'note' => $randevu->note,
             'is_today' => $randevu->isToday(),
         ];

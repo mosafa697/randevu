@@ -1,49 +1,49 @@
 <native:column class="w-full h-full p-4 gap-4 bg-theme-background">
     <native:row class="w-full">
-        <native:button label="Back" @navigate.back />
+        <native:button :label="__('randevu.back')" @navigate.back />
     </native:row>
 
-    <native:outlined-text-input label="Title" native:model="title" />
+    <native:outlined-text-input :label="__('randevu.title_label')" native:model="title" />
     @if(!empty($errors['title']))
         <native:text class="text-sm text-theme-destructive">{{ $errors['title'] }}</native:text>
     @endif
 
     <native:row class="w-full gap-2">
-        <native:button label="ميلادي" @press="useGregorian" />
-        <native:button label="هجري" @press="useHijri" />
+        <native:button :label="__('randevu.mode_gregorian')" @press="useGregorian" />
+        <native:button :label="__('randevu.mode_hijri')" @press="useHijri" />
     </native:row>
 
     @if($calendar_mode === 'hijri')
         <native:row class="w-full gap-2">
-            <native:select label="اليوم" :options="$hDayOptions" native:model="h_day" class="flex-1" />
-            <native:select label="الشهر" :options="$hMonthOptions" native:model="h_month" class="flex-1" />
-            <native:select label="السنة" :options="$hYearOptions" native:model="h_year" class="flex-1" />
+            <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="flex-1" />
+            <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="flex-1" />
+            <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="flex-1" />
         </native:row>
     @else
         <native:row class="w-full gap-2">
-            <native:select label="Day" :options="$dayOptions" native:model="day" class="flex-1" />
-            <native:select label="Month" :options="$monthOptions" native:model="month" class="flex-1" />
-            <native:select label="Year" :options="$yearOptions" native:model="year" class="flex-1" />
+            <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="flex-1" />
+            <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="flex-1" />
+            <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="flex-1" />
         </native:row>
     @endif
     @if(!empty($errors['occurs_on']))
         <native:text class="text-sm text-theme-destructive">{{ $errors['occurs_on'] }}</native:text>
     @endif
 
-    <native:outlined-text-input label="Note (optional)" native:model="note" multiline :min-lines="2" />
+    <native:outlined-text-input :label="__('randevu.note_label')" native:model="note" multiline :min-lines="2" />
     @if(!empty($errors['note']))
         <native:text class="text-sm text-theme-destructive">{{ $errors['note'] }}</native:text>
     @endif
 
-    <native:button label="Save changes" @press="update" />
+    <native:button :label="__('randevu.save_changes')" @press="update" />
 
     @if(!$confirmingDelete)
-        <native:button label="Delete" @press="askDelete" />
+        <native:button :label="__('randevu.delete')" @press="askDelete" />
     @else
-        <native:text class="text-base font-semibold text-theme-on-background">Delete this randevu?</native:text>
+        <native:text class="text-base font-semibold text-theme-on-background">{{ __('randevu.delete_confirm') }}</native:text>
         <native:row class="w-full gap-2">
-            <native:button label="Keep" @press="cancelDelete" />
-            <native:button label="Delete" @press="destroy" />
+            <native:button :label="__('randevu.keep')" @press="cancelDelete" />
+            <native:button :label="__('randevu.delete')" @press="destroy" />
         </native:row>
     @endif
 </native:column>

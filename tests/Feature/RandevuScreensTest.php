@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Randevu;
+use App\Models\Setting;
 use App\NativeComponents\Follow;
 use App\NativeComponents\RandevuCreate;
 use App\NativeComponents\RandevuEdit;
+use App\NativeComponents\Settings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Native\Mobile\Testing\Native;
 use Tests\TestCase;
@@ -14,15 +16,17 @@ class RandevuScreensTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_follow_shows_empty_state(): void
+    public function test_follow_shows_arabic_empty_state_by_default(): void
     {
         Native::test(Follow::class)
-            ->assertSee('No randevus yet')
-            ->assertSee('Add your first randevu');
+            ->assertSee('مفيش مواعيد لسه')
+            ->assertSee('ضيف أول ميعاد');
     }
 
-    public function test_follow_sections_today_upcoming_and_memories(): void
+    public function test_follow_sections_english_when_switched(): void
     {
+        Setting::set('locale', 'en');
+
         Randevu::create(['title' => 'Dentist', 'occurs_on' => today(), 'note' => 'Bring card']);
         Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDays(3)]);
         Randevu::create(['title' => 'Graduation', 'occurs_on' => today()->subDays(2)]);
@@ -39,8 +43,24 @@ class RandevuScreensTest extends TestCase
             ->assertSee('Bring card');
     }
 
+    public function test_follow_sections_arabic_by_default(): void
+    {
+        Randevu::create(['title' => 'Dentist', 'occurs_on' => today()]);
+        Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDays(3)]);
+        Randevu::create(['title' => 'Graduation', 'occurs_on' => today()->subDays(2)]);
+
+        Native::test(Follow::class)
+            ->assertSee('النهاردة')
+            ->assertSee('اللي جاي')
+            ->assertSee('ذكريات')
+            ->assertSee('بعد 3 أيام')
+            ->assertSee('من يومين');
+    }
+
     public function test_create_rejects_invalid_input_and_keeps_values(): void
     {
+        Setting::set('locale', 'en');
+
         $screen = Native::test(RandevuCreate::class)
             ->set('title', '')
             ->set('day', '30')
@@ -61,7 +81,7 @@ class RandevuScreensTest extends TestCase
         Native::test(RandevuCreate::class)
             ->set('title', 'Dentist')
             ->set('day', (string) $date->day)
-            ->set('month', $date->format('F'))
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('note', 'Second floor')
             ->call('save')
@@ -80,7 +100,7 @@ class RandevuScreensTest extends TestCase
 
         Native::test(RandevuEdit::class, ['id' => $randevu->id])
             ->assertSet('title', 'Old')
-            ->assertSet('month', today()->format('F'))
+            ->assertSet('month', \App\Services\RandevuTime::monthNames()[today()->month - 1])
             ->set('title', 'New')
             ->call('update')
             ->assertReplacedWith('/');
@@ -107,7 +127,7 @@ class RandevuScreensTest extends TestCase
         $screen = Native::test(RandevuEdit::class, ['id' => $randevu->id])
             ->call('askDelete')
             ->assertSet('confirmingDelete', true)
-            ->assertSee('Delete this randevu?');
+            ->assertSee('تمسح الميعاد ده؟');
 
         $screen->call('destroy')->assertReplacedWith('/');
 
@@ -157,6 +177,31 @@ class RandevuScreensTest extends TestCase
         Native::test(Follow::class)->assertSee(Randevu::firstOrFail()->hijriLabel());
     }
 
+    public function test_settings_switches_language_and_persists(): void
+    {
+        $screen = Native::test(Settings::class)
+            ->assertSet('locale', 'ar')
+            ->assertSee('اللغة');
+
+        $screen->call('useEnglish')
+            ->assertSet('locale', 'en')
+            ->assertSee('Language');
+
+        $this->assertSame('en', Setting::get('locale'));
+
+        // A fresh mount picks up the stored language without restart.
+        Native::test(Follow::class)->assertSee('No randevus yet');
+
+        $screen->call('useArabic')->assertSet('locale', 'ar');
+        $this->assertSame('ar', Setting::get('locale'));
+    }
+
+    public function test_default_locale_is_arabic(): void
+    {
+        $this->assertSame('ar', config('app.locale'));
+        $this->assertSame('en', config('app.fallback_locale'));
+    }
+
     public function test_follow_screen_route_answers(): void
     {
         $this->get('/')->assertStatus(200);
@@ -167,7 +212,12 @@ class RandevuScreensTest extends TestCase
         $randevu = Randevu::create(['title' => 'Routed', 'occurs_on' => today()]);
 
         Native::visit('/edit/'.$randevu->id)
-            ->assertSee('Edit randevu')
+            ->assertSee('تعديل الميعاد')
             ->assertSet('title', 'Routed');
+    }
+
+    public function test_settings_route_resolves_via_visit(): void
+    {
+        Native::visit('/settings')->assertSee('اللغة');
     }
 }

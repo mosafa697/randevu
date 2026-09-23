@@ -19,7 +19,8 @@ class RandevuLayout extends NativeLayout
     {
         return TabBar::make()
             ->labelVisibility('labeled')
-            ->add(Tab::link('Follow', '/', ios: 'calendar', android: 'calendar_month'))
-            ->add(Tab::link('New', '/create', ios: 'plus', android: 'add'));
+            ->add(Tab::link(__('randevu.tab_follow'), '/', ios: 'calendar', android: 'calendar_month'))
+            ->add(Tab::link(__('randevu.tab_new'), '/create', ios: 'plus', android: 'add'))
+            ->add(Tab::link(__('randevu.tab_settings'), '/settings', ios: 'gear', android: 'settings'));
     }
 }

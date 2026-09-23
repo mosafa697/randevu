@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Device language for every request (validation messages included);
+        // screens re-apply it on mount so in-app switches take effect at once.
+        \App\Services\AppLocale::apply();
     }
 }

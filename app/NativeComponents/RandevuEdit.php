@@ -3,6 +3,7 @@
 namespace App\NativeComponents;
 
 use App\Models\Randevu;
+use App\NativeComponents\Concerns\AppliesLocale;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Support\Facades\Validator;
@@ -11,6 +12,7 @@ use Native\Mobile\Edge\NativeComponent;
 
 class RandevuEdit extends NativeComponent
 {
+    use AppliesLocale;
     /**
      * Only scalar state lives on the component — a full Eloquent model in
      * public state may not survive native shared-memory sync, so the row
@@ -61,19 +63,20 @@ class RandevuEdit extends NativeComponent
 
     public function mount(): void
     {
+        $this->applyLocale();
         $this->randevuId = (int) $this->param('id');
         $randevu = $this->findOrFail();
         $this->title = $randevu->title;
         $this->note = (string) ($randevu->note ?? '');
         $this->calendar_mode = $randevu->entered_in === 'hijri' ? 'hijri' : 'gregorian';
         $this->dayOptions = RandevuCreate::dayOptions();
-        $this->monthOptions = RandevuTime::MONTH_NAMES;
+        $this->monthOptions = RandevuTime::monthNames();
         $this->yearOptions = RandevuCreate::yearOptions();
         $this->hDayOptions = array_map(strval(...), range(1, 30));
         $this->hMonthOptions = RandevuHijri::MONTH_NAMES;
         $this->hYearOptions = RandevuHijri::yearOptions();
         $this->day = (string) $randevu->occurs_on->day;
-        $this->month = $randevu->occurs_on->format('F');
+        $this->month = RandevuTime::monthNames()[$randevu->occurs_on->month - 1];
         $this->year = (string) $randevu->occurs_on->year;
 
         if ($randevu->hijri_year !== null && $randevu->hijri_month !== null && $randevu->hijri_day !== null) {
@@ -92,7 +95,7 @@ class RandevuEdit extends NativeComponent
 
     public function navTitle(): string
     {
-        return 'Edit randevu';
+        return __('randevu.edit_title');
     }
 
     public function useGregorian(): void

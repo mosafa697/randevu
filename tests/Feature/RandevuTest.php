@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Randevu;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
@@ -36,10 +37,24 @@ class RandevuTest extends TestCase
 
     public function test_relative_phrase_and_exact_count_available(): void
     {
+        App::setLocale('en');
         $randevu = Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDays(3)]);
 
         $this->assertSame('In 3 days', $randevu->relativePhrase());
         $this->assertSame(3, $randevu->exactDayCount());
+
+        App::setLocale('ar');
+        $this->assertSame('بعد 3 أيام', $randevu->relativePhrase());
+    }
+
+    public function test_hijri_label_available(): void
+    {
+        $randevu = Randevu::create(array_merge(
+            ['title' => 'Trip', 'occurs_on' => '2026-09-23'],
+            Randevu::hijriTriple('2026-09-23')
+        ));
+
+        $this->assertSame('10 ربيع الثاني 1448', $randevu->hijriLabel());
     }
 
     public function test_validation_rejects_invalid_input(): void
