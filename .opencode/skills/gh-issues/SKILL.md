@@ -15,7 +15,7 @@ One task at a time, end to end. Never work two tasks together.
 4. **Implement** — scoped to the issue's "Done when" only. Multiple commits are fine and encouraged (one logical step per commit).
 5. **Review** — re-read your own diff: accidental scope creep, leftover debug, Blade directive misuse (see `nativephp-clean` skill), secrets (never commit `.env`).
 6. **Test** — `php artisan test --compact` green + true native precompile lint on touched Blade views (see `randevu` skill). Fix failures before pushing.
-7. **Ship** — `git checkout -b issue-<n>-<slug>` **from main**, push, open PR with `Closes #n`. Then move to the next task only.
+7. **Ship** — `git checkout -b issue-<n>-<slug>` **from main**, commit, push. Then STOP and ask the user to test on device first — NEVER open the PR until the user explicitly approves. Only after approval: open PR with `Closes #n`, then move to the next task.
 
 ## Rules
 
