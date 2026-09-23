@@ -16,6 +16,9 @@
                     <native:badge label="Today" />
                 </native:row>
                 <native:text class="text-sm text-theme-on-surface-variant">{{ $item['absolute'] }} · {{ $item['phrase'] }}</native:text>
+                @if(!empty($item['hijri']))
+                    <native:text class="text-sm text-theme-on-surface-variant">{{ $item['hijri'] }} هـ</native:text>
+                @endif
                 @if(!empty($item['note']))
                     <native:text class="text-sm text-theme-on-surface-variant">{{ $item['note'] }}</native:text>
                 @endif
@@ -33,6 +36,9 @@
                         <native:text class="text-sm text-theme-on-surface-variant">{{ $item['phrase'] }}</native:text>
                     </native:row>
                     <native:text class="text-sm text-theme-on-surface-variant">{{ $item['absolute'] }} · {{ $item['days'] }} days</native:text>
+                    @if(!empty($item['hijri']))
+                        <native:text class="text-sm text-theme-on-surface-variant">{{ $item['hijri'] }} هـ</native:text>
+                    @endif
                     @if(!empty($item['note']))
                         <native:text class="text-sm text-theme-on-surface-variant">{{ $item['note'] }}</native:text>
                     @endif
@@ -51,6 +57,9 @@
                         <native:text class="text-sm text-theme-on-surface-variant">{{ $item['phrase'] }}</native:text>
                     </native:row>
                     <native:text class="text-sm text-theme-on-surface-variant">{{ $item['absolute'] }} · {{ abs($item['days']) }} days ago</native:text>
+                    @if(!empty($item['hijri']))
+                        <native:text class="text-sm text-theme-on-surface-variant">{{ $item['hijri'] }} هـ</native:text>
+                    @endif
                     @if(!empty($item['note']))
                         <native:text class="text-sm text-theme-on-surface-variant">{{ $item['note'] }}</native:text>
                     @endif
