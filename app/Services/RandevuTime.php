@@ -7,6 +7,19 @@ use Illuminate\Support\Carbon;
 
 class RandevuTime
 {
+    /** Gregorian month names in calendar order, for picker selects. */
+    public const MONTH_NAMES = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+
+    public static function monthNumber(string $name): ?int
+    {
+        $index = array_search($name, self::MONTH_NAMES, true);
+
+        return $index === false ? null : $index + 1;
+    }
+
     /**
      * Signed day difference: positive = future, negative = past, 0 = today.
      */

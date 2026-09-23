@@ -8,7 +8,11 @@
         <native:text class="text-sm text-theme-destructive">{{ $errors['title'] }}</native:text>
     @endif
 
-    <native:outlined-text-input label="Date (YYYY-MM-DD)" native:model="occurs_on" keyboard="number" />
+    <native:row class="w-full gap-2">
+        <native:select label="Day" :options="$dayOptions" native:model="day" class="flex-1" />
+        <native:select label="Month" :options="$monthOptions" native:model="month" class="flex-1" />
+        <native:select label="Year" :options="$yearOptions" native:model="year" class="flex-1" />
+    </native:row>
     @if(!empty($errors['occurs_on']))
         <native:text class="text-sm text-theme-destructive">{{ $errors['occurs_on'] }}</native:text>
     @endif

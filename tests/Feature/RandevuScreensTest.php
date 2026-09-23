@@ -43,26 +43,35 @@ class RandevuScreensTest extends TestCase
     {
         $screen = Native::test(RandevuCreate::class)
             ->set('title', '')
-            ->set('occurs_on', 'not-a-date')
+            ->set('day', '30')
+            ->set('month', 'February')
+            ->set('year', (string) today()->year)
             ->call('save');
 
         $screen->assertNotSet('errors', []);
         $this->assertSame('', $screen->get('title'));
-        $this->assertSame('not-a-date', $screen->get('occurs_on'));
-        $this->assertDatabaseMissing('randevus', ['occurs_on' => 'not-a-date']);
+        $this->assertSame('30', $screen->get('day'));
         $this->assertDatabaseCount('randevus', 0);
     }
 
     public function test_create_saves_and_returns_to_follow(): void
     {
+        $date = today()->addDay();
+
         Native::test(RandevuCreate::class)
             ->set('title', 'Dentist')
-            ->set('occurs_on', today()->addDay()->toDateString())
+            ->set('day', (string) $date->day)
+            ->set('month', $date->format('F'))
+            ->set('year', (string) $date->year)
             ->set('note', 'Second floor')
             ->call('save')
             ->assertReplacedWith('/');
 
         $this->assertDatabaseHas('randevus', ['title' => 'Dentist', 'note' => 'Second floor']);
+        $this->assertSame(
+            $date->toDateString(),
+            Randevu::where('title', 'Dentist')->firstOrFail()->occurs_on->toDateString()
+        );
     }
 
     public function test_edit_prefills_and_saves(): void
@@ -71,6 +80,7 @@ class RandevuScreensTest extends TestCase
 
         Native::test(RandevuEdit::class, ['id' => $randevu->id])
             ->assertSet('title', 'Old')
+            ->assertSet('month', today()->format('F'))
             ->set('title', 'New')
             ->call('update')
             ->assertReplacedWith('/');
