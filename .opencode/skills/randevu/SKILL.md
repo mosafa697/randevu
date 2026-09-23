@@ -1,32 +1,38 @@
 # Randevu Skill
 
-Android-first NativePHP Mobile v4 app. Users track future appointments and past memories with distance-from-today phrasing.
+Android-first NativePHP Mobile v4 app. Users track future appointments and past memories with distance-from-today phrasing, in Gregorian and Hijri calendars.
 
 ## Domain
 
-- Model `App\Models\Randevu`: `title`, `occurs_on` (date), `note` (nullable).
+- Model `App\Models\Randevu`: `title`, `occurs_on` (date, Gregorian, source of truth), `note` (nullable), `hijri_year/month/day` (nullable, stored alongside), `entered_in` (`gregorian`|`hijri`).
 - Rule: `occurs_on >= today` = appointment, `< today` = memory. Today counts as appointment and gets a Today badge.
 - Service `App\Services\RandevuTime`:
   - `dayCount($date, $today = null)` signed int (future +, past -).
   - `phrase(...)`: Today / Tomorrow / Yesterday / `In N days` / `N days ago` (2-29) / `In N months` / `N months ago` (30-364) / `In N years` / `N years ago` (365+).
+  - `MONTH_NAMES`, `monthNumber()` for the Gregorian picker.
+- Service `App\Services\RandevuHijri`: pure-PHP TABULAR Islamic calendar (no intl, runs in embedded PHP). `fromGregorian`, `toGregorian`, `valid`, `daysInMonth`, `isLeapYear`, `format` ("12 ربيع الثاني 1448"), `MONTH_NAMES` (Arabic), `yearOptions`. Caveat: ±1–2 days vs observed Umm al-Qura; Gregorian stays source of truth.
 - Scopes: `upcoming()` ASC (includes today), `memories()` DESC, `today()`.
-- Validation: `Randevu::rules()` — title required max 255, occurs_on required date, note nullable max 2000.
+- Validation: `Randevu::rules()` — title required max 255, occurs_on required date, note nullable max 2000, hijri_* nullable ints, entered_in in:gregorian,hijri.
 
 ## Where code lives
 
-- `database/migrations/2026_09_23_000001_create_randevus_table.php` — SQLite table (local per device, auto-migrated on boot).
-- `app/Models/Randevu.php`, `app/Services/RandevuTime.php`
-- Screens `app/NativeComponents/`: `Follow.php`, `RandevuCreate.php`, `RandevuEdit.php`
+- `database/migrations/2026_09_23_000001_create_randevus_table.php`, `2026_09_24_000002_add_hijri_to_randevus_table.php` — SQLite (local per device, auto-migrated on boot).
+- `app/Models/Randevu.php`, `app/Services/RandevuTime.php`, `app/Services/RandevuHijri.php`
+- Screens `app/NativeComponents/`: `Follow.php`, `RandevuCreate.php`, `RandevuEdit.php`, `Layouts/RandevuLayout.php`
 - Views `resources/views/native/`: `follow.blade.php`, `randevu-create.blade.php`, `randevu-edit.blade.php`
-- Routes `routes/mobile.php`: `/` Follow, `/create` Create, `/edit/{id}` Edit via `Route::native()`.
-- Tests: `tests/Unit/RandevuTimeTest.php`, `tests/Feature/RandevuTest.php`.
+- Routes `routes/mobile.php`: `/` Follow, `/create` Create, `/edit/{id}` Edit via `Route::native()`, all with `->layout(RandevuLayout::class)`.
+- Tests: `tests/Unit/RandevuTimeTest.php`, `tests/Unit/RandevuHijriTest.php`, `tests/Feature/RandevuTest.php`, `tests/Feature/RandevuScreensTest.php`, `tests/Unit/AppNameTest.php`, `tests/Feature/HealthTest.php`.
 
 ## UI conventions (EDGE / SuperNative)
 
-- Tags use `<native:*>`: `column`, `row`, `text`, `outlined-text-input` with `native:model="prop"`, `button` with `@press="method"`, `pressable` with `@navigate="'/path'"`.
-- Screens extend `Native\Mobile\Edge\NativeComponent`, state is public props, navigation via `$this->navigate()`, `$this->replace()`, `$this->back()`, params via `$this->param('id')`.
-- Follow view: Today section first, then Coming up (soonest first), then Memories (newest first). Each card shows relative phrase + absolute date (`d M Y`) + exact day count. Empty state invites first randevu.
+- Tags use `<native:*>`: `column`, `row`, `text`, `outlined-text-input` with `native:model="prop"`, `button` with `@press="methodName"` (bare method only — no args, no `$this->` expressions), `pressable`/`button` navigation ONLY via `@navigate` directive: quote style `@navigate="'/path'"`, expression style `@navigate="'/edit/'.$item['id']"`, boolean `@navigate.back`. NEVER `@navigate="/path"` (compiles to unquoted PHP) and NEVER `{{ }}` inside a directive argument.
+- Colors: every `native:text` needs an explicit theme token (`text-theme-on-background`, `text-theme-on-surface`, `text-theme-on-surface-variant`, `text-theme-destructive`). Cards on `bg-theme-surface`. Never rely on inheritance — dark mode falls back to black.
+- Date entry: Day/Month/Year `native:select` triples bound to string props (`:options="$dayOptions"` from public array props, NOT method calls). Validate combos with `checkdate()` / `RandevuHijri::valid()`, keep one `errors['occurs_on']` message.
+- Calendar mode toggle: `useGregorian`/`useHijri` methods + `@if($calendar_mode === ...)` blocks. Components resolve BOTH calendars on save (`resolveDates()`); edit prefills per `entered_in`.
+- Layout: `RandevuLayout` (NavBar title via `navTitle()`, tabs Follow/New). Screens declare `navTitle()`; keep inline Back buttons on forms, no inline title rows.
+- Follow view: Today section first, then Coming up (soonest first), then Memories (newest first). Each card: relative phrase + absolute date (`d M Y`) + Hijri line + exact day count + note. Empty state invites first randevu.
 - Forms keep old values on validation failure (public props persist), show per-field `$errors`.
+- Verify Blade with the TRUE native precompile (`NativeTagPrecompiler::setActive(true)` + `compileString` + `php -l`): `view:cache` bypasses the precompiler and gives false confidence. Always `view:clear` after so the device recompiles fresh.
 
 ## Storage
 
