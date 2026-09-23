@@ -72,6 +72,26 @@ return [
         'July', 'August', 'September', 'October', 'November', 'December',
     ],
 
+    // Details screen
+    'details_title' => 'Details',
+    'details_missing' => 'This randevu no longer exists.',
+    'gregorian_label' => 'Gregorian',
+    'hijri_label' => 'Hijri',
+    'exact_label' => 'Exact',
+    'kind_appointment' => 'Appointment',
+    'kind_memory' => 'Memory',
+    'edit_cta' => 'Edit',
+
+    // Per-appointment distance units
+    'period_label' => 'Show distance as',
+    'period_days' => 'Days',
+    'period_months' => 'Months',
+    'period_years' => 'Years',
+    'period_units_required' => 'Pick at least one unit.',
+    'combined_future' => 'In :parts',
+    'combined_past' => ':parts ago',
+    'combined_separator' => ', ',
+
     // Settings
     'language_label' => 'Language',
     'current_arabic' => 'اللغة الحالية: العربية',
