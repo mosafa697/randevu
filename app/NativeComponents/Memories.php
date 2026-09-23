@@ -8,12 +8,12 @@ use App\Services\RandevuTime;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
 
-class Follow extends NativeComponent
+class Memories extends NativeComponent
 {
     use AppliesLocale;
 
     /** @var array<int,array<string,mixed>> */
-    public array $appointments = [];
+    public array $memories = [];
 
     public function mount(): void
     {
@@ -23,12 +23,12 @@ class Follow extends NativeComponent
 
     public function navTitle(): string
     {
-        return __('randevu.follow_title');
+        return __('randevu.memories_title');
     }
 
     public function refresh(): void
     {
-        $this->appointments = Randevu::upcoming()->get()->map(fn (Randevu $r) => $this->present($r))->all();
+        $this->memories = Randevu::memories()->get()->map(fn (Randevu $r) => $this->present($r))->all();
     }
 
     /** @return array<string,mixed> */
@@ -43,12 +43,11 @@ class Follow extends NativeComponent
             'phrase' => $randevu->relativePhrase(),
             'exact' => RandevuTime::exactSuffix($randevu->exactDayCount()),
             'note' => $randevu->note,
-            'is_today' => $randevu->isToday(),
         ];
     }
 
     public function render(): View
     {
-        return view('native.follow');
+        return view('native.memories');
     }
 }
