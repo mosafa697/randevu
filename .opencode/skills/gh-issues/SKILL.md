@@ -1,8 +1,15 @@
 # GH Issues Skill (task-by-task workflow)
 
 One task at a time, end to end. Never work two tasks together.
+Every step gate waits for the user's word — never jump ahead.
 
-## Task lifecycle (follow in order, every task)
+## Agreed flow (the user drives, step by step)
+
+1. **User tells the task/bug** → I refine it and create a GH issue for it. Then STOP and wait.
+2. **User says "implementation"** → I implement on the claimed branch. NEVER commit, push, or open a PR in this step. Then STOP and wait.
+3. **User asks to commit** → I commit on a separate branch from `main`, push, and open the PR. Then STOP and wait for the next task.
+
+## Task lifecycle (within the steps above)
 
 1. **Refinement** — read `gh issue view <n>`, confirm the "Done when" list is clear and small. If vague, ask the user before coding.
 2. **Planning** — short plan: files to touch, tests to add, how to verify. Keep it in the todo list.
@@ -12,14 +19,15 @@ One task at a time, end to end. Never work two tasks together.
    # NOTE (PowerShell): quote the label values or the CLI misparses them.
    gh issue view <n>  # re-check: if assignee is not you, stop
    ```
-4. **Implement** — scoped to the issue's "Done when" only. Multiple commits are fine and encouraged (one logical step per commit).
+4. **Implement** — scoped to the issue's "Done when" only. No commit, no push, no PR — ever in this step.
 5. **Review** — re-read your own diff: accidental scope creep, leftover debug, Blade directive misuse (see `nativephp-clean` skill), secrets (never commit `.env`).
 6. **Test** — `php artisan test --compact` green + true native precompile lint on touched Blade views (see `randevu` skill). Fix failures before pushing.
-7. **Ship** — `git checkout -b issue-<n>-<slug>` **from main**, commit, push. Then STOP and ask the user to test on device first — NEVER open the PR until the user explicitly approves. Only after approval: open PR with `Closes #n`, then move to the next task.
+7. **Ship (only on explicit user approval)** — `git checkout -b issue-<n>-<slug>` **from main**, commit, push, open PR with `Closes #n`. Then move to the next task only when told.
 
 ## Rules
 
 - One task = one branch from `main` = one PR. Branches always start from `main`, never from another task branch.
+- NEVER commit, push, or open a PR without explicit user sign-off — even if work is tested and green. Wait for approval at each gated step.
 - Never edit an `in-progress` issue owned by someone else.
 - Labels: `ready` = unclaimed, `in-progress` = claimed.
 
