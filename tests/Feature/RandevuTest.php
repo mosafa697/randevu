@@ -66,6 +66,46 @@ class RandevuTest extends TestCase
         $this->assertArrayHasKey('occurs_on', $validator->errors()->messages());
     }
 
+    public function test_color_rule_accepts_only_six_digit_hex(): void
+    {
+        $rule = Randevu::rules()['color'];
+
+        foreach (['#2563EB', '#2563eb', null] as $valid) {
+            $this->assertTrue(
+                Validator::make(['color' => $valid], ['color' => $rule])->passes(),
+                "Expected [$valid] to pass the color rule."
+            );
+        }
+
+        foreach (['blue', '2563EB', '#12345', '#2563EB7', '#00FF0G', '#'] as $invalid) {
+            $this->assertTrue(
+                Validator::make(['color' => $invalid], ['color' => $rule])->fails(),
+                "Expected [$invalid] to fail the color rule."
+            );
+        }
+    }
+
+    public function test_normalize_color_trims_uppercases_and_prepends_hash(): void
+    {
+        $this->assertSame('#2563EB', Randevu::normalizeColor('2563eb'));
+        $this->assertSame('#2563EB', Randevu::normalizeColor(' #2563eb '));
+        $this->assertSame('#2563EB', Randevu::normalizeColor('#2563EB'));
+        $this->assertNull(Randevu::normalizeColor(null));
+        $this->assertNull(Randevu::normalizeColor('   '));
+    }
+
+    public function test_color_persists_on_create_and_update(): void
+    {
+        $randevu = Randevu::create(['title' => 'A', 'occurs_on' => today(), 'color' => '#2563EB']);
+        $this->assertSame('#2563EB', $randevu->fresh()->color);
+
+        $randevu->update(['color' => '#059669']);
+        $this->assertSame('#059669', $randevu->fresh()->color);
+
+        $randevu->update(['color' => null]);
+        $this->assertNull($randevu->fresh()->color);
+    }
+
     public function test_randevu_can_be_updated_and_deleted(): void
     {
         $randevu = Randevu::create(['title' => 'Old title', 'occurs_on' => today()]);

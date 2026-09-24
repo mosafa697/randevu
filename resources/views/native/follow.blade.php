@@ -8,8 +8,9 @@
     @foreach($appointments as $item)
         <native:pressable @navigate="'/details/'.$item['id']" class="w-full p-3 rounded-2xl bg-theme-surface">
             <native:column class="w-full gap-1">
-                <native:row class="w-full items-center justify-between">
-                    <native:text class="text-base font-semibold text-theme-on-surface">{{ $item['title'] }}</native:text>
+                <native:row class="w-full items-center gap-2">
+                    <native:column class="rounded-full w-3 h-3 {{ !empty($item['color']) ? 'bg-[#'.ltrim($item['color'], '#').']' : 'bg-theme-outline' }}" />
+                    <native:text class="flex-1 text-base font-semibold text-theme-on-surface">{{ $item['title'] }}</native:text>
                     @if($item['is_today'])
                         <native:badge :label="__('randevu.today')" variant="accent" />
                     @else

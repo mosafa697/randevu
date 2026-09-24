@@ -4,6 +4,7 @@ namespace App\NativeComponents;
 
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
+use App\NativeComponents\Concerns\PicksColor;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Support\Facades\Validator;
@@ -13,6 +14,7 @@ use Native\Mobile\Edge\NativeComponent;
 class RandevuEdit extends NativeComponent
 {
     use AppliesLocale;
+    use PicksColor;
     /**
      * Only scalar state lives on the component — a full Eloquent model in
      * public state may not survive native shared-memory sync, so the row
@@ -74,6 +76,7 @@ class RandevuEdit extends NativeComponent
         $randevu = $this->findOrFail();
         $this->title = $randevu->title;
         $this->note = (string) ($randevu->note ?? '');
+        $this->color = (string) ($randevu->color ?? '');
         $this->calendar_mode = $randevu->entered_in === 'hijri' ? 'hijri' : 'gregorian';
         $this->show_years = (bool) $randevu->show_years;
         $this->show_months = (bool) $randevu->show_months;
@@ -169,10 +172,12 @@ class RandevuEdit extends NativeComponent
     public function update(): void
     {
         $dates = $this->resolveDates();
+        $color = Randevu::normalizeColor($this->color);
 
         $validator = Validator::make([
             'title' => $this->title,
             'occurs_on' => $dates['occurs_on'] ?? null,
+            'color' => $color,
             'note' => $this->note ?: null,
             'entered_in' => $this->calendar_mode,
             'show_years' => $this->show_years,
@@ -197,6 +202,7 @@ class RandevuEdit extends NativeComponent
         $this->findOrFail()->update([
             'title' => trim($this->title),
             'occurs_on' => $dates['occurs_on'],
+            'color' => $color,
             'note' => $this->note !== '' ? trim($this->note) : null,
             'hijri_year' => $dates['hijri_year'],
             'hijri_month' => $dates['hijri_month'],

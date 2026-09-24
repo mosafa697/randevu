@@ -39,6 +39,22 @@ return [
     'mode_hijri' => 'Hijri',
     'form_hint' => 'Today or later becomes an appointment; earlier becomes a memory.',
 
+    // Color
+    'color_label' => 'Color (optional)',
+    'color_none' => 'None',
+    'color_blue' => 'Blue',
+    'color_indigo' => 'Indigo',
+    'color_purple' => 'Purple',
+    'color_pink' => 'Pink',
+    'color_red' => 'Red',
+    'color_orange' => 'Orange',
+    'color_amber' => 'Amber',
+    'color_green' => 'Green',
+    'color_teal' => 'Teal',
+    'color_cyan' => 'Cyan',
+    'color_brown' => 'Brown',
+    'color_gray' => 'Gray',
+
     // Relative phrases
     'phrase_today' => 'Today',
     'phrase_tomorrow' => 'Tomorrow',
