@@ -4,6 +4,7 @@ namespace App\NativeComponents;
 
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
+use App\NativeComponents\Concerns\PicksColor;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Support\Facades\Validator;
@@ -13,6 +14,8 @@ use Native\Mobile\Edge\NativeComponent;
 class RandevuCreate extends NativeComponent
 {
     use AppliesLocale;
+    use PicksColor;
+
     public string $title = '';
 
     public string $note = '';
@@ -163,10 +166,12 @@ class RandevuCreate extends NativeComponent
     public function save(): void
     {
         $dates = $this->resolveDates();
+        $color = Randevu::normalizeColor($this->color);
 
         $validator = Validator::make([
             'title' => $this->title,
             'occurs_on' => $dates['occurs_on'] ?? null,
+            'color' => $color,
             'note' => $this->note ?: null,
             'entered_in' => $this->calendar_mode,
             'show_years' => $this->show_years,
@@ -191,6 +196,7 @@ class RandevuCreate extends NativeComponent
         Randevu::create([
             'title' => trim($this->title),
             'occurs_on' => $dates['occurs_on'],
+            'color' => $color,
             'note' => $this->note !== '' ? trim($this->note) : null,
             'hijri_year' => $dates['hijri_year'],
             'hijri_month' => $dates['hijri_month'],

@@ -14,11 +14,13 @@ return [
         'string' => 'The :attribute field must not be greater than :max characters.',
     ],
     'in' => 'The selected :attribute is invalid.',
+    'regex' => 'The :attribute format is invalid.',
 
     'attributes' => [
         'title' => 'title',
         'occurs_on' => 'date',
         'note' => 'note',
         'entered_in' => 'calendar',
+        'color' => 'color',
     ],
 ];

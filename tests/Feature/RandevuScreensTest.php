@@ -112,6 +112,40 @@ class RandevuScreensTest extends TestCase
         );
     }
 
+    public function test_create_saves_chosen_color_normalized(): void
+    {
+        $date = today()->addDay();
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'Colorful')
+            ->set('day', (string) $date->day)
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->set('color', '2563eb')
+            ->call('save')
+            ->assertReplacedWith('/');
+
+        $this->assertSame('#2563EB', Randevu::where('title', 'Colorful')->firstOrFail()->color);
+    }
+
+    public function test_create_rejects_invalid_color_hex(): void
+    {
+        Setting::set('locale', 'en');
+        $date = today()->addDay();
+
+        $screen = Native::test(RandevuCreate::class)
+            ->set('title', 'Bad color')
+            ->set('day', (string) $date->day)
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->set('color', '#nope')
+            ->call('save');
+
+        $screen->assertNotSet('errors', []);
+        $screen->assertSee('The color format is invalid.');
+        $this->assertDatabaseCount('randevus', 0);
+    }
+
     public function test_edit_prefills_and_saves(): void
     {
         $randevu = Randevu::create(['title' => 'Old', 'occurs_on' => today(), 'note' => 'x']);
@@ -124,6 +158,40 @@ class RandevuScreensTest extends TestCase
             ->assertReplacedWith('/');
 
         $this->assertSame('New', $randevu->fresh()->title);
+    }
+
+    public function test_edit_prefills_color_and_persists_changes(): void
+    {
+        $randevu = Randevu::create(['title' => 'Keep', 'occurs_on' => today(), 'color' => '#DB2777']);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->assertSet('color', '#DB2777')
+            ->call('pickPurple')
+            ->call('update')
+            ->assertReplacedWith('/');
+
+        $this->assertSame('#7C3AED', $randevu->fresh()->color);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->call('clearColor')
+            ->call('update');
+
+        $this->assertNull($randevu->fresh()->color);
+    }
+
+    public function test_follow_card_data_and_dot_include_the_color(): void
+    {
+        Randevu::create(['title' => 'Colorful', 'occurs_on' => today()->addDay(), 'color' => '#DB2777']);
+        Randevu::create(['title' => 'Plain', 'occurs_on' => today()->addDays(2)]);
+
+        $screen = Native::test(Follow::class);
+
+        $this->assertSame(
+            '#DB2777',
+            collect($screen->get('appointments'))->firstWhere('title', 'Colorful')['color']
+        );
+
+        $screen->assertElement('column', fn ($n) => ($n['style']['bg_color'] ?? null) === '#DB2777');
     }
 
     public function test_edit_rejects_invalid_input(): void

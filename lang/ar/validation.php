@@ -14,11 +14,13 @@ return [
         'string' => 'خانة :attribute ماينفعش تزيد عن :max حرف.',
     ],
     'in' => 'القيمة المختارة في :attribute مش سليمة.',
+    'regex' => 'شكل القيمة في :attribute مش سليم.',
 
     'attributes' => [
         'title' => 'العنوان',
         'occurs_on' => 'التاريخ',
         'note' => 'الملاحظة',
         'entered_in' => 'التقويم',
+        'color' => 'اللون',
     ],
 ];

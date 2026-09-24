@@ -39,6 +39,22 @@ return [
     'mode_hijri' => 'هجري',
     'form_hint' => 'النهاردة أو بعد كده يبقى ميعاد، وقبل كده يبقى ذكرى.',
 
+    // Color
+    'color_label' => 'اللون (اختياري)',
+    'color_none' => 'بدون',
+    'color_blue' => 'أزرق',
+    'color_indigo' => 'نيلي',
+    'color_purple' => 'بنفسجي',
+    'color_pink' => 'وردي',
+    'color_red' => 'أحمر',
+    'color_orange' => 'برتقالي',
+    'color_amber' => 'كهرماني',
+    'color_green' => 'أخضر',
+    'color_teal' => 'تركوازي',
+    'color_cyan' => 'سماوي',
+    'color_brown' => 'بني',
+    'color_gray' => 'رمادي',
+
     // Relative phrases (Egyptian)
     'phrase_today' => 'النهاردة',
     'phrase_tomorrow' => 'بكرة',

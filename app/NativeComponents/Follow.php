@@ -43,6 +43,7 @@ class Follow extends NativeComponent
             'phrase' => $randevu->relativePhrase(),
             'exact' => RandevuTime::exactSuffix($randevu->exactDayCount()),
             'note' => $randevu->note,
+            'color' => $randevu->color,
             'is_today' => $randevu->isToday(),
         ];
     }

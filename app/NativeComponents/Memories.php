@@ -43,6 +43,7 @@ class Memories extends NativeComponent
             'phrase' => $randevu->relativePhrase(),
             'exact' => RandevuTime::exactSuffix($randevu->exactDayCount()),
             'note' => $randevu->note,
+            'color' => $randevu->color,
         ];
     }
 

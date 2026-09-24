@@ -10,6 +10,7 @@ use App\NativeComponents\RandevuCreate;
 use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
+use App\Services\RandevuHijri;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Native\Mobile\Testing\Native;
 use Tests\TestCase;
@@ -139,24 +140,29 @@ class PeriodDisplayTest extends TestCase
     {
         Setting::set('locale', 'en');
 
+        // Enter a Hijri date that lands safely in the future so the card
+        // appears on Follow regardless of the day the suite runs.
+        $target = today()->addDays(30);
+        [$hy, $hm, $hd] = RandevuHijri::fromGregorian($target->year, $target->month, $target->day);
+
         Native::test(RandevuCreate::class)
             ->set('title', 'Hijri night')
             ->call('useHijri')
-            ->set('h_day', '10')
-            ->set('h_month', 'ربيع الثاني')
-            ->set('h_year', '1448')
+            ->set('h_day', (string) $hd)
+            ->set('h_month', RandevuHijri::MONTH_NAMES[$hm - 1])
+            ->set('h_year', (string) $hy)
             ->call('save')
             ->assertReplacedWith('/');
 
         $randevu = Randevu::where('title', 'Hijri night')->firstOrFail();
 
         // Both calendars stored from a Hijri-only entry.
-        $this->assertSame('2026-09-23', $randevu->occurs_on->toDateString());
+        $this->assertSame($target->toDateString(), $randevu->occurs_on->toDateString());
         $this->assertSame('hijri', $randevu->entered_in);
 
         Native::test(Follow::class)
             ->assertSee('Hijri night')
-            ->assertSee('23 September 2026')
+            ->assertSee($target->format('j F Y'))
             ->assertSee($randevu->hijriLabel())
             ->assertSee($randevu->relativePhrase());
     }
@@ -186,7 +192,7 @@ class PeriodDisplayTest extends TestCase
         Native::visit('/details/'.$randevu->id)
             ->assertSee('Full card')
             ->assertSee('Today')
-            ->assertSee('23 September 2026')
+            ->assertSee(today()->format('j F Y'))
             ->assertSee($randevu->hijriLabel())
             ->assertSee('Appointment')
             ->assertSee('Second floor');

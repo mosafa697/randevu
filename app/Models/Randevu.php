@@ -16,7 +16,7 @@ use Illuminate\Support\Carbon;
  */
 class Randevu extends Model
 {
-    protected $fillable = ['title', 'occurs_on', 'note', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in', 'show_years', 'show_months', 'show_days'];
+    protected $fillable = ['title', 'occurs_on', 'note', 'color', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in', 'show_years', 'show_months', 'show_days'];
 
     protected $casts = [
         'occurs_on' => 'date',
@@ -28,11 +28,28 @@ class Randevu extends Model
         'show_days' => 'boolean',
     ];
 
+    /** Tappable palette offered on the form. */
+    public const COLOR_PRESETS = [
+        'blue' => '#2563EB',
+        'indigo' => '#4F46E5',
+        'purple' => '#7C3AED',
+        'pink' => '#DB2777',
+        'red' => '#DC2626',
+        'orange' => '#EA580C',
+        'amber' => '#D97706',
+        'green' => '#059669',
+        'teal' => '#0D9488',
+        'cyan' => '#0E7490',
+        'brown' => '#8C5E3C',
+        'gray' => '#64748B',
+    ];
+
     public static function rules(): array
     {
         return [
             'title' => 'required|string|max:255',
             'occurs_on' => 'required|date',
+            'color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'note' => 'nullable|string|max:2000',
             'hijri_year' => 'nullable|integer|min:1',
             'hijri_month' => 'nullable|integer|min:1|max:12',
@@ -48,6 +65,26 @@ class Randevu extends Model
     public static function hasAnyUnit(bool $years, bool $months, bool $days): bool
     {
         return $years || $months || $days;
+    }
+
+    /**
+     * Normalize a raw hex value: trim, uppercase, prepend `#` when missing.
+     * Empty input becomes null (no color). Anything malformed fails the
+     * rules() regex and is rejected.
+     */
+    public static function normalizeColor(?string $raw): ?string
+    {
+        $raw = trim((string) $raw);
+
+        if ($raw === '') {
+            return null;
+        }
+
+        if (! str_starts_with($raw, '#')) {
+            $raw = '#'.$raw;
+        }
+
+        return strtoupper($raw);
     }
 
     /**
