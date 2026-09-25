@@ -8,7 +8,7 @@
     @else
         <native:column class="w-full p-4 gap-2 rounded-2xl bg-theme-surface">
             <native:row class="w-full items-center justify-between">
-                <native:text class="text-xl font-bold text-theme-on-surface">{{ $randevu['title'] }}</native:text>
+                <native:text font="heading" class="text-xl font-bold text-theme-on-surface">{{ $randevu['title'] }}</native:text>
                 @if($randevu['is_today'])
                     <native:badge :label="__('randevu.today')" variant="accent" />
                 @endif

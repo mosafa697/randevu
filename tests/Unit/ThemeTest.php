@@ -46,17 +46,16 @@ class ThemeTest extends TestCase
         $this->assertSame('#1E1E3A', config('native-ui.authored-theme.dark.surface'));
     }
 
-    public function test_tajawal_is_default_font_with_per_weight_aliases(): void
+    public function test_amiri_is_body_font_with_amiri_bold_headings(): void
     {
         $fonts = config('native-ui.fonts');
 
-        $this->assertSame('Tajawal-Regular', $fonts['default']);
-        $this->assertSame('Tajawal-Black', $fonts['title']);
+        $this->assertSame('Amiri-Regular', $fonts['default']);
+        $this->assertSame('Amiri-Regular', $fonts['body']);
+        $this->assertSame('Amiri-Bold', $fonts['heading']);
         $this->assertSame('Tajawal-Bold', $fonts['label']);
-        $this->assertSame('Tajawal-Regular', $fonts['body']);
-        $this->assertSame('Tajawal-Medium', $fonts['body-medium']);
 
-        foreach (['Tajawal-Regular', 'Tajawal-Medium', 'Tajawal-Bold', 'Tajawal-Black'] as $token) {
+        foreach (['Amiri-Regular', 'Amiri-Bold', 'Tajawal-Bold'] as $token) {
             $this->assertFileExists(
                 resource_path("fonts/{$token}.ttf"),
                 "Bundled font file [{$token}.ttf] missing"

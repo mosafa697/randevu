@@ -1,4 +1,4 @@
-<native:text class="text-sm font-semibold text-theme-on-surface">{{ __('randevu.color_label') }}</native:text>
+<native:text font="heading" class="text-sm font-semibold text-theme-on-surface">{{ __('randevu.color_label') }}</native:text>
 
 <native:row class="w-full flex-wrap gap-3 items-center">
     <native:pressable @press="pickBlue" :a11y-label="__('randevu.color_blue')" class="rounded-full {{ $selected === '#2563EB' ? 'w-11 h-11 border border-theme-on-surface' : 'w-10 h-10' }} bg-[#2563EB]" />

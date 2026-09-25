@@ -154,11 +154,10 @@ return [
     */
 
     'fonts' => [
-        'default' => 'Tajawal-Regular',
-        'title' => 'Tajawal-Black',
+        'default' => 'Amiri-Regular',
+        'heading' => 'Amiri-Bold',
         'label' => 'Tajawal-Bold',
-        'body' => 'Tajawal-Regular',
-        'body-medium' => 'Tajawal-Medium',
+        'body' => 'Amiri-Regular',
     ],
 
 ];

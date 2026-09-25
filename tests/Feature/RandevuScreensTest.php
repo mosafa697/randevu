@@ -194,6 +194,36 @@ class RandevuScreensTest extends TestCase
         $screen->assertElement('column', fn ($n) => ($n['style']['bg_color'] ?? null) === '#DB2777');
     }
 
+    public function test_titles_and_section_headers_render_in_amiri_bold(): void
+    {
+        Setting::set('locale', 'en');
+        Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDay()]);
+
+        $heading = fn ($n) => ($n['props']['font_name'] ?? null) === 'heading';
+
+        Native::test(Follow::class)
+            ->assertElement('text', fn ($n) => $heading($n) && ($n['props']['text'] ?? '') === 'Dentist');
+
+        Native::test(RandevuCreate::class)
+            ->assertElement('text', fn ($n) => $heading($n) && ($n['props']['text'] ?? '') === 'Show distance as');
+
+        Native::test(Settings::class)
+            ->assertElement('text', fn ($n) => $heading($n) && ($n['props']['text'] ?? '') === 'Language');
+
+        Native::visit('/')
+            ->assertElement('top_bar', fn ($n) => ($n['props']['font_name'] ?? null) === 'heading');
+    }
+
+    public function test_body_copy_is_not_heading_font(): void
+    {
+        Setting::set('locale', 'en');
+        Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDay(), 'note' => 'Bring card']);
+
+        Native::test(Follow::class)
+            ->assertMissingElement('text', fn ($n) => ($n['props']['font_name'] ?? null) === 'heading'
+                && ($n['props']['text'] ?? '') === 'Bring card');
+    }
+
     public function test_edit_rejects_invalid_input(): void
     {
         $randevu = Randevu::create(['title' => 'Keep me', 'occurs_on' => today()]);
