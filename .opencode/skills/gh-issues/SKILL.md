@@ -1,3 +1,8 @@
+---
+name: gh-issues
+description: Use for this repo's task lifecycle — refine → plan → claim → implement → review → test → branch from main + PR, one task at a time. Load when starting/claiming a GitHub issue or when the user says "implementation", "commit", "ship".
+---
+
 # GH Issues Skill (task-by-task workflow)
 
 One task at a time, end to end. Never work two tasks together.
@@ -20,7 +25,7 @@ Every step gate waits for the user's word — never jump ahead.
    gh issue view <n>  # re-check: if assignee is not you, stop
    ```
 4. **Implement** — scoped to the issue's "Done when" only. No commit, no push, no PR — ever in this step.
-5. **Review** — re-read your own diff: accidental scope creep, leftover debug, Blade directive misuse (see `nativephp-clean` skill), secrets (never commit `.env`).
+5. **Review** — read-only pass with the `review` skill (`.opencode/skills/review/SKILL.md`): diff vs `main`, NativePHP clean-code + domain checklist, re-run tests/precompile evidence, findings by severity. Fix Blockers/Majors before Test/Ship.
 6. **Test** — `php artisan test --compact` green + true native precompile lint on touched Blade views (see `randevu` skill). Fix failures before pushing.
 7. **Ship (only on explicit user approval)** — `git checkout -b issue-<n>-<slug>` **from main**, commit, push, open PR with `Closes #n`. Then move to the next task only when told.
 
@@ -29,6 +34,7 @@ Every step gate waits for the user's word — never jump ahead.
 - One task = one branch from `main` = one PR. Branches always start from `main`, never from another task branch.
 - NEVER commit, push, or open a PR without explicit user sign-off — even if work is tested and green. Wait for approval at each gated step.
 - Never edit an `in-progress` issue owned by someone else.
+- Review is read-only — the `review` skill never edits or commits; ship only after a PASS verdict + explicit user sign-off.
 - Labels: `ready` = unclaimed, `in-progress` = claimed.
 
 ## Open tracking

@@ -1,3 +1,8 @@
+---
+name: nativephp-clean
+description: Use before writing or reviewing NativePHP Mobile v4 (SuperNative/EDGE) Blade or NativeComponents — docs-first API verification, Blade directive hard rules, component state, layouts, native test/precompile verification.
+---
+
 # NativePHP Clean-Code Skill
 
 Write idiomatic NativePHP Mobile v4 (SuperNative + EDGE). The framework moves fast — **verify every API against the latest docs before using it**, not from memory.
@@ -35,3 +40,4 @@ Write idiomatic NativePHP Mobile v4 (SuperNative + EDGE). The framework moves fa
 - `php artisan test --compact` must be green — cover save/update/delete AND error paths via the `Native` harness (`Native::test()`, `Native::visit()`, `assertReplacedWith`, `assertSet`).
 - Lint Blade with the TRUE native compile (`NativeTagPrecompiler::setActive(true)` → `compileString` → `php -l`). `view:cache` bypasses the precompiler and gives false confidence. Always `view:clear` after, so devices recompile fresh.
 - Final proof is visual in Jump (light AND dark mode) — say which modes you checked.
+- Before commit/PR, run the `review` skill (`.opencode/skills/review/SKILL.md`) as the read-only gate; fix Blockers/Majors first.

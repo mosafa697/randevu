@@ -11,7 +11,7 @@ php artisan native:jump   # scan QR with the Jump app
 php artisan test --compact
 ```
 
-See `AGENTS.md` and `.opencode/skills/` for domain rules and the GH-issue claim protocol.
+See `AGENTS.md` and `.opencode/skills/` for domain rules, the `review` clean-code gate, and the GH-issue claim protocol.
 
 ---
 
