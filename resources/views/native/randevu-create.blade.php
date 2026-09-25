@@ -32,7 +32,7 @@
                 <native:text class="text-sm text-theme-destructive">{{ $errors['occurs_on'] }}</native:text>
             @endif
 
-            <native:text class="text-sm font-semibold text-theme-on-surface">{{ __('randevu.period_label') }}</native:text>
+            <native:text font="heading" class="text-sm font-semibold text-theme-on-surface">{{ __('randevu.period_label') }}</native:text>
 
             <native:row class="w-full gap-2">
                 <native:checkbox :label="__('randevu.period_years')" native:model="show_years" />

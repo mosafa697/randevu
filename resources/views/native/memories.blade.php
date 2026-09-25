@@ -10,7 +10,7 @@
             <native:column class="w-full gap-1">
                 <native:row class="w-full items-center gap-2">
                     <native:column class="rounded-full w-3 h-3 {{ !empty($item['color']) ? 'bg-[#'.ltrim($item['color'], '#').']' : 'bg-theme-outline' }}" />
-                    <native:text class="flex-1 text-base font-semibold text-theme-on-surface">{{ $item['title'] }}</native:text>
+                    <native:text font="heading" class="flex-1 text-base font-semibold text-theme-on-surface">{{ $item['title'] }}</native:text>
                     <native:text class="text-sm text-theme-on-surface-variant">{{ $item['phrase'] }}</native:text>
                 </native:row>
                 <native:text class="text-sm text-theme-on-surface-variant">{{ $item['absolute'] }} · {{ $item['exact'] }}</native:text>

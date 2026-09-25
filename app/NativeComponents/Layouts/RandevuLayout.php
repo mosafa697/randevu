@@ -21,6 +21,7 @@ class RandevuLayout extends NativeLayout
         // which goes invisible when the app palette is forced the other way.
         return NavBar::make()
             ->title($screen->navTitle())
+            ->font('heading')
             ->backgroundColor((string) AppTheme::token('background', '#FBF9F4'))
             ->textColor((string) AppTheme::token('on-background', '#2B2740'))
             ->action(
