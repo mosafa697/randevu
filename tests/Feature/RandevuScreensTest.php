@@ -20,6 +20,8 @@ class RandevuScreensTest extends TestCase
     {
         Native::test(Follow::class)
             ->assertSee('ضيف أول ميعاد')
+            ->assertSee('لسه مفيش مواعيد')
+            ->assertSee('ضيف أول ميعاد عشان تتابعه هنا')
             ->assertDontSee('مفيش مواعيد لسه')
             ->assertDontSee('عشان تتابعها');
     }
@@ -72,6 +74,8 @@ class RandevuScreensTest extends TestCase
     {
         Native::visit('/memories')
             ->assertSee('ضيف أول ميعاد')
+            ->assertSee('لسه مفيش ذكريات محفوظة')
+            ->assertSee('ضيف ميعاد عشان يظهر هنا بعد ما يعدى')
             ->assertDontSee('مفيش مواعيد لسه');
     }
 
@@ -190,8 +194,24 @@ class RandevuScreensTest extends TestCase
             '#DB2777',
             collect($screen->get('appointments'))->firstWhere('title', 'Colorful')['color']
         );
+    }
 
-        $screen->assertElement('column', fn ($n) => ($n['style']['bg_color'] ?? null) === '#DB2777');
+    public function test_follow_card_has_ring_webview_and_countdown_pill(): void
+    {
+        Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDays(5)]);
+
+        $screen = Native::test(Follow::class);
+
+        $screen->assertElement('webview', fn ($n) => isset($n['props']['html']) && str_contains($n['props']['html'], '<svg'));
+        $screen->assertSee('بعد 5 أيام');
+    }
+
+    public function test_memories_card_has_ring_webview(): void
+    {
+        Randevu::create(['title' => 'Old', 'occurs_on' => today()->subDays(10)]);
+
+        Native::visit('/memories')
+            ->assertElement('webview', fn ($n) => isset($n['props']['html']) && str_contains($n['props']['html'], '<svg'));
     }
 
     public function test_titles_and_section_headers_render_in_amiri_bold(): void

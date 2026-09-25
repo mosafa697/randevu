@@ -37,6 +37,8 @@ class Memories extends NativeComponent
     /** @return array<string,mixed> */
     private function present(Randevu $randevu): array
     {
+        $days = RandevuTime::dayCount($randevu->occurs_on);
+
         return [
             'id' => $randevu->id,
             'title' => $randevu->title,
@@ -44,9 +46,11 @@ class Memories extends NativeComponent
             'absolute' => RandevuTime::absolute($randevu->occurs_on),
             'hijri' => $randevu->hijriLabel(),
             'phrase' => $randevu->relativePhrase(),
-            'exact' => RandevuTime::exactSuffix($randevu->exactDayCount()),
             'note' => $randevu->note,
             'color' => $randevu->color,
+            'days' => $days,
+            'pct' => max(0.08, min(1.0, 1 - abs($days) / 30)),
+            'entered_in' => $randevu->entered_in,
         ];
     }
 

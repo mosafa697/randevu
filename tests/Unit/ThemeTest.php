@@ -12,7 +12,7 @@ class ThemeTest extends TestCase
         'accent', 'on-accent', 'accent-soft',
         'surface', 'on-surface', 'background', 'on-background',
         'surface-variant', 'on-surface-variant',
-        'outline', 'progress-track',
+        'outline', 'outline-variant', 'progress-track',
         'destructive', 'on-destructive',
     ];
 

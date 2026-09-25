@@ -86,6 +86,7 @@ return [
 
             // Neutral borders (text fields, dividers, cards).
             'outline' => '#EDE9DE',
+            'outline-variant' => '#D8D4C8',
 
             // Circular progress-ring / bar backgrounds.
             'progress-track' => '#EDEAE0',
@@ -114,6 +115,7 @@ return [
             'on-destructive' => '#14142A',
 
             'outline' => '#2C2C50',
+            'outline-variant' => '#3A3A60',
 
             'progress-track' => '#33335A',
         ],

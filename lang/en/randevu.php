@@ -17,6 +17,10 @@ return [
     'upcoming' => 'Coming up',
     'memories' => 'Memories',
     'empty_cta' => 'Add your first randevu',
+    'follow_empty_headline' => 'No appointments yet',
+    'follow_empty_support' => 'Add your first appointment to start tracking',
+    'memories_empty_headline' => 'No memories saved yet',
+    'memories_empty_support' => 'Add an appointment and it will show up here once it passes',
 
     // Buttons
     'new' => '+ New',

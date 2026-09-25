@@ -17,6 +17,10 @@ return [
     'upcoming' => 'اللي جاي',
     'memories' => 'ذكريات',
     'empty_cta' => 'ضيف أول ميعاد',
+    'follow_empty_headline' => 'لسه مفيش مواعيد',
+    'follow_empty_support' => 'ضيف أول ميعاد عشان تتابعه هنا',
+    'memories_empty_headline' => 'لسه مفيش ذكريات محفوظة',
+    'memories_empty_support' => 'ضيف ميعاد عشان يظهر هنا بعد ما يعدى',
 
     // Buttons
     'new' => '+ جديد',
