@@ -4,6 +4,7 @@ namespace App\NativeComponents;
 
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
+use App\NativeComponents\Concerns\AppliesTheme;
 use App\Services\RandevuTime;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
@@ -11,6 +12,7 @@ use Native\Mobile\Edge\NativeComponent;
 class Follow extends NativeComponent
 {
     use AppliesLocale;
+    use AppliesTheme;
 
     /** @var array<int,array<string,mixed>> */
     public array $appointments = [];
@@ -18,6 +20,7 @@ class Follow extends NativeComponent
     public function mount(): void
     {
         $this->applyLocale();
+        $this->applyTheme();
         $this->refresh();
     }
 

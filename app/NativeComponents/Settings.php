@@ -3,6 +3,7 @@
 namespace App\NativeComponents;
 
 use App\NativeComponents\Concerns\AppliesLocale;
+use App\NativeComponents\Concerns\AppliesTheme;
 use App\Services\AppLocale;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
@@ -10,12 +11,14 @@ use Native\Mobile\Edge\NativeComponent;
 class Settings extends NativeComponent
 {
     use AppliesLocale;
+    use AppliesTheme;
 
     public string $locale = 'ar';
 
     public function mount(): void
     {
         $this->applyLocale();
+        $this->applyTheme();
         $this->locale = $this->currentLocale();
     }
 

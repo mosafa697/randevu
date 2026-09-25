@@ -4,6 +4,7 @@ namespace App\NativeComponents;
 
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
+use App\NativeComponents\Concerns\AppliesTheme;
 use App\NativeComponents\Concerns\PicksColor;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
@@ -14,6 +15,7 @@ use Native\Mobile\Edge\NativeComponent;
 class RandevuEdit extends NativeComponent
 {
     use AppliesLocale;
+    use AppliesTheme;
     use PicksColor;
     /**
      * Only scalar state lives on the component — a full Eloquent model in
@@ -72,6 +74,7 @@ class RandevuEdit extends NativeComponent
     public function mount(): void
     {
         $this->applyLocale();
+        $this->applyTheme();
         $this->randevuId = (int) $this->param('id');
         $randevu = $this->findOrFail();
         $this->title = $randevu->title;

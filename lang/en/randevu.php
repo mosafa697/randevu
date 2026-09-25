@@ -114,4 +114,10 @@ return [
     'current_english' => 'Current language: English',
     'lang_arabic' => 'العربية',
     'lang_english' => 'English',
+
+    // Theme
+    'theme_label' => 'Theme',
+    'theme_light' => 'Light',
+    'theme_dark' => 'Dark',
+    'theme_toggle_a11y' => 'Toggle theme',
 ];

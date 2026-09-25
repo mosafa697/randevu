@@ -4,6 +4,7 @@ namespace App\NativeComponents;
 
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
+use App\NativeComponents\Concerns\AppliesTheme;
 use App\Services\RandevuTime;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
@@ -15,6 +16,7 @@ use Native\Mobile\Edge\NativeComponent;
 class RandevuDetails extends NativeComponent
 {
     use AppliesLocale;
+    use AppliesTheme;
 
     public int $randevuId = 0;
 
@@ -24,6 +26,7 @@ class RandevuDetails extends NativeComponent
     public function mount(): void
     {
         $this->applyLocale();
+        $this->applyTheme();
         $this->randevuId = (int) $this->param('id');
         $this->refresh();
     }

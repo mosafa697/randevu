@@ -43,91 +43,79 @@ return [
     | The default pairs meet WCAG AA (4.5:1) — if you customize, keep each
     | `on-*` color at 4.5:1 contrast against its background token.
     |
+    | AA deviations from the design spec (all spec pairs failed 4.5:1):
+    |   - light.on-surface-variant #69647D (spec #8B879C = 3.5:1 on white)
+    |   - light.primary #6F63DB (spec #7C6FE0 + white = 4.05:1)
+    |   - light.on-accent #2B2740 (spec white on #DD8A44 = 2.65:1)
+    |
     */
 
     'theme' => [
 
         'light' => [
-            // Randevu brand: deep violet. Used for filled buttons, active states, key accents.
-            'primary' => '#6D28D9',
+            // Gregorian-anchored violet — filled buttons, active states, key accents.
+            'primary' => '#6F63DB',
             'on-primary' => '#FFFFFF',
-
-            // Secondary / muted action color.
-            'secondary' => '#475569',
-            'on-secondary' => '#FFFFFF',
 
             // Surface = cards, sheets, dialogs. Background = page root.
             'surface' => '#FFFFFF',
-            'on-surface' => '#0F172A',
-            'background' => '#F8FAFC',
-            'on-background' => '#0F172A',
+            'on-surface' => '#2B2740',
+            'background' => '#FBF9F4',
+            'on-background' => '#2B2740',
 
             // Surface variant = filled text fields, muted tonal surfaces.
-            // on-surface-variant = muted label/hint text on those surfaces.
-            'surface-variant' => '#F1F5F9',
-            'on-surface-variant' => '#475569',
+            'surface-variant' => '#F3EFE6',
+            // AA-adjusted from spec #8B879C (3.5:1 on white — fails 4.5:1).
+            'on-surface-variant' => '#69647D',
 
-            // Text-field container, for the OUTLINED variant. Both are unset
-            // on purpose, and unset means "transparent box, Material 3
-            // defaults inside" — the outlined field then reads as whatever is
-            // behind it, which is correct on a plain page and invisible on a
-            // colored one. Declare the pair to give the field a body of its
-            // own:
-            //
-            //   'input-fill' => '#FFFFFF',
-            //   'on-input'   => '#0F172A',
-            //
-            // `on-input` recolors everything drawn INSIDE the box — typed
-            // text, placeholder, icons, prefix/suffix — so declare it
-            // alongside any fill dark enough to swallow the default grays.
-            // The label and supporting text sit outside the box and keep
-            // taking their color from the surface behind it.
+            // Tonal fill behind primary actions (chips, pill hovers).
+            'primary-soft' => '#EDEAFB',
 
-            // Outline = neutral borders (text fields, dividers, cards).
-            // outline-variant = softer edges: hairline dividers, card seams.
-            'outline' => '#CBD5E1',
-            'outline-variant' => '#E2E8F0',
+            // Hijri-anchored amber accent — Today badge, Hijri emphasis.
+            'accent' => '#DD8A44',
+            // AA-adjusted from spec #DD8A44 + white (2.65:1 — fails).
+            'on-accent' => '#2B2740',
 
-            // Destructive actions — maps to `variant="destructive"` on components.
-            'destructive' => '#B91C1C',
+            // Tonal fill behind accent elements.
+            'accent-soft' => '#FBEEE0',
+
+            // Destructive actions — maps to `variant="destructive"` on
+            // components and `text-theme-destructive` on inline error text.
+            'destructive' => '#B3261E',
             'on-destructive' => '#FFFFFF',
 
-            // Success / "safe to proceed" — confirmations, verified badges.
-            'success' => '#15803D',
-            'on-success' => '#FFFFFF',
+            // Neutral borders (text fields, dividers, cards).
+            'outline' => '#EDE9DE',
 
-            // Warm amber accent — Today badge, highlights, emphasis outside primary.
-            'accent' => '#B45309',
-            'on-accent' => '#FFFFFF',
+            // Circular progress-ring / bar backgrounds.
+            'progress-track' => '#EDEAE0',
         ],
 
         'dark' => [
-            // Explicit Randevu dark tokens (no auto-derive surprises).
-            'primary' => '#A78BFA',
-            'on-primary' => '#1E1B4B',
+            'primary' => '#9C90F5',
+            'on-primary' => '#14142A',
 
-            'secondary' => '#94A3B8',
-            'on-secondary' => '#0F172A',
+            'surface' => '#1E1E3A',
+            'on-surface' => '#F3F1FB',
+            'background' => '#14142A',
+            'on-background' => '#F3F1FB',
 
-            'surface' => '#1E293B',
-            'on-surface' => '#F8FAFC',
-            'background' => '#0F172A',
-            'on-background' => '#F8FAFC',
+            'surface-variant' => '#262646',
+            'on-surface-variant' => '#8E8AB5',
 
-            'surface-variant' => '#334155',
-            'on-surface-variant' => '#94A3B8',
+            'primary-soft' => '#2A2856',
 
-            'outline' => '#475569',
-            'outline-variant' => '#334155',
+            'accent' => '#F0A868',
+            'on-accent' => '#14142A',
 
-            'destructive' => '#F87171',
-            'on-destructive' => '#0F172A',
+            'accent-soft' => '#3A2E22',
 
-            'success' => '#4ADE80',
-            'on-success' => '#052E16',
+            'destructive' => '#F2B8B5',
+            'on-destructive' => '#14142A',
 
-            'accent' => '#FBBF24',
-            'on-accent' => '#451A03',
+            'outline' => '#2C2C50',
+
+            'progress-track' => '#33335A',
         ],
 
         // Corner radii (points / dp).
@@ -166,7 +154,11 @@ return [
     */
 
     'fonts' => [
-        'default' => 'System',
+        'default' => 'Tajawal-Regular',
+        'title' => 'Tajawal-Black',
+        'label' => 'Tajawal-Bold',
+        'body' => 'Tajawal-Regular',
+        'body-medium' => 'Tajawal-Medium',
     ],
 
 ];
