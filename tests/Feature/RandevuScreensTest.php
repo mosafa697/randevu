@@ -211,7 +211,50 @@ class RandevuScreensTest extends TestCase
             ->assertElement('text', fn ($n) => $heading($n) && ($n['props']['text'] ?? '') === 'Language');
 
         Native::visit('/')
-            ->assertElement('top_bar', fn ($n) => ($n['props']['font_name'] ?? null) === 'heading');
+            ->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_font_name'] ?? null) === 'heading');
+    }
+
+    public function test_every_route_renders_native_tab_chrome(): void
+    {
+        Setting::set('locale', 'en');
+        $randevu = Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDay()]);
+
+        $routes = [
+            '/' => 'Follow',
+            '/create' => 'New',
+            '/memories' => 'Memories',
+            '/settings' => 'Settings',
+            '/details/'.$randevu->id => null,
+            '/edit/'.$randevu->id => null,
+        ];
+
+        foreach ($routes as $uri => $activeTab) {
+            $screen = Native::visit($uri)->assertHasTabBar();
+
+            if ($activeTab !== null) {
+                $screen->assertTabActive($activeTab);
+            }
+        }
+    }
+
+    public function test_tab_bar_uses_theme_tokens_and_the_chrome_font(): void
+    {
+        Setting::set('locale', 'en');
+
+        $tree = Native::visit('/')->tree();
+
+        $this->assertSame('#6F63DB', $tree['props']['active_color'] ?? null);
+        $this->assertSame('#69647D', $tree['props']['text_color'] ?? null);
+        $this->assertSame('label', $tree['props']['font_name'] ?? null);
+        $this->assertSame('labeled', $tree['props']['label_visibility'] ?? null);
+        $this->assertArrayNotHasKey('background_color', $tree['props']);
+
+        $labels = array_values(array_map(
+            fn ($node) => $node['props']['label'] ?? null,
+            array_filter($tree['children'], fn ($node) => ($node['type'] ?? null) === 'bottom_nav_item'),
+        ));
+
+        $this->assertSame(['Follow', 'Memories', 'New', 'Settings'], $labels);
     }
 
     public function test_body_copy_is_not_heading_font(): void

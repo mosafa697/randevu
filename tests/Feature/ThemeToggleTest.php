@@ -14,9 +14,10 @@ use Tests\TestCase;
  * guarded here:
  *  - TailwindParser's class cache is process-lifetime, so a toggle must
  *    invalidate it or the first render's colors win forever.
- *  - The drawn chrome must carry explicit palette colors, otherwise the
- *    native bars fall back to the OS scheme (white text on a light app
- *    palette when the device is dark).
+ *  - The native chrome must carry the current palette (explicit nav-bar
+ *    colors plus the tab bar's dark flag and token colors), otherwise the
+ *    bars fall back to the OS scheme (white text on a light app palette
+ *    when the device is dark).
  */
 class ThemeToggleTest extends TestCase
 {
@@ -31,10 +32,17 @@ class ThemeToggleTest extends TestCase
         // Default light: forced light palette in both blocks (no distinct
         // dark companion), moon icon inviting the switch to dark.
         $tree = $screen->tree();
+        $this->assertSame('native_root_tabs', $tree['type']);
         $this->assertSame('#FBF9F4', $this->effectiveBackground($tree));
         $this->assertSame('dark_mode', $this->actionIcon($tree));
-        $this->assertSame('#FBF9F4', $this->topBarProp($tree, 'background_color'));
-        $this->assertSame('#2B2740', $this->topBarProp($tree, 'text_color'));
+        $this->assertSame('#FBF9F4', $this->chromeProp($tree, 'nav_background_color'));
+        $this->assertSame('#2B2740', $this->chromeProp($tree, 'nav_text_color'));
+        $this->assertSame('#6F63DB', $this->chromeProp($tree, 'active_color'));
+        $this->assertSame('#69647D', $this->chromeProp($tree, 'text_color'));
+        $this->assertSame('label', $this->chromeProp($tree, 'font_name'));
+        $this->assertSame('heading', $this->chromeProp($tree, 'nav_font_name'));
+        $this->assertNull($this->chromeProp($tree, 'dark'));
+        $this->assertNull($this->chromeProp($tree, 'background_color'));
 
         // light → dark: forced palette lands in both blocks, chrome follows.
         $screen->press('toggleTheme');
@@ -42,11 +50,11 @@ class ThemeToggleTest extends TestCase
         $tree = $screen->tree();
         $this->assertSame('#14142A', $this->effectiveBackground($tree));
         $this->assertSame('light_mode', $this->actionIcon($tree));
-        $this->assertSame('#14142A', $this->topBarProp($tree, 'background_color'));
-        $this->assertSame('#F3F1FB', $this->topBarProp($tree, 'text_color'));
-        $this->assertSame('#14142A', $this->bottomNavProp($tree, 'background_color'));
-        $this->assertSame('#8E8AB5', $this->bottomNavProp($tree, 'text_color'));
-        $this->assertSame('#9C90F5', $this->bottomNavProp($tree, 'active_color'));
+        $this->assertSame('#14142A', $this->chromeProp($tree, 'nav_background_color'));
+        $this->assertSame('#F3F1FB', $this->chromeProp($tree, 'nav_text_color'));
+        $this->assertTrue($this->chromeProp($tree, 'dark'));
+        $this->assertSame('#8E8AB5', $this->chromeProp($tree, 'text_color'));
+        $this->assertSame('#9C90F5', $this->chromeProp($tree, 'active_color'));
 
         // dark → light: the authored light palette returns losslessly.
         $screen->press('toggleTheme');
@@ -54,8 +62,8 @@ class ThemeToggleTest extends TestCase
         $tree = $screen->tree();
         $this->assertSame('#FBF9F4', $this->effectiveBackground($tree));
         $this->assertSame('dark_mode', $this->actionIcon($tree));
-        $this->assertSame('#FBF9F4', $this->topBarProp($tree, 'background_color'));
-        $this->assertSame('#2B2740', $this->topBarProp($tree, 'text_color'));
+        $this->assertSame('#FBF9F4', $this->chromeProp($tree, 'nav_background_color'));
+        $this->assertSame('#2B2740', $this->chromeProp($tree, 'nav_text_color'));
     }
 
     /**
@@ -65,23 +73,24 @@ class ThemeToggleTest extends TestCase
      */
     private function effectiveBackground(array $tree): ?string
     {
-        $content = $tree['children'][1] ?? [];
+        $content = $tree['children'][count($tree['children']) - 1] ?? [];
 
         return $content['props']['dark_bg_color'] ?? $content['style']['bg_color'] ?? null;
     }
 
     private function actionIcon(array $tree): ?string
     {
-        return $tree['children'][0]['children'][0]['props']['icon'] ?? null;
+        foreach ($tree['children'] ?? [] as $child) {
+            if (($child['type'] ?? null) === 'top_bar_action') {
+                return $child['props']['icon'] ?? null;
+            }
+        }
+
+        return null;
     }
 
-    private function topBarProp(array $tree, string $key): mixed
+    private function chromeProp(array $tree, string $key): mixed
     {
-        return $tree['children'][0]['props'][$key] ?? null;
-    }
-
-    private function bottomNavProp(array $tree, string $key): mixed
-    {
-        return $tree['children'][2]['props'][$key] ?? null;
+        return $tree['props'][$key] ?? null;
     }
 }
