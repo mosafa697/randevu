@@ -5,6 +5,7 @@ namespace App\NativeComponents;
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
+use App\NativeComponents\Concerns\HandlesCalendarAndPeriods;
 use App\NativeComponents\Concerns\PicksColor;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
@@ -16,6 +17,7 @@ class RandevuCreate extends NativeComponent
 {
     use AppliesLocale;
     use AppliesTheme;
+    use HandlesCalendarAndPeriods;
     use PicksColor;
 
     public string $title = '';
@@ -23,6 +25,8 @@ class RandevuCreate extends NativeComponent
     public string $note = '';
 
     public string $calendar_mode = 'gregorian';
+
+    public int $calendarIndex = 0;
 
     public string $day = '';
 
@@ -105,16 +109,6 @@ class RandevuCreate extends NativeComponent
         $this->hDayOptions = array_map(strval(...), range(1, 30));
         $this->hMonthOptions = RandevuHijri::MONTH_NAMES;
         $this->hYearOptions = RandevuHijri::yearOptions();
-    }
-
-    public function useGregorian(): void
-    {
-        $this->calendar_mode = 'gregorian';
-    }
-
-    public function useHijri(): void
-    {
-        $this->calendar_mode = 'hijri';
     }
 
     /** Gregorian Y-m-d string, or null when the selection is not a real date. */

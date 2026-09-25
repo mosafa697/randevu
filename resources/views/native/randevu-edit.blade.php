@@ -5,15 +5,12 @@
 
     <native:scroll-view class="w-full flex-1">
         <native:column class="w-full gap-4">
-            <native:outlined-text-input :label="__('randevu.title_label')" native:model="title" />
+            <native:outlined-text-input :label="__('randevu.title_label')" native:model="title" class="rounded-[14px]" />
             @if(!empty($errors['title']))
                 <native:text class="text-sm text-theme-destructive">{{ $errors['title'] }}</native:text>
             @endif
 
-            <native:row class="w-full gap-2">
-                <native:button :label="__('randevu.mode_gregorian')" @press="useGregorian" />
-                <native:button :label="__('randevu.mode_hijri')" @press="useHijri" />
-            </native:row>
+            <native:button-group :options="[__('randevu.mode_gregorian'), __('randevu.mode_hijri')]" native:model="calendarIndex" @change="calendarChanged" />
 
             @if($calendar_mode === 'hijri')
                 <native:row class="w-full gap-2">
@@ -35,30 +32,30 @@
             <native:text font="heading" class="text-sm font-semibold text-theme-on-surface">{{ __('randevu.period_label') }}</native:text>
 
             <native:row class="w-full gap-2">
-                <native:checkbox :label="__('randevu.period_years')" native:model="show_years" />
-                <native:checkbox :label="__('randevu.period_months')" native:model="show_months" />
-                <native:checkbox :label="__('randevu.period_days')" native:model="show_days" />
+                <native:chip :label="__('randevu.period_years')" :selected="$show_years" @change="toggleYears" />
+                <native:chip :label="__('randevu.period_months')" :selected="$show_months" @change="toggleMonths" />
+                <native:chip :label="__('randevu.period_days')" :selected="$show_days" @change="toggleDays" />
             </native:row>
             @if(!empty($errors['period_units']))
                 <native:text class="text-sm text-theme-destructive">{{ $errors['period_units'] }}</native:text>
             @endif
 
-            <native:outlined-text-input :label="__('randevu.note_label')" native:model="note" multiline :min-lines="2" />
+            <native:outlined-text-input :label="__('randevu.note_label')" native:model="note" multiline :min-lines="2" class="rounded-[14px]" />
             @if(!empty($errors['note']))
                 <native:text class="text-sm text-theme-destructive">{{ $errors['note'] }}</native:text>
             @endif
 
             @include('native.partials.color-picker', ['selected' => $color, 'errors' => $errors])
 
-            <native:button :label="__('randevu.save_changes')" @press="update" />
+            <native:button :label="__('randevu.save_changes')" @press="update" variant="primary" class="w-full rounded-lg" />
 
             @if(!$confirmingDelete)
-                <native:button :label="__('randevu.delete')" @press="askDelete" />
+                <native:button :label="__('randevu.delete')" @press="askDelete" variant="destructive" class="w-full rounded-lg" />
             @else
                 <native:text class="text-base font-semibold text-theme-on-background">{{ __('randevu.delete_confirm') }}</native:text>
                 <native:row class="w-full gap-2">
-                    <native:button :label="__('randevu.keep')" @press="cancelDelete" />
-                    <native:button :label="__('randevu.delete')" @press="destroy" />
+                    <native:button :label="__('randevu.keep')" @press="cancelDelete" class="flex-1 rounded-lg" />
+                    <native:button :label="__('randevu.delete')" @press="destroy" variant="destructive" class="flex-1 rounded-lg" />
                 </native:row>
             @endif
         </native:column>

@@ -96,6 +96,42 @@ class RandevuScreensTest extends TestCase
         $this->assertDatabaseCount('randevus', 0);
     }
 
+    public function test_create_has_segmented_calendar_control_and_chips(): void
+    {
+        Setting::set('locale', 'en');
+
+        $screen = Native::test(RandevuCreate::class);
+
+        $screen->assertElement('button_group', fn ($n) => ($n['props']['options'] ?? []) === ['Gregorian', 'Hijri']);
+        $screen->assertElement('chip', fn ($n) => ($n['props']['label'] ?? '') === 'Years');
+        $screen->assertElement('chip', fn ($n) => ($n['props']['label'] ?? '') === 'Months');
+        $screen->assertElement('chip', fn ($n) => ($n['props']['label'] ?? '') === 'Days');
+    }
+
+    public function test_create_calendar_segmented_control_switches_mode(): void
+    {
+        $screen = Native::test(RandevuCreate::class);
+
+        $this->assertSame('gregorian', $screen->get('calendar_mode'));
+        $this->assertSame(0, $screen->get('calendarIndex'));
+
+        $screen->set('calendarIndex', 1)->call('calendarChanged');
+
+        $this->assertSame('hijri', $screen->get('calendar_mode'));
+        $this->assertSame(1, $screen->get('calendarIndex'));
+    }
+
+    public function test_create_chips_toggle_period_units(): void
+    {
+        $screen = Native::test(RandevuCreate::class);
+
+        $this->assertTrue($screen->get('show_years'));
+        $screen->call('toggleYears');
+        $this->assertFalse($screen->get('show_years'));
+        $screen->call('toggleYears');
+        $this->assertTrue($screen->get('show_years'));
+    }
+
     public function test_create_saves_and_returns_to_follow(): void
     {
         $date = today()->addDay();

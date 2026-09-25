@@ -5,6 +5,7 @@ namespace App\NativeComponents;
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
+use App\NativeComponents\Concerns\HandlesCalendarAndPeriods;
 use App\NativeComponents\Concerns\PicksColor;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
@@ -16,6 +17,7 @@ class RandevuEdit extends NativeComponent
 {
     use AppliesLocale;
     use AppliesTheme;
+    use HandlesCalendarAndPeriods;
     use PicksColor;
     /**
      * Only scalar state lives on the component — a full Eloquent model in
@@ -29,6 +31,8 @@ class RandevuEdit extends NativeComponent
     public string $note = '';
 
     public string $calendar_mode = 'gregorian';
+
+    public int $calendarIndex = 0;
 
     public string $day = '';
 
@@ -81,6 +85,7 @@ class RandevuEdit extends NativeComponent
         $this->note = (string) ($randevu->note ?? '');
         $this->color = (string) ($randevu->color ?? '');
         $this->calendar_mode = $randevu->entered_in === 'hijri' ? 'hijri' : 'gregorian';
+        $this->calendarIndex = $this->calendar_mode === 'hijri' ? 1 : 0;
         $this->show_years = (bool) $randevu->show_years;
         $this->show_months = (bool) $randevu->show_months;
         $this->show_days = (bool) $randevu->show_days;
@@ -111,16 +116,6 @@ class RandevuEdit extends NativeComponent
     public function navTitle(): string
     {
         return __('randevu.edit_title');
-    }
-
-    public function useGregorian(): void
-    {
-        $this->calendar_mode = 'gregorian';
-    }
-
-    public function useHijri(): void
-    {
-        $this->calendar_mode = 'hijri';
     }
 
     /** Gregorian Y-m-d string, or null when the selection is not a real date. */
