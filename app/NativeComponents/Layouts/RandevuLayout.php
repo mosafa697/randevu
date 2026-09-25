@@ -12,6 +12,11 @@ use Native\Mobile\Edge\NativeComponent;
 
 class RandevuLayout extends NativeLayout
 {
+    public function usesNativeChrome(): bool
+    {
+        return true;
+    }
+
     public function navBar(NativeComponent $screen): ?NavBar
     {
         $isLight = AppTheme::current() === 'light';
@@ -38,10 +43,11 @@ class RandevuLayout extends NativeLayout
     public function tabBar(NativeComponent $screen): ?TabBar
     {
         return TabBar::make()
+            ->dark(AppTheme::current() === 'dark')
             ->labelVisibility('labeled')
-            ->backgroundColor((string) AppTheme::token('background', '#FBF9F4'))
             ->textColor((string) AppTheme::token('on-surface-variant', '#69647D'))
             ->activeColor((string) AppTheme::token('primary', '#6F63DB'))
+            ->font('label')
             ->add(Tab::link(__('randevu.tab_follow'), '/', ios: 'calendar', android: 'calendar_month'))
             ->add(Tab::link(__('randevu.tab_memories'), '/memories', ios: 'clock', android: 'history'))
             ->add(Tab::link(__('randevu.tab_new'), '/create', ios: 'plus', android: 'add'))
