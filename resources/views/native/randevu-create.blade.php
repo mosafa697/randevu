@@ -10,7 +10,10 @@
                 <native:text class="text-sm text-theme-destructive">{{ $errors['title'] }}</native:text>
             @endif
 
-            <native:button-group :options="[__('randevu.mode_gregorian'), __('randevu.mode_hijri')]" native:model="calendarIndex" @change="calendarChanged" />
+            <native:row class="w-full gap-2">
+                <native:button :label="__('randevu.mode_gregorian')" :variant="$calendar_mode === 'gregorian' ? 'primary' : 'ghost'" @press="useGregorian" />
+                <native:button :label="__('randevu.mode_hijri')" :variant="$calendar_mode === 'hijri' ? 'primary' : 'ghost'" @press="useHijri" />
+            </native:row>
 
             @if($calendar_mode === 'hijri')
                 <native:row class="w-full gap-2">

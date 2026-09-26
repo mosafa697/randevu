@@ -22,6 +22,7 @@ Write idiomatic NativePHP Mobile v4 (SuperNative + EDGE). The framework moves fa
 - `@press="methodName"` — **bare method name only**. No arguments, no `$this->` expressions. Need a parameter? Write a dedicated method (`useHijri()`), never `@press="setMode('x')"`.
 - Navigation ONLY via `@navigate`: quote style `@navigate="'/path'"`, expression style `@navigate="'/edit/'.$item['id']"`, boolean `@navigate.back`. NEVER `@navigate="/path"` (compiles to unquoted, invalid PHP) and NEVER `{{ }}` inside a directive argument (the precompiler captures it raw → ParseError on device).
 - `native:model="prop"` binds to a **public string property**. Select `:options` must reference a **public array prop** (`:options="$dayOptions"`), never a method call.
+- For binary/segmented choices (language, theme, calendar mode) use a row of `native:button` with bare `@press` methods + `:variant="$x === '…' ? 'primary' : 'ghost'"` highlighting — `@press` is the proven on-device path. Avoid `native:button-group` + `@change`: its `native:model` sync callback shares the single `on_change` slot (duplicate `_change` key — last wins at compile), and `@change` handlers that read the bound prop replay the stale selection, looking dead on device. Test interactions with `->press('method')`, which follows the same wire path as the device.
 - Every `native:text` gets an explicit theme token — colors do NOT inherit; unprefixed text renders black in dark mode.
 
 ## Components

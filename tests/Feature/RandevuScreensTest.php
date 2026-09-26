@@ -96,29 +96,35 @@ class RandevuScreensTest extends TestCase
         $this->assertDatabaseCount('randevus', 0);
     }
 
-    public function test_create_has_segmented_calendar_control_and_chips(): void
+    public function test_create_has_calendar_mode_buttons_and_chips(): void
     {
         Setting::set('locale', 'en');
 
         $screen = Native::test(RandevuCreate::class);
 
-        $screen->assertElement('button_group', fn ($n) => ($n['props']['options'] ?? []) === ['Gregorian', 'Hijri']);
+        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Gregorian');
+        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Hijri');
         $screen->assertElement('chip', fn ($n) => ($n['props']['label'] ?? '') === 'Years');
         $screen->assertElement('chip', fn ($n) => ($n['props']['label'] ?? '') === 'Months');
         $screen->assertElement('chip', fn ($n) => ($n['props']['label'] ?? '') === 'Days');
     }
 
-    public function test_create_calendar_segmented_control_switches_mode(): void
+    public function test_create_calendar_buttons_switch_mode(): void
     {
         $screen = Native::test(RandevuCreate::class);
 
         $this->assertSame('gregorian', $screen->get('calendar_mode'));
         $this->assertSame(0, $screen->get('calendarIndex'));
 
-        $screen->set('calendarIndex', 1)->call('calendarChanged');
+        $screen->press('useHijri');
 
         $this->assertSame('hijri', $screen->get('calendar_mode'));
         $this->assertSame(1, $screen->get('calendarIndex'));
+
+        $screen->press('useGregorian');
+
+        $this->assertSame('gregorian', $screen->get('calendar_mode'));
+        $this->assertSame(0, $screen->get('calendarIndex'));
     }
 
     public function test_create_chips_toggle_period_units(): void
@@ -409,6 +415,64 @@ class RandevuScreensTest extends TestCase
 
         $screen->call('useArabic')->assertSet('locale', 'ar');
         $this->assertSame('ar', Setting::get('locale'));
+    }
+
+    public function test_settings_theme_switch_persists(): void
+    {
+        $screen = Native::test(Settings::class)
+            ->assertSet('theme', 'light');
+
+        $screen->press('useDark')
+            ->assertSet('theme', 'dark');
+
+        $this->assertSame('dark', Setting::get('theme'));
+
+        // A fresh mount reflects the stored mode on the highlighted button.
+        Native::test(Settings::class)
+            ->assertSet('theme', 'dark')
+            ->assertElement('button', fn ($n) => in_array($n['props']['label'] ?? '', ['Dark', 'غامق'], true)
+                && ($n['props']['variant'] ?? '') === 'primary');
+
+        $screen->press('useLight')
+            ->assertSet('theme', 'light');
+
+        $this->assertSame('light', Setting::get('theme'));
+    }
+
+    public function test_settings_buttons_switch_language_and_theme(): void
+    {
+        $screen = Native::test(Settings::class);
+
+        $screen->press('useEnglish')
+            ->assertSet('locale', 'en');
+
+        $this->assertSame('en', Setting::get('locale'));
+
+        $screen->press('useDark')
+            ->assertSet('theme', 'dark');
+
+        $this->assertSame('dark', Setting::get('theme'));
+
+        $screen->press('useArabic')
+            ->assertSet('locale', 'ar');
+
+        $screen->press('useLight')
+            ->assertSet('theme', 'light');
+    }
+
+    public function test_settings_option_buttons_render(): void
+    {
+        Setting::set('locale', 'en');
+
+        $screen = Native::test(Settings::class);
+
+        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'العربية');
+        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'English');
+        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Light'
+            && ($n['props']['variant'] ?? '') === 'primary');
+        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Dark'
+            && ($n['props']['variant'] ?? '') === 'ghost');
+        $screen->assertElement('divider', fn ($n) => true);
     }
 
     public function test_default_locale_is_arabic(): void

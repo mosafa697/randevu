@@ -4,7 +4,6 @@ namespace App\NativeComponents\Layouts;
 
 use App\Services\AppTheme;
 use Native\Mobile\Edge\Layouts\Builders\NavBar;
-use Native\Mobile\Edge\Layouts\Builders\NavAction;
 use Native\Mobile\Edge\Layouts\Builders\Tab;
 use Native\Mobile\Edge\Layouts\Builders\TabBar;
 use Native\Mobile\Edge\Layouts\NativeLayout;
@@ -19,25 +18,15 @@ class RandevuLayout extends NativeLayout
 
     public function navBar(NativeComponent $screen): ?NavBar
     {
-        $isLight = AppTheme::current() === 'light';
-
         // Explicit chrome colors: the drawn bar otherwise falls back to the
         // OS scheme (white text on Android in system dark, .primary on iOS),
         // which goes invisible when the app palette is forced the other way.
+        // Theme switching lives on the Settings screen — no header action.
         return NavBar::make()
             ->title($screen->navTitle())
             ->font('heading')
             ->backgroundColor((string) AppTheme::token('background', '#FBF9F4'))
-            ->textColor((string) AppTheme::token('on-background', '#2B2740'))
-            ->action(
-                NavAction::make('toggle-theme')
-                    ->icon(
-                        ios: $isLight ? 'moon' : 'sun.max',
-                        android: $isLight ? 'dark_mode' : 'light_mode'
-                    )
-                    ->a11yLabel(__('randevu.theme_toggle_a11y'))
-                    ->press('toggleTheme')
-            );
+            ->textColor((string) AppTheme::token('on-background', '#2B2740'));
     }
 
     public function tabBar(NativeComponent $screen): ?TabBar

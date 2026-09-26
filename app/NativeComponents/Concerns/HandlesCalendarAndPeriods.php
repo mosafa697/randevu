@@ -16,15 +16,6 @@ trait HandlesCalendarAndPeriods
         $this->calendarIndex = 1;
     }
 
-    public function calendarChanged(): void
-    {
-        if ($this->calendarIndex === 0) {
-            $this->useGregorian();
-        } else {
-            $this->useHijri();
-        }
-    }
-
     public function toggleYears(): void
     {
         $this->show_years = ! $this->show_years;

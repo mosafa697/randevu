@@ -5,6 +5,7 @@ namespace App\NativeComponents;
 use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
 use App\Services\AppLocale;
+use App\Services\AppTheme;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
 
@@ -35,6 +36,16 @@ class Settings extends NativeComponent
     public function useEnglish(): void
     {
         $this->locale = AppLocale::persist('en');
+    }
+
+    public function useLight(): void
+    {
+        $this->theme = AppTheme::persist('light');
+    }
+
+    public function useDark(): void
+    {
+        $this->theme = AppTheme::persist('dark');
     }
 
     public function render(): View
