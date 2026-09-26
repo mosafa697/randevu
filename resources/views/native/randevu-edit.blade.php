@@ -26,9 +26,9 @@
                     @if($rtl)
                         <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="w-24 shrink-0" />
                         <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="flex-1" />
-                        <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="w-20 shrink-0" />
+                        <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="w-24 shrink-0" />
                     @else
-                        <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="w-20 shrink-0" />
+                        <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="w-24 shrink-0" />
                         <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="flex-1" />
                         <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="w-24 shrink-0" />
                     @endif
@@ -38,9 +38,9 @@
                     @if($rtl)
                         <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="w-24 shrink-0" />
                         <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="flex-1" />
-                        <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="w-20 shrink-0" />
+                        <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="w-24 shrink-0" />
                     @else
-                        <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="w-20 shrink-0" />
+                        <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="w-24 shrink-0" />
                         <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="flex-1" />
                         <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="w-24 shrink-0" />
                     @endif
