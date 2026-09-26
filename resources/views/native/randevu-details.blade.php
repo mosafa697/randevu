@@ -1,4 +1,5 @@
 <native:column class="w-full h-full p-4 gap-4 bg-theme-background">
+    @php($rtl = \App\Services\AppLocale::isRtl())
     <native:row class="w-full">
         <native:button :label="__('randevu.back')" @navigate.back />
     </native:row>
@@ -8,8 +9,11 @@
     @else
         <native:column class="w-full p-4 gap-2 rounded-2xl bg-theme-surface">
             <native:row class="w-full items-center justify-between">
+                @if($rtl && $randevu['is_today'])
+                    <native:badge :label="__('randevu.today')" variant="accent" />
+                @endif
                 <native:text font="heading" class="text-xl font-bold text-theme-on-surface">{{ $randevu['title'] }}</native:text>
-                @if($randevu['is_today'])
+                @if(!$rtl && $randevu['is_today'])
                     <native:badge :label="__('randevu.today')" variant="accent" />
                 @endif
             </native:row>

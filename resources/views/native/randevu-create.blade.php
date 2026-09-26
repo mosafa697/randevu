@@ -1,4 +1,5 @@
 <native:column class="w-full h-full p-4 gap-4 bg-theme-background">
+    @php($rtl = \App\Services\AppLocale::isRtl())
     <native:row class="w-full">
         <native:button :label="__('randevu.back')" @navigate.back />
     </native:row>
@@ -11,21 +12,38 @@
             @endif
 
             <native:row class="w-full gap-2">
-                <native:button :label="__('randevu.mode_gregorian')" :variant="$calendar_mode === 'gregorian' ? 'primary' : 'ghost'" @press="useGregorian" />
-                <native:button :label="__('randevu.mode_hijri')" :variant="$calendar_mode === 'hijri' ? 'primary' : 'ghost'" @press="useHijri" />
+                @if($rtl)
+                    <native:button :label="__('randevu.mode_hijri')" :variant="$calendar_mode === 'hijri' ? 'primary' : 'ghost'" @press="useHijri" />
+                    <native:button :label="__('randevu.mode_gregorian')" :variant="$calendar_mode === 'gregorian' ? 'primary' : 'ghost'" @press="useGregorian" />
+                @else
+                    <native:button :label="__('randevu.mode_gregorian')" :variant="$calendar_mode === 'gregorian' ? 'primary' : 'ghost'" @press="useGregorian" />
+                    <native:button :label="__('randevu.mode_hijri')" :variant="$calendar_mode === 'hijri' ? 'primary' : 'ghost'" @press="useHijri" />
+                @endif
             </native:row>
 
             @if($calendar_mode === 'hijri')
                 <native:row class="w-full gap-2">
-                    <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="w-20 shrink-0" />
-                    <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="flex-1" />
-                    <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="w-24 shrink-0" />
+                    @if($rtl)
+                        <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="w-24 shrink-0" />
+                        <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="flex-1" />
+                        <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="w-20 shrink-0" />
+                    @else
+                        <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="w-20 shrink-0" />
+                        <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="flex-1" />
+                        <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="w-24 shrink-0" />
+                    @endif
                 </native:row>
             @else
                 <native:row class="w-full gap-2">
-                    <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="w-20 shrink-0" />
-                    <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="flex-1" />
-                    <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="w-24 shrink-0" />
+                    @if($rtl)
+                        <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="w-24 shrink-0" />
+                        <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="flex-1" />
+                        <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="w-20 shrink-0" />
+                    @else
+                        <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="w-20 shrink-0" />
+                        <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="flex-1" />
+                        <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="w-24 shrink-0" />
+                    @endif
                 </native:row>
             @endif
             @if(!empty($errors['occurs_on']))
@@ -35,9 +53,15 @@
             <native:text font="heading" class="text-sm font-semibold text-theme-on-surface">{{ __('randevu.period_label') }}</native:text>
 
             <native:row class="w-full gap-2">
-                <native:chip :label="__('randevu.period_years')" :selected="$show_years" @change="toggleYears" />
-                <native:chip :label="__('randevu.period_months')" :selected="$show_months" @change="toggleMonths" />
-                <native:chip :label="__('randevu.period_days')" :selected="$show_days" @change="toggleDays" />
+                @if($rtl)
+                    <native:chip :label="__('randevu.period_days')" :selected="$show_days" @change="toggleDays" />
+                    <native:chip :label="__('randevu.period_months')" :selected="$show_months" @change="toggleMonths" />
+                    <native:chip :label="__('randevu.period_years')" :selected="$show_years" @change="toggleYears" />
+                @else
+                    <native:chip :label="__('randevu.period_years')" :selected="$show_years" @change="toggleYears" />
+                    <native:chip :label="__('randevu.period_months')" :selected="$show_months" @change="toggleMonths" />
+                    <native:chip :label="__('randevu.period_days')" :selected="$show_days" @change="toggleDays" />
+                @endif
             </native:row>
             @if(!empty($errors['period_units']))
                 <native:text class="text-sm text-theme-destructive">{{ $errors['period_units'] }}</native:text>

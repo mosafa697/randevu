@@ -560,6 +560,126 @@ class RandevuScreensTest extends TestCase
         $screen->assertElement('divider', fn ($n) => true);
     }
 
+    public function test_layout_mirrors_order_sensitive_rows_per_direction(): void
+    {
+        Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDay()]);
+
+        // Arabic (RTL): mirrored DOM order. Labels hardcoded: the test
+        // process locale is unreliable for __() here.
+        $this->assertSame(
+            ['السنة', 'الشهر', 'اليوم'],
+            $this->selectRowLabels(Native::test(RandevuCreate::class)->tree())
+        );
+        $this->assertSame('English', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
+        $this->assertSame('column', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
+
+        // English (LTR): source order.
+        Setting::set('locale', 'en');
+
+        $this->assertSame(
+            ['Day', 'Month', 'Year'],
+            $this->selectRowLabels(Native::test(RandevuCreate::class)->tree())
+        );
+        $this->assertSame('العربية', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
+        $this->assertSame('webview', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
+    }
+
+    /** Labels of the first row holding exactly 3 selects. */
+    private function selectRowLabels(array $tree): array
+    {
+        foreach ($this->collectNodes($tree, 'row') as $row) {
+            $children = [];
+            foreach ($row['children'] ?? [] as $child) {
+                if (is_array($child)) {
+                    $children[] = $child;
+                }
+            }
+
+            $allSelects = count($children) === 3;
+            foreach ($children as $child) {
+                $allSelects = $allSelects && (($child['type'] ?? null) === 'select');
+            }
+
+            if ($allSelects) {
+                return array_map(fn ($child) => $child['props']['label'] ?? '', $children);
+            }
+        }
+
+        $this->fail('No 3-select row found in the rendered tree.');
+
+        return [];
+    }
+
+    /** Label of the first button in the first 2-button row. */
+    private function firstButtonLabel(array $tree): string
+    {
+        foreach ($this->collectNodes($tree, 'row') as $row) {
+            $children = [];
+            foreach ($row['children'] ?? [] as $child) {
+                if (is_array($child)) {
+                    $children[] = $child;
+                }
+            }
+
+            $allButtons = count($children) === 2;
+            foreach ($children as $child) {
+                $allButtons = $allButtons && (($child['type'] ?? null) === 'button');
+            }
+
+            if ($allButtons) {
+                return $children[0]['props']['label'] ?? '';
+            }
+        }
+
+        $this->fail('No 2-button row found in the rendered tree.');
+
+        return '';
+    }
+
+    /** Type of the first child of the card row (holds the ring webview). */
+    private function cardRowFirstType(array $tree): string
+    {
+        foreach ($this->collectNodes($tree, 'row') as $row) {
+            $children = [];
+            foreach ($row['children'] ?? [] as $child) {
+                if (is_array($child)) {
+                    $children[] = $child;
+                }
+            }
+
+            $hasWebview = false;
+            foreach ($children as $child) {
+                $hasWebview = $hasWebview || (($child['type'] ?? null) === 'webview');
+            }
+
+            if ($hasWebview && count($children) > 0) {
+                return $children[0]['type'];
+            }
+        }
+
+        $this->fail('No card row found in the rendered tree.');
+
+        return '';
+    }
+
+    /** @return list<array> */
+    private function collectNodes(array $node, string $type): array
+    {
+        $out = [];
+
+        if (($node['type'] ?? null) === $type) {
+            $out[] = $node;
+        }
+
+        foreach ($node['children'] ?? [] as $child) {
+            if (is_array($child)) {
+                array_push($out, ...$this->collectNodes($child, $type));
+            }
+        }
+
+        return $out;
+    }
+
     public function test_default_locale_is_arabic(): void
     {
         $this->assertSame('ar', config('app.locale'));
