@@ -37,9 +37,10 @@ class RandevuLayout extends NativeLayout
             ->textColor((string) AppTheme::token('on-surface-variant', '#69647D'))
             ->activeColor((string) AppTheme::token('primary', '#6F63DB'))
             ->font('label')
-            ->add(Tab::link(__('randevu.tab_follow'), '/', ios: 'calendar', android: 'calendar_month'))
-            ->add(Tab::link(__('randevu.tab_memories'), '/memories', ios: 'clock', android: 'history'))
+            ->add(Tab::link(__('randevu.tab_settings'), '/settings', ios: 'gear', android: 'settings'))
+            ->add(Tab::link(__('randevu.tab_follow'), '/follow', ios: 'calendar', android: 'calendar_month'))
             ->add(Tab::link(__('randevu.tab_new'), '/create', ios: 'plus', android: 'add'))
-            ->add(Tab::link(__('randevu.tab_settings'), '/settings', ios: 'gear', android: 'settings'));
+            ->add(Tab::link(__('randevu.tab_memories'), '/memories', ios: 'clock', android: 'history'))
+            ->add(Tab::link(__('randevu.tab_dashboard'), '/', ios: 'chart.bar', android: 'bar_chart'));
     }
 }

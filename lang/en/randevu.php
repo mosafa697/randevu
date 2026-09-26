@@ -10,6 +10,7 @@ return [
     'tab_new' => 'New',
     'tab_memories' => 'Memories',
     'memories_title' => 'Memories',
+    'tab_dashboard' => 'Dashboard',
     'tab_settings' => 'Settings',
 
     // Follow sections
@@ -111,6 +112,19 @@ return [
     'combined_future' => 'In :parts',
     'combined_past' => ':parts ago',
     'combined_separator' => ', ',
+
+    // Dashboard
+    'dashboard_title' => 'Dashboard',
+    'dash_total' => 'Total',
+    'dash_upcoming' => 'Upcoming',
+    'dash_memories' => 'Memories',
+    'dash_today' => 'Today',
+    'dash_this_month' => 'This month',
+    'dash_split_headline' => 'Entry calendar',
+    'dash_split_support' => 'Gregorian vs Hijri-entered',
+    'dash_gregorian' => 'Gregorian',
+    'dash_hijri' => 'Hijri',
+    'dash_empty_support' => 'Add a randevu to see your overview here',
 
     // Settings
     'language_label' => 'Language',

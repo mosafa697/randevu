@@ -107,7 +107,7 @@ class RandevuScreensTest extends TestCase
             ->set('month', 'February')
             ->set('year', '2026')
             ->call('save')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $this->assertSame(
             '2026-02-28',
@@ -120,7 +120,7 @@ class RandevuScreensTest extends TestCase
             ->set('month', 'April')
             ->set('year', '2026')
             ->call('save')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $this->assertSame(
             '2026-04-30',
@@ -138,7 +138,7 @@ class RandevuScreensTest extends TestCase
             ->set('month', 'February')
             ->set('day', '29')
             ->call('save')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $this->assertSame(
             '2024-02-29',
@@ -231,7 +231,7 @@ class RandevuScreensTest extends TestCase
             ->set('year', (string) $date->year)
             ->set('note', 'Second floor')
             ->call('save')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $this->assertDatabaseHas('randevus', ['title' => 'Dentist', 'note' => 'Second floor']);
         $this->assertSame(
@@ -251,7 +251,7 @@ class RandevuScreensTest extends TestCase
             ->set('year', (string) $date->year)
             ->set('color', '2563eb')
             ->call('save')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $this->assertSame('#2563EB', Randevu::where('title', 'Colorful')->firstOrFail()->color);
     }
@@ -283,7 +283,7 @@ class RandevuScreensTest extends TestCase
             ->assertSet('month', \App\Services\RandevuTime::monthNames()[today()->month - 1])
             ->set('title', 'New')
             ->call('update')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $this->assertSame('New', $randevu->fresh()->title);
     }
@@ -296,7 +296,7 @@ class RandevuScreensTest extends TestCase
             ->assertSet('color', '#DB2777')
             ->call('pickPurple')
             ->call('update')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $this->assertSame('#7C3AED', $randevu->fresh()->color);
 
@@ -364,7 +364,8 @@ class RandevuScreensTest extends TestCase
         $randevu = Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDay()]);
 
         $routes = [
-            '/' => 'Follow',
+            '/' => 'Dashboard',
+            '/follow' => 'Follow',
             '/create' => 'New',
             '/memories' => 'Memories',
             '/settings' => 'Settings',
@@ -398,7 +399,7 @@ class RandevuScreensTest extends TestCase
             array_filter($tree['children'], fn ($node) => ($node['type'] ?? null) === 'bottom_nav_item'),
         ));
 
-        $this->assertSame(['Follow', 'Memories', 'New', 'Settings'], $labels);
+        $this->assertSame(['Settings', 'Follow', 'New', 'Memories', 'Dashboard'], $labels);
     }
 
     public function test_body_copy_is_not_heading_font(): void
@@ -432,7 +433,7 @@ class RandevuScreensTest extends TestCase
             ->assertSet('confirmingDelete', true)
             ->assertSee('تمسح الميعاد ده؟');
 
-        $screen->call('destroy')->assertReplacedWith('/');
+        $screen->call('destroy')->assertReplacedWith('/follow');
 
         $this->assertDatabaseMissing('randevus', ['id' => $randevu->id]);
     }
@@ -446,7 +447,7 @@ class RandevuScreensTest extends TestCase
             ->set('h_month', 'ربيع الثاني')
             ->set('h_year', '1448')
             ->call('save')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $randevu = Randevu::where('title', 'Ramadan night')->firstOrFail();
 
@@ -465,7 +466,7 @@ class RandevuScreensTest extends TestCase
             ->set('h_month', 'صفر')
             ->set('h_year', '1448')
             ->call('save')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $randevu = Randevu::where('title', 'Safar night')->firstOrFail();
 

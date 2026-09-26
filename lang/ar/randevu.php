@@ -10,6 +10,7 @@ return [
     'tab_new' => 'جديد',
     'tab_memories' => 'ذكريات',
     'memories_title' => 'ذكريات',
+    'tab_dashboard' => 'نظرة عامة',
     'tab_settings' => 'الإعدادات',
 
     // Follow sections
@@ -111,6 +112,19 @@ return [
     'combined_future' => 'بعد :parts',
     'combined_past' => 'من :parts',
     'combined_separator' => '، ',
+
+    // Dashboard
+    'dashboard_title' => 'نظرة عامة',
+    'dash_total' => 'الإجمالي',
+    'dash_upcoming' => 'اللي جاي',
+    'dash_memories' => 'ذكريات',
+    'dash_today' => 'النهاردة',
+    'dash_this_month' => 'الشهر ده',
+    'dash_split_headline' => 'طريقة الإدخال',
+    'dash_split_support' => 'ميلادي ولا هجري',
+    'dash_gregorian' => 'ميلادي',
+    'dash_hijri' => 'هجري',
+    'dash_empty_support' => 'ضيف ميعاد عشان تشوف الإحصائيات هنا',
 
     // Settings
     'language_label' => 'اللغة',

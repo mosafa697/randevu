@@ -204,7 +204,7 @@ class RandevuCreate extends NativeComponent
             'show_days' => $this->show_days,
         ]);
 
-        $this->replace('/');
+        $this->replace('/follow');
     }
 
     public function render(): View

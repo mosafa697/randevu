@@ -211,7 +211,7 @@ class RandevuEdit extends NativeComponent
             'show_days' => $this->show_days,
         ]);
 
-        $this->replace('/');
+        $this->replace('/follow');
     }
 
     public function askDelete(): void
@@ -227,7 +227,7 @@ class RandevuEdit extends NativeComponent
     public function destroy(): void
     {
         $this->findOrFail()->delete();
-        $this->replace('/');
+        $this->replace('/follow');
     }
 
     private function findOrFail(): Randevu

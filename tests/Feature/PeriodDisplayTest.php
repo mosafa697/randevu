@@ -39,7 +39,7 @@ class PeriodDisplayTest extends TestCase
             ->set('year', (string) $date->year)
             ->set('show_months', false)
             ->call('save')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $randevu = Randevu::where('title', 'Trip')->firstOrFail();
 
@@ -86,7 +86,7 @@ class PeriodDisplayTest extends TestCase
             ->set('show_days', false)
             ->set('show_months', true)
             ->call('update')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $fresh = $randevu->fresh();
 
@@ -152,7 +152,7 @@ class PeriodDisplayTest extends TestCase
             ->set('h_month', RandevuHijri::MONTH_NAMES[$hm - 1])
             ->set('h_year', (string) $hy)
             ->call('save')
-            ->assertReplacedWith('/');
+            ->assertReplacedWith('/follow');
 
         $randevu = Randevu::where('title', 'Hijri night')->firstOrFail();
 
