@@ -92,8 +92,58 @@ class RandevuScreensTest extends TestCase
 
         $screen->assertNotSet('errors', []);
         $this->assertSame('', $screen->get('title'));
-        $this->assertSame('30', $screen->get('day'));
+        // Feb 30 does not survive: picking February clamps the day to 28.
+        $this->assertSame('28', $screen->get('day'));
         $this->assertDatabaseCount('randevus', 0);
+    }
+
+    public function test_create_clamps_day_to_month_length_and_saves(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'Feb meeting')
+            ->set('day', '30')
+            ->set('month', 'February')
+            ->set('year', '2026')
+            ->call('save')
+            ->assertReplacedWith('/');
+
+        $this->assertSame(
+            '2026-02-28',
+            Randevu::where('title', 'Feb meeting')->firstOrFail()->occurs_on->toDateString()
+        );
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'April deadline')
+            ->set('day', '31')
+            ->set('month', 'April')
+            ->set('year', '2026')
+            ->call('save')
+            ->assertReplacedWith('/');
+
+        $this->assertSame(
+            '2026-04-30',
+            Randevu::where('title', 'April deadline')->firstOrFail()->occurs_on->toDateString()
+        );
+    }
+
+    public function test_create_keeps_valid_leap_day_and_saves(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'Leap day')
+            ->set('year', '2024')
+            ->set('month', 'February')
+            ->set('day', '29')
+            ->call('save')
+            ->assertReplacedWith('/');
+
+        $this->assertSame(
+            '2024-02-29',
+            Randevu::where('title', 'Leap day')->firstOrFail()->occurs_on->toDateString()
+        );
     }
 
     public function test_create_has_calendar_mode_buttons_and_chips(): void
@@ -405,18 +455,21 @@ class RandevuScreensTest extends TestCase
         $this->assertSame('hijri', $randevu->entered_in);
     }
 
-    public function test_create_rejects_impossible_hijri_date(): void
+    public function test_create_clamps_impossible_hijri_day_and_saves(): void
     {
+        // Safar has 29 days: picking it clamps h_day 30 → 29, then saves.
         Native::test(RandevuCreate::class)
-            ->set('title', 'Bad hijri')
+            ->set('title', 'Safar night')
             ->call('useHijri')
             ->set('h_day', '30')
             ->set('h_month', 'صفر')
             ->set('h_year', '1448')
             ->call('save')
-            ->assertNotSet('errors', []);
+            ->assertReplacedWith('/');
 
-        $this->assertDatabaseCount('randevus', 0);
+        $randevu = Randevu::where('title', 'Safar night')->firstOrFail();
+
+        $this->assertSame([1448, 2, 29], [$randevu->hijri_year, $randevu->hijri_month, $randevu->hijri_day]);
     }
 
     public function test_follow_shows_hijri_date(): void
