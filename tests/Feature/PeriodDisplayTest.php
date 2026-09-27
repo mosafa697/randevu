@@ -95,6 +95,138 @@ class PeriodDisplayTest extends TestCase
         $this->assertFalse($fresh->show_days);
     }
 
+    public function test_create_saves_optional_time_and_hours_unit(): void
+    {
+        Setting::set('locale', 'en');
+        $date = today()->addDays(2);
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'Meeting')
+            ->set('day', (string) $date->day)
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->set('hour', '14')
+            ->set('minute', '30')
+            ->set('show_hours', true)
+            ->call('save')
+            ->assertReplacedWith('/follow');
+
+        $randevu = Randevu::where('title', 'Meeting')->firstOrFail();
+
+        $this->assertSame('14:30', $randevu->occurs_time->format('H:i'));
+        $this->assertTrue($randevu->show_hours);
+
+        Native::test(Follow::class)->assertSee('In 2 days, 14 hours');
+    }
+
+    public function test_create_with_hour_only_means_top_of_hour(): void
+    {
+        $date = today()->addDays(2);
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'Sharp')
+            ->set('day', (string) $date->day)
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->set('hour', '14')
+            ->call('save')
+            ->assertReplacedWith('/follow');
+
+        $randevu = Randevu::where('title', 'Sharp')->firstOrFail();
+
+        $this->assertSame('14:00', $randevu->occurs_time->format('H:i'));
+        $this->assertFalse($randevu->show_hours);
+    }
+
+    public function test_create_without_time_stores_null_time(): void
+    {
+        Setting::set('locale', 'en');
+        $date = today()->addDays(40);
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'Plain')
+            ->set('day', (string) $date->day)
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->call('save')
+            ->assertReplacedWith('/follow');
+
+        $randevu = Randevu::where('title', 'Plain')->firstOrFail();
+
+        $this->assertNull($randevu->occurs_time);
+        $this->assertFalse($randevu->show_hours);
+
+        // Time-less keeps the day-precision breakdown for the default units.
+        $this->assertSame('In 1 month, 10 days', $randevu->relativePhrase());
+    }
+
+    public function test_create_allows_hours_as_the_only_unit(): void
+    {
+        Setting::set('locale', 'en');
+        $date = today()->addDays(40);
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'Countdown')
+            ->set('day', (string) $date->day)
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->set('hour', '14')
+            ->set('minute', '30')
+            ->set('show_years', false)
+            ->set('show_months', false)
+            ->set('show_days', false)
+            ->set('show_hours', true)
+            ->call('save')
+            ->assertReplacedWith('/follow');
+
+        $randevu = Randevu::where('title', 'Countdown')->firstOrFail();
+
+        $this->assertTrue($randevu->show_hours);
+        $this->assertSame('In 974 hours', $randevu->relativePhrase());
+    }
+
+    public function test_edit_prefills_time_and_updates_it(): void
+    {
+        $randevu = Randevu::create([
+            'title' => 'Trip',
+            'occurs_on' => today()->addDays(40),
+            'occurs_time' => '14:30',
+            'show_hours' => true,
+        ]);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->assertSet('hour', '14')
+            ->assertSet('minute', '30')
+            ->assertSet('show_hours', true)
+            ->set('hour', '15')
+            ->call('update')
+            ->assertReplacedWith('/follow');
+
+        $this->assertSame('15:30', $randevu->fresh()->occurs_time->format('H:i'));
+    }
+
+    public function test_edit_clearing_time_sets_null(): void
+    {
+        $randevu = Randevu::create([
+            'title' => 'Trip',
+            'occurs_on' => today()->addDays(40),
+            'occurs_time' => '14:30',
+            'show_hours' => true,
+        ]);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->set('hour', __('randevu.time_none'))
+            ->set('minute', __('randevu.time_none'))
+            ->set('show_hours', false)
+            ->call('update')
+            ->assertReplacedWith('/follow');
+
+        $fresh = $randevu->fresh();
+
+        $this->assertNull($fresh->occurs_time);
+        $this->assertFalse($fresh->show_hours);
+    }
+
     public function test_follow_card_shows_each_appointments_own_units(): void
     {
         Setting::set('locale', 'en');

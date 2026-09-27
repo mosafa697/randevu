@@ -46,11 +46,17 @@ class RandevuEdit extends NativeComponent
 
     public string $h_year = '';
 
+    public string $hour = '';
+
+    public string $minute = '';
+
     public bool $show_years = true;
 
     public bool $show_months = true;
 
     public bool $show_days = true;
+
+    public bool $show_hours = false;
 
     /** @var list<string> */
     public array $dayOptions = [];
@@ -69,6 +75,12 @@ class RandevuEdit extends NativeComponent
 
     /** @var list<string> */
     public array $hYearOptions = [];
+
+    /** @var list<string> */
+    public array $hourOptions = [];
+
+    /** @var list<string> */
+    public array $minuteOptions = [];
 
     public bool $confirmingDelete = false;
 
@@ -89,12 +101,17 @@ class RandevuEdit extends NativeComponent
         $this->show_years = (bool) $randevu->show_years;
         $this->show_months = (bool) $randevu->show_months;
         $this->show_days = (bool) $randevu->show_days;
+        $this->show_hours = (bool) $randevu->show_hours;
         $this->dayOptions = RandevuCreate::dayOptions();
         $this->monthOptions = RandevuTime::monthNames();
         $this->yearOptions = RandevuCreate::yearOptions();
         $this->hDayOptions = array_map(strval(...), range(1, 30));
         $this->hMonthOptions = RandevuHijri::MONTH_NAMES;
         $this->hYearOptions = RandevuHijri::yearOptions();
+        $this->hourOptions = RandevuCreate::hourOptions();
+        $this->minuteOptions = RandevuCreate::minuteOptions();
+        $this->hour = $randevu->occurs_time?->format('H') ?? __('randevu.time_none');
+        $this->minute = $randevu->occurs_time?->format('i') ?? __('randevu.time_none');
         $this->day = (string) $randevu->occurs_on->day;
         $this->month = RandevuTime::monthNames()[$randevu->occurs_on->month - 1];
         $this->year = (string) $randevu->occurs_on->year;
@@ -171,24 +188,27 @@ class RandevuEdit extends NativeComponent
     {
         $dates = $this->resolveDates();
         $color = Randevu::normalizeColor($this->color);
+        $time = $this->resolveTime();
 
         $validator = Validator::make([
             'title' => $this->title,
             'occurs_on' => $dates['occurs_on'] ?? null,
+            'occurs_time' => $time,
             'color' => $color,
             'note' => $this->note ?: null,
             'entered_in' => $this->calendar_mode,
             'show_years' => $this->show_years,
             'show_months' => $this->show_months,
             'show_days' => $this->show_days,
+            'show_hours' => $this->show_hours,
         ], Randevu::rules());
 
-        if ($validator->fails() || ! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days)) {
+        if ($validator->fails() || ! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days, $this->show_hours)) {
             $this->errors = collect($validator->errors()->messages())
                 ->mapWithKeys(fn ($msgs, $field) => [$field => (string) $msgs[0]])
                 ->all();
 
-            if (! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days)) {
+            if (! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days, $this->show_hours)) {
                 $this->errors['period_units'] = __('randevu.period_units_required');
             }
 
@@ -200,6 +220,7 @@ class RandevuEdit extends NativeComponent
         $this->findOrFail()->update([
             'title' => trim($this->title),
             'occurs_on' => $dates['occurs_on'],
+            'occurs_time' => $time,
             'color' => $color,
             'note' => $this->note !== '' ? trim($this->note) : null,
             'hijri_year' => $dates['hijri_year'],
@@ -209,6 +230,7 @@ class RandevuEdit extends NativeComponent
             'show_years' => $this->show_years,
             'show_months' => $this->show_months,
             'show_days' => $this->show_days,
+            'show_hours' => $this->show_hours,
         ]);
 
         $this->replace('/follow');

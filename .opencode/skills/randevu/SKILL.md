@@ -9,13 +9,13 @@ Android-first NativePHP Mobile v4 app. Users track future appointments and past 
 
 ## Domain
 
-- Model `App\Models\Randevu`: `title`, `occurs_on` (date, Gregorian, source of truth), `note` (nullable), `color` (nullable `#RRGGBB`), `hijri_year/month/day` (nullable, stored alongside), `entered_in` (`gregorian`|`hijri`), `show_years/show_months/show_days` (distance units the phrase uses).
+- Model `App\Models\Randevu`: `title`, `occurs_on` (date, Gregorian, source of truth), `occurs_time` (nullable `H:i` time-of-day), `note` (nullable), `color` (nullable `#RRGGBB`), `hijri_year/month/day` (nullable, stored alongside), `entered_in` (`gregorian`|`hijri`), `show_years/show_months/show_days/show_hours` (distance units the phrase uses).
 - Helpers: `COLOR_PRESETS`, `normalizeColor()` (trim/uppercase/prepend `#`, empty → null), `hijriTriple()`, `hasAnyUnit()` (at least one unit stays on).
 - Rule: `occurs_on >= today` = appointment, `< today` = memory. Today counts as appointment and gets a Today badge.
 - Service `App\Services\RandevuTime`:
   - `dayCount($date, $today = null)` signed int (future +, past -).
   - `phrase(...)`: Today / Tomorrow / Yesterday / `In N days` / `N days ago` (2-29) / `In N months` / `N months ago` (30-364) / `In N years` / `N years ago` (365+).
-  - `phraseFor($date, $showYears, $showMonths, $showDays, $today = null)`: per-randevu units — days-only keeps the exact count; a single shown unit rounds; all units give the exact calendar breakdown; switched-off middle units roll down; falls back to `phrase()` when no unit is on.
+  - `phraseFor($date, $showYears, $showMonths, $showDays, $showHours = false, $occursTime = null, $today = null)`: per-randevu units — days-only keeps the exact count; a single shown unit rounds; all units give the exact calendar breakdown; switched-off middle units roll down; falls back to `phrase()` when no unit is on. Hours refines Today/Tomorrow/Yesterday into breakdowns when a time is set; hours-only rolls days into hours (min 1); time-less rows phrase exactly as before.
   - `MONTH_NAMES`, `monthNumber()` for the Gregorian picker.
 - Service `App\Services\RandevuHijri`: pure-PHP TABULAR Islamic calendar (no intl, runs in embedded PHP). `fromGregorian`, `toGregorian`, `valid`, `daysInMonth`, `isLeapYear`, `format` ("12 ربيع الثاني 1448"), `MONTH_NAMES` (Arabic), `yearOptions`. Caveat: ±1–2 days vs observed Umm al-Qura; Gregorian stays source of truth.
 - Scopes: `upcoming()` ASC (includes today), `memories()` DESC, `today()`.
@@ -39,7 +39,7 @@ Android-first NativePHP Mobile v4 app. Users track future appointments and past 
 
 - Tags use `<native:*>`: `column`, `row`, `text`, `outlined-text-input` with `native:model="prop"`, `button` with `@press="methodName"` (bare method only — no args, no `$this->` expressions), `pressable`/`button` navigation ONLY via `@navigate` directive: quote style `@navigate="'/path'"`, expression style `@navigate="'/edit/'.$item['id']"`, boolean `@navigate.back`. NEVER `@navigate="/path"` (compiles to unquoted PHP) and NEVER `{{ }}` inside a directive argument.
 - Colors: every `native:text` needs an explicit theme token (`text-theme-on-background`, `text-theme-on-surface`, `text-theme-on-surface-variant`, `text-theme-destructive`). Cards on `bg-theme-surface`. Never rely on inheritance — dark mode falls back to black.
-- Date entry: Day/Month/Year `native:select` triples bound to string props (`:options="$dayOptions"` from public array props, NOT method calls). Validate combos with `checkdate()` / `RandevuHijri::valid()`, keep one `errors['occurs_on']` message.
+- Date entry: Day/Month/Year `native:select` triples bound to string props (`:options="$dayOptions"` from public array props, NOT method calls). Validate combos with `checkdate()` / `RandevuHijri::valid()`, keep one `errors['occurs_on']` message. Time-of-day: optional Hour/Minute selects with a leading none option (fixed hour-then-minute order in both directions, deliberately not mirrored); clearing sets null. Distance units: Years/Months/Days/Hours chips (`toggleHours` in `HandlesCalendarAndPeriods`).
 - Calendar mode toggle: `useGregorian`/`useHijri` methods + `@if($calendar_mode === ...)` blocks. Components resolve BOTH calendars on save (`resolveDates()`); edit prefills per `entered_in`.
 - Layout: `RandevuLayout` — NavBar title via `navTitle()` plus a sun/moon `toggleTheme()` action, tabs Follow/Memories/New/Settings. Drawn chrome colors come from `AppTheme::token()` literals. Screens declare `navTitle()`; keep inline Back buttons on forms, no inline title rows.
 - Follow view: Today section first, then Coming up (soonest first). Memories screen lists past entries newest first. Each card: relative phrase + absolute date (`d M Y`) + Hijri line + exact day count + note (+ optional `color` accent). Empty states invite the first randevu.

@@ -110,4 +110,25 @@ trait HandlesCalendarAndPeriods
     {
         $this->show_days = ! $this->show_days;
     }
+
+    public function toggleHours(): void
+    {
+        $this->show_hours = ! $this->show_hours;
+    }
+
+    /**
+     * 'H:i' from the Hour/Minute selects, or null when no hour is picked
+     * (the leading "none" option). A picked hour with the minute left on
+     * "none" means the top of that hour.
+     */
+    public function resolveTime(): ?string
+    {
+        if (! ctype_digit($this->hour)) {
+            return null;
+        }
+
+        $minute = ctype_digit($this->minute) ? (int) $this->minute : 0;
+
+        return sprintf('%02d:%02d', (int) $this->hour, $minute);
+    }
 }

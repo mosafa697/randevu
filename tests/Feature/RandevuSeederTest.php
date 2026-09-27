@@ -41,7 +41,7 @@ class RandevuSeederTest extends TestCase
             );
 
             $this->assertTrue(
-                Randevu::hasAnyUnit($randevu->show_years, $randevu->show_months, $randevu->show_days),
+                Randevu::hasAnyUnit($randevu->show_years, $randevu->show_months, $randevu->show_days, $randevu->show_hours),
                 "At least one distance unit must stay on [{$randevu->title}]."
             );
 
