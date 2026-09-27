@@ -95,7 +95,8 @@ class RandevuEdit extends NativeComponent
         $randevu = $this->findOrFail();
         $this->title = $randevu->title;
         $this->note = (string) ($randevu->note ?? '');
-        $this->color = (string) ($randevu->color ?? '');
+        // setColor() also mirrors the hex into the slider channels.
+        $this->setColor((string) ($randevu->color ?? ''));
         $this->calendar_mode = $randevu->entered_in === 'hijri' ? 'hijri' : 'gregorian';
         $this->calendarIndex = $this->calendar_mode === 'hijri' ? 1 : 0;
         $this->show_years = (bool) $randevu->show_years;

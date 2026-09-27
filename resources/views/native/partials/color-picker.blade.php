@@ -18,6 +18,32 @@
     </native:pressable>
 </native:row>
 
+<native:text font="heading" class="text-sm font-semibold text-theme-on-surface">{{ __('randevu.color_custom_label') }}</native:text>
+
+<native:row class="w-full gap-3 items-center">
+    @if($selected !== '')
+        <native:pressable class="w-10 h-10 rounded-full shrink-0 bg-[{{ $selected }}]" />
+    @else
+        <native:pressable class="w-10 h-10 rounded-full shrink-0 border border-theme-outline" />
+    @endif
+    <native:text class="text-sm text-theme-on-surface-variant">{{ $selected !== '' ? $selected : __('randevu.color_none') }}</native:text>
+</native:row>
+
+<native:row class="w-full gap-2 items-center">
+    <native:text class="text-sm text-theme-on-surface-variant w-16 shrink-0">{{ __('randevu.color_channel_red') }}</native:text>
+    <native:slider min="0" max="255" step="1" native:model="color_r" :a11y-label="__('randevu.color_channel_red')" class="flex-1" />
+</native:row>
+
+<native:row class="w-full gap-2 items-center">
+    <native:text class="text-sm text-theme-on-surface-variant w-16 shrink-0">{{ __('randevu.color_channel_green') }}</native:text>
+    <native:slider min="0" max="255" step="1" native:model="color_g" :a11y-label="__('randevu.color_channel_green')" class="flex-1" />
+</native:row>
+
+<native:row class="w-full gap-2 items-center">
+    <native:text class="text-sm text-theme-on-surface-variant w-16 shrink-0">{{ __('randevu.color_channel_blue') }}</native:text>
+    <native:slider min="0" max="255" step="1" native:model="color_b" :a11y-label="__('randevu.color_channel_blue')" class="flex-1" />
+</native:row>
+
 @if(!empty($errors['color']))
     <native:text class="text-sm text-theme-destructive">{{ $errors['color'] }}</native:text>
 @endif

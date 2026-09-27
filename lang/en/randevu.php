@@ -62,6 +62,10 @@ return [
     'color_cyan' => 'Cyan',
     'color_brown' => 'Brown',
     'color_gray' => 'Gray',
+    'color_custom_label' => 'Custom color',
+    'color_channel_red' => 'Red',
+    'color_channel_green' => 'Green',
+    'color_channel_blue' => 'Blue',
 
     // Relative phrases
     'phrase_today' => 'Today',

@@ -62,6 +62,10 @@ return [
     'color_cyan' => 'سماوي',
     'color_brown' => 'بني',
     'color_gray' => 'رمادي',
+    'color_custom_label' => 'لون مخصص',
+    'color_channel_red' => 'أحمر',
+    'color_channel_green' => 'أخضر',
+    'color_channel_blue' => 'أزرق',
 
     // Relative phrases (Egyptian)
     'phrase_today' => 'النهاردة',

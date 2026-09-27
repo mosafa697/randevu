@@ -309,6 +309,73 @@ class RandevuScreensTest extends TestCase
         $this->assertNull($randevu->fresh()->color);
     }
 
+    public function test_sliders_mix_custom_hex_on_create(): void
+    {
+        $date = today()->addDay();
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'Mixed')
+            ->set('day', (string) $date->day)
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->set('color_r', 255)
+            ->set('color_g', 99)
+            ->set('color_b', 71)
+            ->call('save')
+            ->assertReplacedWith('/follow');
+
+        $this->assertSame('#FF6347', Randevu::where('title', 'Mixed')->firstOrFail()->color);
+    }
+
+    public function test_preset_tap_moves_sliders_to_match(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)
+            ->call('pickBlue')
+            ->assertSet('color', '#2563EB')
+            ->assertSet('color_r', 37)
+            ->assertSet('color_g', 99)
+            ->assertSet('color_b', 235)
+            ->assertSee('#2563EB');
+    }
+
+    public function test_clear_color_resets_sliders_and_saves_null(): void
+    {
+        $date = today()->addDay();
+
+        $screen = Native::test(RandevuCreate::class)
+            ->set('title', 'Cleared')
+            ->set('day', (string) $date->day)
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->set('color_r', 255)
+            ->set('color_g', 99)
+            ->set('color_b', 71)
+            ->call('clearColor');
+
+        $screen
+            ->assertSet('color', '')
+            ->assertSet('color_r', 0)
+            ->assertSet('color_g', 0)
+            ->assertSet('color_b', 0);
+
+        $screen->call('save')->assertReplacedWith('/follow');
+
+        $this->assertNull(Randevu::where('title', 'Cleared')->firstOrFail()->color);
+    }
+
+    public function test_edit_prefills_sliders_from_custom_color(): void
+    {
+        $randevu = Randevu::create(['title' => 'Mixed', 'occurs_on' => today(), 'color' => '#FF6347']);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->assertSet('color', '#FF6347')
+            ->assertSet('color_r', 255)
+            ->assertSet('color_g', 99)
+            ->assertSet('color_b', 71);
+    }
+
     public function test_follow_card_data_and_dot_include_the_color(): void
     {
         Randevu::create(['title' => 'Colorful', 'occurs_on' => today()->addDay(), 'color' => '#DB2777']);
