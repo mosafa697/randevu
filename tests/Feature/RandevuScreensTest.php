@@ -468,7 +468,7 @@ class RandevuScreensTest extends TestCase
             array_filter($tree['children'], fn ($node) => ($node['type'] ?? null) === 'bottom_nav_item'),
         ));
 
-        $this->assertSame(['Settings', 'Follow', 'New', 'Memories', 'Dashboard'], $labels);
+        $this->assertSame(['Dashboard', 'Follow', 'New', 'Memories', 'Settings'], $labels);
     }
 
     public function test_body_copy_is_not_heading_font(): void
