@@ -21,8 +21,8 @@
 <native:text font="heading" class="text-sm font-semibold text-theme-on-surface">{{ __('randevu.color_custom_label') }}</native:text>
 
 <native:row class="w-full gap-3 items-center">
-    @if($selected !== '')
-        <native:pressable class="w-10 h-10 rounded-full shrink-0 bg-[{{ $selected }}]" />
+    @if($selected !== '' && preg_match('/^#[0-9A-Fa-f]{6}$/', (string) $selected))
+        <native:pressable :bg="$selected" class="w-10 h-10 rounded-full shrink-0" />
     @else
         <native:pressable class="w-10 h-10 rounded-full shrink-0 border border-theme-outline" />
     @endif

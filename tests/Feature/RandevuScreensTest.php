@@ -389,6 +389,56 @@ class RandevuScreensTest extends TestCase
         );
     }
 
+    public function test_follow_card_accent_only_for_colored_randevu(): void
+    {
+        Randevu::create(['title' => 'Colorful', 'occurs_on' => today()->addDay(), 'color' => '#DB2777']);
+        Randevu::create(['title' => 'Plain', 'occurs_on' => today()->addDays(2)]);
+
+        $tree = Native::test(Follow::class)->tree();
+
+        $accents = $this->collectBgColors($tree);
+
+        $this->assertContains('#DB2777', $accents);
+        $this->assertCount(1, array_keys($accents, '#DB2777', true));
+    }
+
+    public function test_details_presents_and_renders_color_accent(): void
+    {
+        $randevu = Randevu::create(['title' => 'Colorful', 'occurs_on' => today()->addDay(), 'color' => '#DB2777']);
+
+        $screen = Native::test(\App\NativeComponents\RandevuDetails::class, ['id' => $randevu->id]);
+
+        $this->assertSame('#DB2777', $screen->get('randevu')['color']);
+
+        $accents = $this->collectBgColors($screen->tree());
+
+        $this->assertContains('#DB2777', $accents);
+    }
+
+    /** @return list<string> */
+    private function collectBgColors(array $node): array
+    {
+        $colors = [];
+
+        $walk = function ($current) use (&$walk, &$colors): void {
+            if (! is_array($current)) {
+                return;
+            }
+
+            if (isset($current['style']['bg_color']) && is_string($current['style']['bg_color'])) {
+                $colors[] = $current['style']['bg_color'];
+            }
+
+            foreach ($current['children'] ?? [] as $child) {
+                $walk($child);
+            }
+        };
+
+        $walk($node);
+
+        return $colors;
+    }
+
     public function test_follow_card_has_ring_webview_and_countdown_pill(): void
     {
         Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDays(5)]);
