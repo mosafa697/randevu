@@ -11,6 +11,9 @@
 
     @foreach($appointments as $index => $item)
         <native:pressable @navigate="'/details/'.$item['id']" class="w-full p-4 rounded-[20px] bg-theme-surface border border-theme-outline-variant">
+            @if(!empty($item['cover']))
+                <native:image :src="$item['cover']" class="w-full rounded-xl" :height="160" :fit="2" />
+            @endif
             <native:row class="w-full items-center gap-3">
                 @if($rtl)
                     @include('native.partials.card-text', ['item' => $item, 'rtl' => $rtl, 'badge' => true])

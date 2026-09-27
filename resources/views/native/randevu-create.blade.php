@@ -74,6 +74,8 @@
 
             @include('native.partials.color-picker', ['selected' => $color, 'errors' => $errors])
 
+            @include('native.partials.cover-picker')
+
             <native:button :label="__('randevu.save')" @press="save" variant="primary" class="w-full rounded-lg" />
             <native:text class="text-sm text-theme-on-surface-variant">{{ __('randevu.form_hint') }}</native:text>
         </native:column>

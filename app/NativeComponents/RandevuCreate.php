@@ -7,6 +7,8 @@ use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
 use App\NativeComponents\Concerns\HandlesCalendarAndPeriods;
 use App\NativeComponents\Concerns\PicksColor;
+use App\NativeComponents\Concerns\PicksCover;
+use App\Services\CoverImage;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Support\Facades\Validator;
@@ -19,6 +21,7 @@ class RandevuCreate extends NativeComponent
     use AppliesTheme;
     use HandlesCalendarAndPeriods;
     use PicksColor;
+    use PicksCover;
 
     public string $title = '';
 
@@ -164,11 +167,15 @@ class RandevuCreate extends NativeComponent
     {
         $dates = $this->resolveDates();
         $color = Randevu::normalizeColor($this->color);
+        $cover = CoverImage::normalize($this->cover_path);
+        $coverMime = CoverImage::normalizeMime($this->cover_mime);
+        $coverError = CoverImage::validate($cover, $coverMime);
 
         $validator = Validator::make([
             'title' => $this->title,
             'occurs_on' => $dates['occurs_on'] ?? null,
             'color' => $color,
+            'cover_path' => $cover,
             'note' => $this->note ?: null,
             'entered_in' => $this->calendar_mode,
             'show_years' => $this->show_years,
@@ -176,10 +183,16 @@ class RandevuCreate extends NativeComponent
             'show_days' => $this->show_days,
         ], Randevu::rules());
 
-        if ($validator->fails() || ! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days)) {
+        if ($validator->fails() || $coverError !== null || ! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days)) {
             $this->errors = collect($validator->errors()->messages())
                 ->mapWithKeys(fn ($msgs, $field) => [$field => (string) $msgs[0]])
                 ->all();
+
+            if ($coverError !== null) {
+                $this->errors['cover'] = $coverError === 'size'
+                    ? __('randevu.cover_error_size')
+                    : $this->coverTypeMessage($cover, $coverMime);
+            }
 
             if (! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days)) {
                 $this->errors['period_units'] = __('randevu.period_units_required');
@@ -194,6 +207,7 @@ class RandevuCreate extends NativeComponent
             'title' => trim($this->title),
             'occurs_on' => $dates['occurs_on'],
             'color' => $color,
+            'cover_path' => $cover,
             'note' => $this->note !== '' ? trim($this->note) : null,
             'hijri_year' => $dates['hijri_year'],
             'hijri_month' => $dates['hijri_month'],

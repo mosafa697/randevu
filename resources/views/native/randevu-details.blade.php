@@ -8,6 +8,9 @@
         <native:text class="text-base text-theme-on-surface-variant">{{ __('randevu.details_missing') }}</native:text>
     @else
         <native:column class="w-full p-4 gap-2 rounded-2xl bg-theme-surface">
+            @if(!empty($randevu['cover']))
+                <native:image :src="$randevu['cover']" class="w-full rounded-xl" :height="200" :fit="2" />
+            @endif
             <native:row class="w-full items-center justify-between">
                 @if($rtl && $randevu['is_today'])
                     <native:badge :label="__('randevu.today')" variant="accent" />

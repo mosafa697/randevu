@@ -181,7 +181,9 @@ class RandevuScreensTest extends TestCase
     {
         Setting::set('locale', 'en');
 
-        $narrow = fn ($n) => ($n['layout']['width'] ?? null) == 80
+        // Day rides at w-24 like Year since 601d1b5 ("Increase width of day
+        // select inputs"); Month stays the flex-1 wide one.
+        $narrow = fn ($n) => ($n['layout']['width'] ?? null) == 96
             && ($n['layout']['flex_shrink'] ?? null) == 0;
         $wide = fn ($n) => ($n['layout']['flex_grow'] ?? null) == 1
             && ! isset($n['layout']['width']);

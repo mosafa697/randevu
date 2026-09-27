@@ -5,6 +5,7 @@ namespace App\NativeComponents;
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
+use App\Services\CoverImage;
 use App\Services\RandevuTime;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
@@ -57,6 +58,7 @@ class RandevuDetails extends NativeComponent
             'is_appointment' => $randevu->isAppointment(),
             'is_today' => $randevu->isToday(),
             'note' => $randevu->note,
+            'cover' => CoverImage::src($randevu->cover_path),
         ];
     }
 
