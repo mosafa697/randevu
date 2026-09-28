@@ -35,7 +35,7 @@ class CoverImageTest extends TestCase
         // The exact save-time failure: an Android gallery copy (no suffix,
         // no MIME carried into save, file not visible to PHP under Jump)
         // must NOT be rejected — it could only come from the picker.
-        $this->assertNull(CoverImage::validate('/data/data/app/files/Gallery/gallery_selected_1759000000000'));
+        $this->assertNull(CoverImage::validate('/data/data/app/cache/Gallery/gallery_selected_1759000000000'));
         $this->assertNull(CoverImage::validate('/tmp/no-extension'));
     }
 
@@ -53,10 +53,10 @@ class CoverImageTest extends TestCase
     {
         // Android gallery copies arrive with no suffix at all.
         $this->assertNull(CoverImage::validate(
-            '/data/data/app/files/Gallery/gallery_selected_1759000000000', 'image/jpeg'
+            '/data/data/app/cache/Gallery/gallery_selected_1759000000000', 'image/jpeg'
         ));
         $this->assertSame('type', CoverImage::validate(
-            '/data/data/app/files/Gallery/gallery_selected_1759000000000', 'application/pdf'
+            '/data/data/app/cache/Gallery/gallery_selected_1759000000000', 'application/pdf'
         ));
         $this->assertSame('type', CoverImage::validate('/tmp/report.pdf', 'application/pdf'));
     }
@@ -94,8 +94,8 @@ class CoverImageTest extends TestCase
     public function test_to_file_uri_prefixes_device_paths_only(): void
     {
         $this->assertSame(
-            'file:///data/data/app/files/Gallery/gallery_selected_1',
-            CoverImage::toFileUri('/data/data/app/files/Gallery/gallery_selected_1')
+            'file:///data/data/app/cache/Gallery/gallery_selected_1',
+            CoverImage::toFileUri('/data/data/app/cache/Gallery/gallery_selected_1')
         );
         $this->assertSame('file:///var/mobile/x.jpg', CoverImage::toFileUri('/var/mobile/x.jpg'));
         $this->assertSame('C:\\Users\\x\\a.jpg', CoverImage::toFileUri('C:\\Users\\x\\a.jpg'));
@@ -113,10 +113,26 @@ class CoverImageTest extends TestCase
         file_put_contents($path, 'x');
 
         try {
-            $this->assertSame($path, CoverImage::src($path));
+            // Platform-stable: `/…` paths gain the `file://` prefix (Coil
+            // loads URIs), Windows `C:\…` paths stay as-is.
+            $this->assertSame(CoverImage::toFileUri($path), CoverImage::src($path));
         } finally {
             @unlink($path);
         }
+    }
+
+    public function test_managed_detects_only_single_segment_covers_refs(): void
+    {
+        $this->assertTrue(CoverImage::managed('covers/uuid.jpg'));
+        $this->assertFalse(CoverImage::managed('covers/uuid.jpg/extra'));
+        $this->assertFalse(CoverImage::managed('covers/../secret.jpg'));
+        $this->assertFalse(CoverImage::managed('covers/'));
+        $this->assertFalse(CoverImage::managed('covers/.'));
+        $this->assertFalse(CoverImage::managed('covers/..'));
+        $this->assertFalse(CoverImage::managed('/data/data/app/cache/Gallery/gallery_selected_1'));
+        $this->assertFalse(CoverImage::managed('C:\\Users\\x\\a.jpg'));
+        $this->assertFalse(CoverImage::managed(''));
+        $this->assertFalse(CoverImage::managed(null));
     }
 
     public function test_validate_rejects_oversize_file(): void

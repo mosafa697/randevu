@@ -9,13 +9,18 @@ use Native\Mobile\Facades\Camera;
 
 /**
  * Shared gallery-cover picking for the Create/Edit forms: one `cover_path`
- * prop holds the device file path (`''` = none), `pickCover` opens the
- * gallery, the MediaSelected event stores the first valid pick, and
- * `removeCover` goes back to a color-only card.
+ * prop holds the picked file (`''` = none), `pickCover` opens the gallery
+ * via the nativephp/mobile-camera plugin, the MediaSelected event stores the
+ * first valid pick, and `removeCover` goes back to a color-only card. The
+ * durable copy into app storage happens in save()/update() (see CoverImage).
  *
- * Gallery-only v1 (see CoverImage): Camera::pickImages()->images()->single().
- * The bridge call safely no-ops where native gallery support is unavailable
- * (tests, builds without the camera plugin) — the form keeps working.
+ * `start()`'s boolean is NOT a failure signal: the plugin answers
+ * `Camera.PickMedia` with an empty map (`{"status":…}` never comes back —
+ * GalleryFunctions.kt returns `emptyMap()`), so start() is false even when
+ * the gallery just opened. The honest gate is the capability check — a
+ * build without the plugin (or a test simulating it via
+ * `FakeBridge::withoutCapability`) says so up front instead of silently
+ * doing nothing.
  */
 trait PicksCover
 {
@@ -27,6 +32,12 @@ trait PicksCover
     /** @press entry point — bare method only. */
     public function pickCover(): void
     {
+        if (! nativephp_can('Camera.PickMedia')) {
+            $this->errors['cover'] = __('randevu.cover_error_pick');
+
+            return;
+        }
+
         Camera::pickImages()->images()->single()->start();
     }
 

@@ -8,8 +8,10 @@ use App\NativeComponents\Follow;
 use App\NativeComponents\RandevuCreate;
 use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
+use App\Services\CoverImage;
 use App\Services\RandevuTime;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Native\Mobile\Testing\Native;
 use Tests\TestCase;
 
@@ -20,13 +22,36 @@ class CoverImageTest extends TestCase
     /** @var list<string> */
     private array $tempFiles = [];
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->cleanCoversDir();
+    }
+
     protected function tearDown(): void
     {
         foreach ($this->tempFiles as $file) {
             @unlink($file);
         }
 
+        $this->cleanCoversDir();
+
         parent::tearDown();
+    }
+
+    /** Covers storage holds no leftovers between tests. */
+    private function cleanCoversDir(): void
+    {
+        foreach (glob(storage_path('app/covers/*')) ?: [] as $file) {
+            @unlink($file);
+        }
+    }
+
+    /** Every stored-cover file currently on disk. */
+    private function storedCovers(): array
+    {
+        return glob(storage_path('app/covers/*')) ?: [];
     }
 
     private function tempImage(string $ext = 'jpg', int $bytes = 1024): string
@@ -53,6 +78,25 @@ class CoverImageTest extends TestCase
         return $path;
     }
 
+    /**
+     * A stored-cover row: a real file in the covers dir + its `covers/<name>`
+     * reference — what an earlier save() leaves in the database.
+     */
+    private function storedCover(string $bytes = 'stored-cover-bytes'): string
+    {
+        $dir = storage_path('app/covers');
+        @mkdir($dir, 0777, true);
+
+        do {
+            $ref = 'covers/'.Str::uuid()->toString().'.jpg';
+            $file = storage_path('app/'.$ref);
+        } while (is_file($file));
+
+        file_put_contents($file, $bytes);
+
+        return $ref;
+    }
+
     public function test_create_saves_cover_path(): void
     {
         Setting::set('locale', 'en');
@@ -68,7 +112,12 @@ class CoverImageTest extends TestCase
             ->call('save')
             ->assertReplacedWith('/follow');
 
-        $this->assertSame($cover, Randevu::where('title', 'Covered')->firstOrFail()->cover_path);
+        $stored = Randevu::where('title', 'Covered')->firstOrFail()->cover_path;
+
+        $this->assertMatchesRegularExpression('#^covers/[0-9a-f-]{36}\.jpg$#', (string) $stored);
+        $file = storage_path('app/'.$stored);
+        $this->assertFileExists($file);
+        $this->assertSame(file_get_contents($cover), file_get_contents($file));
     }
 
     public function test_create_rejects_bad_cover_type(): void
@@ -159,16 +208,22 @@ class CoverImageTest extends TestCase
             ->call('save')
             ->assertReplacedWith('/follow');
 
-        $this->assertSame($cover, Randevu::where('title', 'Gallery cover')->firstOrFail()->cover_path);
+        $stored = Randevu::where('title', 'Gallery cover')->firstOrFail()->cover_path;
+
+        // Extensionless Android picks get named from their MIME/bytes at
+        // copy time — the stored ref always carries a real suffix.
+        $this->assertMatchesRegularExpression('#^covers/[0-9a-f-]{36}\.jpg$#', (string) $stored);
+        $this->assertFileExists(storage_path('app/'.$stored));
     }
 
     public function test_create_saves_unverifiable_gallery_path_without_mime(): void
     {
         // The reported bug: picked on device (extensionless, invisible to
         // PHP under Jump, no MIME carried) — save must succeed, not raise
-        // "Could not read that file".
+        // "Could not read that file". Invisible picks can't be copied, so
+        // the raw phone path is stored as-is (dev-only data).
         Setting::set('locale', 'en');
-        $cover = '/data/data/app/files/Gallery/gallery_selected_1759000000000';
+        $cover = '/data/data/app/cache/Gallery/gallery_selected_1759000000000';
         $date = today()->addDay();
 
         Native::test(RandevuCreate::class)
@@ -200,30 +255,58 @@ class CoverImageTest extends TestCase
         $this->assertStringContainsString('application/pdf', $screen->get('errors')['cover']);
     }
 
-    public function test_pick_cover_does_not_crash_without_bridge(): void
+    public function test_pick_cover_opens_the_picker(): void
     {
-        Native::test(RandevuCreate::class)
-            ->call('pickCover')
-            ->assertSet('cover_path', '');
+        // Ungated bridge: the press reaches Camera.PickMedia and no cover
+        // error is raised (start()'s false is NOT a failure — the plugin
+        // answers with an empty map once the gallery has opened).
+        $screen = Native::test(RandevuCreate::class)->call('pickCover');
+
+        $this->assertSame('', $screen->get('cover_path'));
+        $this->assertArrayNotHasKey('cover', $screen->get('errors'));
+        $this->assertNotEmpty($screen->bridge()->callsTo('Camera.PickMedia'));
+        $this->assertSame('image', $screen->bridge()->callsTo('Camera.PickMedia')[0]['params']['mediaType']);
+        $this->assertFalse($screen->bridge()->callsTo('Camera.PickMedia')[0]['params']['multiple']);
+    }
+
+    public function test_pick_cover_says_so_when_plugin_missing(): void
+    {
+        // A build without the camera plugin: the capability gate answers
+        // before the press is swallowed silently — no bridge call, and the
+        // form says why.
+        $screen = Native::test(RandevuCreate::class);
+
+        $screen->bridge()->withoutCapability('Camera.PickMedia');
+        $screen->call('pickCover');
+
+        $this->assertSame('', $screen->get('cover_path'));
+        $this->assertSame(__('randevu.cover_error_pick'), $screen->get('errors')['cover'] ?? null);
+        $this->assertEmpty($screen->bridge()->callsTo('Camera.PickMedia'));
     }
 
     public function test_follow_renders_cover_image_and_falls_back_when_missing(): void
     {
         Setting::set('locale', 'en');
         $cover = $this->tempImage();
+        $stored = $this->storedCover('stored-cover-bytes');
 
         Randevu::create(['title' => 'Covered', 'occurs_on' => today()->addDay(), 'cover_path' => $cover]);
-        Randevu::create(['title' => 'Gone', 'occurs_on' => today()->addDays(2), 'cover_path' => '/tmp/randevu-missing-cover.jpg']);
-        Randevu::create(['title' => 'Plain', 'occurs_on' => today()->addDays(3)]);
+        Randevu::create(['title' => 'Stored', 'occurs_on' => today()->addDays(2), 'cover_path' => $stored]);
+        Randevu::create(['title' => 'StoredGone', 'occurs_on' => today()->addDays(3), 'cover_path' => 'covers/gone.jpg']);
+        Randevu::create(['title' => 'Gone', 'occurs_on' => today()->addDays(4), 'cover_path' => '/tmp/randevu-missing-cover.jpg']);
+        Randevu::create(['title' => 'Plain', 'occurs_on' => today()->addDays(5)]);
 
         $screen = Native::test(Follow::class);
 
         $byTitle = collect($screen->get('appointments'))->keyBy('title');
-        $this->assertSame($cover, $byTitle['Covered']['cover']);
+        $this->assertSame(CoverImage::toFileUri($cover), $byTitle['Covered']['cover']);
+        $this->assertSame(CoverImage::toFileUri(storage_path('app/'.$stored)), $byTitle['Stored']['cover']);
+        $this->assertNull($byTitle['StoredGone']['cover']);
         $this->assertNull($byTitle['Gone']['cover']);
         $this->assertNull($byTitle['Plain']['cover']);
 
-        $screen->assertElement('image', fn ($n) => ($n['props']['src'] ?? null) === $cover);
+        $screen->assertElement('image', fn ($n) => ($n['props']['src'] ?? null) === CoverImage::toFileUri($cover));
+        $screen->assertElement('image', fn ($n) => ($n['props']['src'] ?? null) === CoverImage::toFileUri(storage_path('app/'.$stored)));
         $screen->assertMissingElement('image', fn ($n) => ($n['props']['src'] ?? null) === '/tmp/randevu-missing-cover.jpg');
     }
 
@@ -233,7 +316,57 @@ class CoverImageTest extends TestCase
         $randevu = Randevu::create(['title' => 'Covered', 'occurs_on' => today()->addDay(), 'cover_path' => $cover]);
 
         Native::test(RandevuDetails::class, ['id' => $randevu->id])
-            ->assertElement('image', fn ($n) => ($n['props']['src'] ?? null) === $cover);
+            ->assertElement('image', fn ($n) => ($n['props']['src'] ?? null) === CoverImage::toFileUri($cover));
+    }
+
+    public function test_details_cover_opens_full_size_viewer(): void
+    {
+        Setting::set('locale', 'en');
+        $cover = $this->tempImage();
+        $randevu = Randevu::create(['title' => 'Covered', 'occurs_on' => today()->addDay(), 'cover_path' => $cover]);
+
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id])
+            ->assertSet('show_full_cover', false)
+            ->assertSee('Back')
+            ->assertElement('image', fn ($n) => ($n['props']['fit'] ?? null) === 2)
+            ->assertMissingElement('image', fn ($n) => ($n['props']['fit'] ?? null) === 1)
+            ->press('openCover')
+            ->assertSet('show_full_cover', true);
+
+        // Full image, uncropped (Fit) and tall — the actual picture, not the card crop.
+        $screen->assertElement('image', fn ($n) => ($n['props']['src'] ?? null) === CoverImage::toFileUri($cover)
+            && ($n['props']['fit'] ?? null) === 1
+            && ($n['layout']['height'] ?? null) == 560);
+        // Single exit while viewing: the Back row hides, Close is the way out.
+        $screen->assertDontSee('Back');
+    }
+
+    public function test_details_cover_viewer_closes(): void
+    {
+        $cover = $this->tempImage();
+        $randevu = Randevu::create(['title' => 'Covered', 'occurs_on' => today()->addDay(), 'cover_path' => $cover]);
+
+        Native::test(RandevuDetails::class, ['id' => $randevu->id])
+            ->press('openCover')
+            ->press('closeCover')
+            ->assertSet('show_full_cover', false)
+            ->assertMissingElement('image', fn ($n) => ($n['props']['fit'] ?? null) === 1)
+            ->assertElement('image', fn ($n) => ($n['props']['fit'] ?? null) === 2);
+    }
+
+    public function test_follow_cards_pad_the_cover_image(): void
+    {
+        Setting::set('locale', 'en');
+        $cover = $this->tempImage();
+        Randevu::create(['title' => 'Covered', 'occurs_on' => today()->addDay(), 'cover_path' => $cover]);
+
+        $screen = Native::test(Follow::class);
+
+        // The card separates the image from the text row below it...
+        $screen->assertElement('pressable', fn ($n) => isset($n['layout']['gap']));
+        // ...and the image sits in its own padded wrapper, not edge to edge.
+        $screen->assertElement('column', fn ($n) => ($n['layout']['padding'] ?? null) == 8
+            && collect($n['children'] ?? [])->contains(fn ($c) => ($c['type'] ?? null) === 'image'));
     }
 
     public function test_edit_prefills_cover_and_persists_changes(): void
@@ -248,5 +381,51 @@ class CoverImageTest extends TestCase
             ->assertReplacedWith('/follow');
 
         $this->assertNull($randevu->fresh()->cover_path);
+    }
+
+    public function test_edit_untouched_stored_cover_is_not_duplicated(): void
+    {
+        $stored = $this->storedCover();
+        $randevu = Randevu::create(['title' => 'Keep', 'occurs_on' => today(), 'cover_path' => $stored]);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->assertSet('cover_path', $stored)
+            ->call('update')
+            ->assertReplacedWith('/follow');
+
+        $this->assertSame($stored, $randevu->fresh()->cover_path);
+        $this->assertFileExists(storage_path('app/'.$stored));
+        $this->assertCount(1, $this->storedCovers());
+    }
+
+    public function test_edit_replace_deletes_previous_stored_cover(): void
+    {
+        $old = $this->storedCover('old-bytes');
+        $new = $this->tempImage();
+        $randevu = Randevu::create(['title' => 'Swap', 'occurs_on' => today(), 'cover_path' => $old]);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->set('cover_path', $new)
+            ->call('update')
+            ->assertReplacedWith('/follow');
+
+        $stored = $randevu->fresh()->cover_path;
+        $this->assertNotSame($old, $stored);
+        $this->assertMatchesRegularExpression('#^covers/[0-9a-f-]{36}\.jpg$#', (string) $stored);
+        $this->assertFileDoesNotExist(storage_path('app/'.$old));
+        $this->assertFileExists(storage_path('app/'.$stored));
+    }
+
+    public function test_destroy_deletes_stored_cover(): void
+    {
+        $stored = $this->storedCover();
+        $randevu = Randevu::create(['title' => 'Gone', 'occurs_on' => today(), 'cover_path' => $stored]);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->call('destroy')
+            ->assertReplacedWith('/follow');
+
+        $this->assertNull($randevu->fresh());
+        $this->assertFileDoesNotExist(storage_path('app/'.$stored));
     }
 }

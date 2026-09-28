@@ -2,36 +2,48 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Str;
 use Native\Mobile\System;
 
 /**
  * Optional per-randevu cover image (gallery pick, local file only).
  *
  * Gallery-only v1: the form opens the device gallery via
- * `Camera::pickImages()->images()->single()` and stores the returned device
- * file path in `randevus.cover_path` (nullable). No server upload, no
- * downscaling — files over MAX_BYTES are rejected at pick/save time.
+ * `Camera::pickImages()->images()->single()` (plugin nativephp/mobile-camera,
+ * installed + registered in App\Providers\NativeServiceProvider) and persists
+ * a copy of the pick under `storage/app/covers/`, keeping only the relative
+ * `covers/<uuid>.<ext>` reference in `randevus.cover_path` (nullable). No
+ * server upload, no downscaling — files over MAX_BYTES are rejected at
+ * pick/save time.
  *
- * Docs-first (NativePHP Mobile 4.5.2, verified in vendor source):
+ * Docs-first (NativePHP Mobile 4.5 + mobile-camera 1.0, verified in vendor
+ * source):
  * - `Native\Mobile\Camera::pickImages()` → `PendingMediaPicker`
- *   (vendor/nativephp/mobile/src/Camera.php:41, PendingMediaPicker.php)
+ *   (vendor/nativephp/mobile/src/Camera.php:41, PendingMediaPicker.php).
  * - Result arrives as `Native\Mobile\Events\Gallery\MediaSelected`
  *   ($success, $files, $count), listened for with
  *   `#[On(MediaSelected::class)]` (`Native\Mobile\Attributes\On` — the
  *   Livewire-free listener).
- * - Native payload contract (nativephp/mobile-camera v1.0.4, verified in
- *   plugin source CameraCoordinator.kt `getFileMetadata` + iOS
- *   CameraFunctions.swift `copyFileToCache`): each files[] entry carries
- *   `path` + `mimeType` + `extension` + `type`. WARNING: on Android the
- *   copied `path` has NO extension (`gallery_selected_<ts>`), so type must
- *   be decided from `mimeType` first — never from the path suffix alone.
- * - Rendering via `<native:image :src="..." :height="180" :fit="2" />`
- *   (docs: /docs/mobile/4/edge-components/image — "Image in a card").
- * - Plugin page: /docs/mobile/4/plugins/core/camera
- *   (nativephp/mobile-camera v1.0.4). NOTE: that plugin is not installed in
- *   this project yet (only mobile-ui is registered); the picker call safely
- *   no-ops where the bridge is unavailable until the plugin + permission are
- *   added at build time.
+ * - Native payload contract (mobile-camera, verified in plugin source
+ *   CameraCoordinator.kt:683 `getFileMetadata` + iOS CameraFunctions.swift:642
+ *   `copyFileToCache`): each files[] entry carries `path` + `mimeType` +
+ *   `extension` + `type`. On Android the copied `path` has NO extension
+ *   (`gallery_selected_<ts>`), so type must be decided from `mimeType` first —
+ *   never from the path suffix alone.
+ * - The plugin copies picks into OS-PURGEABLE locations: Android
+ *   `cacheDir/Gallery/` (CameraCoordinator.kt:312), iOS
+ *   `temporaryDirectory()/Gallery/` (CameraFunctions.swift:645) — the OS may
+ *   wipe them any time, and the iOS container path moves between installs.
+ *   Storing that raw path (the first iteration of this feature) is why covers
+ *   "could not be read" after the fact. save()/update() therefore call
+ *   store(): copy the visible pick into durable app storage and persist only
+ *   the relative ref, re-resolved against the CURRENT storage dir at every
+ *   render. Under Jump the pick lives on the phone and is invisible to PHP,
+ *   so the raw path is kept as-is (dev-only data).
+ * - Rendering via `<native:image :src="..." :height="180" :fit="2" />`: the
+ *   renderers resolve absolute device paths and `file://` URIs alike
+ *   (mobile-ui ImageRenderer.kt / NativeUIImageSource.swift), so src() turns
+ *   the display path into a `file://` URI.
  */
 class CoverImage
 {
@@ -40,6 +52,21 @@ class CoverImage
 
     /** Gallery image extensions accepted for covers. */
     public const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'];
+
+    /** Payload/sniffed MIME → extension for naming stored copies. */
+    private const MIME_TO_EXT = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/gif' => 'gif',
+        'image/webp' => 'webp',
+        'image/heic' => 'heic',
+        'image/heif' => 'heif',
+        'image/bmp' => 'bmp',
+        'image/avif' => 'avif',
+    ];
+
+    /** Where stored copies live, relative to storage_path('app/'). */
+    private const COVERS_DIR = 'covers';
 
     /**
      * Trim the raw path; empty becomes null (color-only card).
@@ -99,11 +126,13 @@ class CoverImage
     /**
      * True when the stored path points at a readable file.
      *
-     * Under Jump, PHP runs on the developer's machine while the picked file
-     * lives on the phone — `is_file()` would always report false and the
-     * cover would never render. So in Jump we trust the stored path and let
-     * the native renderer resolve it; on device `is_file()` is authoritative
-     * and gives the graceful color-only fallback when a file goes missing.
+     * Absolute picks only — managed `covers/…` refs are resolved (and checked)
+     * by display(). Under Jump, PHP runs on the developer's machine while the
+     * picked file lives on the phone — `is_file()` would always report false
+     * and the cover would never render. So in Jump we trust the stored path
+     * and let the native renderer resolve it; on device `is_file()` is
+     * authoritative and gives the graceful color-only fallback when a file
+     * goes missing.
      */
     public static function exists(?string $path): bool
     {
@@ -121,12 +150,103 @@ class CoverImage
     }
 
     /**
+     * Persist a validated pick — called only on the save/update success path.
+     *
+     * A visible file (on device PHP shares the filesystem with the renderer;
+     * in tests the temp pick) is COPIED into `storage/app/covers/<uuid>.<ext>`
+     * and only the relative `covers/<uuid>.<ext>` reference is returned for
+     * the database — the plugin's own copies sit in OS-purgeable dirs, so
+     * keeping them would lose the cover. A managed ref passes through
+     * unchanged (re-saving an untouched edit must not duplicate the file).
+     * An invisible path — exactly an Android gallery copy under Jump — is
+     * kept as-is: dev-only data the phone still renders. When the covers dir
+     * can't be created or the copy fails, the raw path is kept too — the
+     * cover rides the plugin's own copy instead of being lost outright.
+     */
+    public static function store(?string $path, ?string $mime = null): ?string
+    {
+        $path = self::normalize($path);
+
+        if ($path === null || self::managed($path) || ! is_file($path)) {
+            return $path;
+        }
+
+        $dir = storage_path('app/'.self::COVERS_DIR);
+
+        if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {
+            return $path;
+        }
+
+        $file = $dir.'/'.Str::uuid()->toString().'.'.self::extensionFor($path, $mime);
+
+        if (! @copy($path, $file)) {
+            return $path;
+        }
+
+        return self::COVERS_DIR.'/'.basename($file);
+    }
+
+    /**
+     * True when the value is one of our stored `covers/<name>` references —
+     * a single safe path segment, no traversal.
+     */
+    public static function managed(?string $value): bool
+    {
+        $value = self::normalize($value);
+        $prefix = self::COVERS_DIR.'/';
+
+        if ($value === null || ! str_starts_with($value, $prefix)) {
+            return false;
+        }
+
+        $name = substr($value, strlen($prefix));
+
+        return $name !== '' && ! str_contains($name, '/') && ! in_array($name, ['.', '..'], true);
+    }
+
+    /**
+     * Absolute path of a managed reference, or null for anything else.
+     */
+    private static function managedFile(string $value): ?string
+    {
+        return self::managed($value)
+            ? storage_path('app/'.self::COVERS_DIR.'/'.basename($value))
+            : null;
+    }
+
+    /**
+     * Delete a stored copy once nothing references it anymore — the row's
+     * previous cover was replaced or cleared (update/destroy). Managed refs
+     * only; raw picked paths are left to the OS.
+     */
+    public static function forget(?string $value): void
+    {
+        $file = self::managedFile((string) $value);
+
+        if ($file !== null && is_file($file)) {
+            @unlink($file);
+        }
+    }
+
+    /**
      * Path safe to hand to `<native:image>` — null when unset or when the
-     * file went missing (color-only fallback).
+     * file went missing (color-only fallback). Managed refs resolve against
+     * the current `storage/app/` (survives container moves); absolute picks
+     * keep the raw value with the Jump-trust rule of exists().
      */
     public static function display(?string $path): ?string
     {
-        return self::exists($path) ? self::normalize($path) : null;
+        $path = self::normalize($path);
+
+        if ($path === null) {
+            return null;
+        }
+
+        if (($file = self::managedFile($path)) !== null) {
+            return is_file($file) ? $file : null;
+        }
+
+        return self::exists($path) ? $path : null;
     }
 
     /**
@@ -216,8 +336,16 @@ class CoverImage
     /** True when the file's actual bytes sniff as an image (fileinfo). */
     private static function sniffedImage(string $path): bool
     {
+        $mime = self::sniffedMime($path);
+
+        return $mime !== null && str_starts_with($mime, 'image/');
+    }
+
+    /** The file's actual MIME from its bytes, or null when undetectable. */
+    private static function sniffedMime(string $path): ?string
+    {
         if (! is_file($path)) {
-            return false;
+            return null;
         }
 
         try {
@@ -225,15 +353,41 @@ class CoverImage
 
             if (! is_string($mime) || $mime === '') {
                 if (! class_exists(\finfo::class)) {
-                    return false;
+                    return null;
                 }
 
                 $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path);
             }
 
-            return is_string($mime) && str_starts_with(strtolower($mime), 'image/');
+            $mime = self::normalizeMime(is_string($mime) ? $mime : null);
+
+            return $mime;
         } catch (\Throwable) {
-            return false;
+            return null;
         }
+    }
+
+    /**
+     * Extension for a stored copy's filename: the payload MIME wins (Android
+     * gallery copies carry no suffix at all), then an allowed suffix, then
+     * the bytes' own sniffed MIME — 'jpg' as the last resort.
+     */
+    private static function extensionFor(string $path, ?string $mime = null): string
+    {
+        $mime = self::normalizeMime($mime);
+
+        if ($mime !== null && isset(self::MIME_TO_EXT[$mime])) {
+            return self::MIME_TO_EXT[$mime];
+        }
+
+        $ext = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+
+        if ($ext !== '' && in_array($ext, self::ALLOWED_EXTENSIONS, true)) {
+            return $ext;
+        }
+
+        $sniffed = self::sniffedMime($path);
+
+        return $sniffed !== null ? (self::MIME_TO_EXT[$sniffed] ?? 'jpg') : 'jpg';
     }
 }

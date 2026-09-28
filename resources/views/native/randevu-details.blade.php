@@ -1,15 +1,28 @@
 <native:column class="w-full h-full p-4 gap-4 bg-theme-background">
     @php($rtl = \App\Services\AppLocale::isRtl())
-    <native:row class="w-full">
-        <native:button :label="__('randevu.back')" @navigate.back />
-    </native:row>
+    @if($randevu === null || !($show_full_cover && !empty($randevu['cover'])))
+        <native:row class="w-full">
+            <native:button :label="__('randevu.back')" @navigate.back />
+        </native:row>
+    @endif
 
     @if($randevu === null)
         <native:text class="text-base text-theme-on-surface-variant">{{ __('randevu.details_missing') }}</native:text>
+    @elseif($show_full_cover && !empty($randevu['cover']))
+        <native:column class="w-full h-full bg-theme-background">
+            <native:scroll-view class="w-full h-full">
+                <native:column class="w-full p-4 gap-4 items-center">
+                    <native:image :src="$randevu['cover']" class="w-full rounded-2xl" :height="560" :fit="1" />
+                    <native:button :label="__('randevu.cover_close')" @press="closeCover" class="w-full" />
+                </native:column>
+            </native:scroll-view>
+        </native:column>
     @else
         <native:column class="w-full p-4 gap-2 rounded-2xl bg-theme-surface">
             @if(!empty($randevu['cover']))
-                <native:image :src="$randevu['cover']" class="w-full rounded-xl" :height="200" :fit="2" />
+                <native:pressable @press="openCover" class="w-full">
+                    <native:image :src="$randevu['cover']" class="w-full rounded-xl" :height="200" :fit="2" />
+                </native:pressable>
             @endif
             <native:row class="w-full items-center justify-between">
                 @if($rtl && $randevu['is_today'])

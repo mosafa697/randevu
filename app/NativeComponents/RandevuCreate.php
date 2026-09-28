@@ -203,20 +203,29 @@ class RandevuCreate extends NativeComponent
 
         $this->errors = [];
 
-        Randevu::create([
-            'title' => trim($this->title),
-            'occurs_on' => $dates['occurs_on'],
-            'color' => $color,
-            'cover_path' => $cover,
-            'note' => $this->note !== '' ? trim($this->note) : null,
-            'hijri_year' => $dates['hijri_year'],
-            'hijri_month' => $dates['hijri_month'],
-            'hijri_day' => $dates['hijri_day'],
-            'entered_in' => $this->calendar_mode,
-            'show_years' => $this->show_years,
-            'show_months' => $this->show_months,
-            'show_days' => $this->show_days,
-        ]);
+        $cover = CoverImage::store($cover, $coverMime);
+
+        try {
+            Randevu::create([
+                'title' => trim($this->title),
+                'occurs_on' => $dates['occurs_on'],
+                'color' => $color,
+                'cover_path' => $cover,
+                'note' => $this->note !== '' ? trim($this->note) : null,
+                'hijri_year' => $dates['hijri_year'],
+                'hijri_month' => $dates['hijri_month'],
+                'hijri_day' => $dates['hijri_day'],
+                'entered_in' => $this->calendar_mode,
+                'show_years' => $this->show_years,
+                'show_months' => $this->show_months,
+                'show_days' => $this->show_days,
+            ]);
+        } catch (\Throwable $e) {
+            // Row not written — the just-copied cover file would be orphaned.
+            CoverImage::forget($cover);
+
+            throw $e;
+        }
 
         $this->replace('/follow');
     }

@@ -4,10 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Randevu;
 use App\Models\Setting;
+use App\NativeComponents\Dashboard;
 use App\NativeComponents\Follow;
+use App\NativeComponents\Memories;
 use App\NativeComponents\RandevuCreate;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
+use App\Services\RandevuTime;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Native\Mobile\Testing\Native;
 use Tests\TestCase;
@@ -229,7 +232,7 @@ class RandevuScreensTest extends TestCase
         Native::test(RandevuCreate::class)
             ->set('title', 'Dentist')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('note', 'Second floor')
             ->call('save')
@@ -249,7 +252,7 @@ class RandevuScreensTest extends TestCase
         Native::test(RandevuCreate::class)
             ->set('title', 'Colorful')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('color', '2563eb')
             ->call('save')
@@ -266,7 +269,7 @@ class RandevuScreensTest extends TestCase
         $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Bad color')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('color', '#nope')
             ->call('save');
@@ -282,7 +285,7 @@ class RandevuScreensTest extends TestCase
 
         Native::test(RandevuEdit::class, ['id' => $randevu->id])
             ->assertSet('title', 'Old')
-            ->assertSet('month', \App\Services\RandevuTime::monthNames()[today()->month - 1])
+            ->assertSet('month', RandevuTime::monthNames()[today()->month - 1])
             ->set('title', 'New')
             ->call('update')
             ->assertReplacedWith('/follow');
@@ -706,5 +709,26 @@ class RandevuScreensTest extends TestCase
     public function test_settings_route_resolves_via_visit(): void
     {
         Native::visit('/settings')->assertSee('اللغة');
+    }
+
+    public function test_follow_memories_settings_and_dashboard_scroll(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(['title' => 'Soon', 'occurs_on' => today()->addDay()]);
+        Randevu::create(['title' => 'Past', 'occurs_on' => today()->subDay()]);
+
+        Native::test(Follow::class)->assertElement('scroll_view');
+        Native::test(Memories::class)->assertElement('scroll_view');
+        Native::test(Settings::class)->assertElement('scroll_view');
+        Native::test(Dashboard::class)->assertElement('scroll_view');
+    }
+
+    public function test_follow_empty_state_stays_centered_without_scroll(): void
+    {
+        // No rows: the centered empty state renders directly — no scroll
+        // container that would break its flex-1 centering.
+        Native::test(Follow::class)->assertMissingElement('scroll_view');
+        Native::test(Memories::class)->assertMissingElement('scroll_view');
     }
 }

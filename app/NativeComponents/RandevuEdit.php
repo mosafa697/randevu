@@ -22,6 +22,7 @@ class RandevuEdit extends NativeComponent
     use HandlesCalendarAndPeriods;
     use PicksColor;
     use PicksCover;
+
     /**
      * Only scalar state lives on the component — a full Eloquent model in
      * public state may not survive native shared-memory sync, so the row
@@ -211,20 +212,38 @@ class RandevuEdit extends NativeComponent
 
         $this->errors = [];
 
-        $this->findOrFail()->update([
-            'title' => trim($this->title),
-            'occurs_on' => $dates['occurs_on'],
-            'color' => $color,
-            'cover_path' => $cover,
-            'note' => $this->note !== '' ? trim($this->note) : null,
-            'hijri_year' => $dates['hijri_year'],
-            'hijri_month' => $dates['hijri_month'],
-            'hijri_day' => $dates['hijri_day'],
-            'entered_in' => $this->calendar_mode,
-            'show_years' => $this->show_years,
-            'show_months' => $this->show_months,
-            'show_days' => $this->show_days,
-        ]);
+        $randevu = $this->findOrFail();
+        $previousCover = CoverImage::normalize($randevu->cover_path);
+        $cover = CoverImage::store($cover, $coverMime);
+
+        try {
+            $randevu->update([
+                'title' => trim($this->title),
+                'occurs_on' => $dates['occurs_on'],
+                'color' => $color,
+                'cover_path' => $cover,
+                'note' => $this->note !== '' ? trim($this->note) : null,
+                'hijri_year' => $dates['hijri_year'],
+                'hijri_month' => $dates['hijri_month'],
+                'hijri_day' => $dates['hijri_day'],
+                'entered_in' => $this->calendar_mode,
+                'show_years' => $this->show_years,
+                'show_months' => $this->show_months,
+                'show_days' => $this->show_days,
+            ]);
+        } catch (\Throwable $e) {
+            // Row untouched: an unchanged cover still backs it, only a fresh
+            // copy would be orphaned.
+            if ($cover !== $previousCover) {
+                CoverImage::forget($cover);
+            }
+
+            throw $e;
+        }
+
+        if ($previousCover !== $cover) {
+            CoverImage::forget($previousCover);
+        }
 
         $this->replace('/follow');
     }
@@ -241,7 +260,13 @@ class RandevuEdit extends NativeComponent
 
     public function destroy(): void
     {
-        $this->findOrFail()->delete();
+        $randevu = $this->findOrFail();
+        $cover = CoverImage::normalize($randevu->cover_path);
+
+        $randevu->delete();
+
+        CoverImage::forget($cover);
+
         $this->replace('/follow');
     }
 
