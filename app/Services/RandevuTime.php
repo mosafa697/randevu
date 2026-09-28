@@ -275,6 +275,22 @@ class RandevuTime
         return self::fill($days >= 0 ? 'exact_future' : 'exact_past', $abs, self::unit('day', $abs));
     }
 
+    /**
+     * Card urgency tier from the signed day distance: today renders in
+     * the accent, the coming week in the primary, everything else
+     * (further out or already past) muted.
+     *
+     * @return 'accent'|'strong'|'muted'
+     */
+    public static function urgencyTier(int $days): string
+    {
+        if ($days === 0) {
+            return 'accent';
+        }
+
+        return $days >= 1 && $days <= 7 ? 'strong' : 'muted';
+    }
+
     private static function fill(string $key, int $count, string $unit): string
     {
         $template = __("randevu.{$key}");

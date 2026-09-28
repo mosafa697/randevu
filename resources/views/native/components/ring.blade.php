@@ -2,7 +2,18 @@
     $r = 29;
     $c = 2 * M_PI * $r;
     $offset = $c * (1 - ($pct ?? 1));
-    $fill = (($entered_in ?? 'gregorian') === 'hijri') ? theme('accent') : theme('primary');
+    // Follow cards pass an urgency tier; Memories cards don't and keep
+    // the entered-calendar fill exactly as before.
+    $tier = $tier ?? null;
+    if ($tier === 'accent') {
+        $fill = theme('accent');
+    } elseif ($tier === 'strong') {
+        $fill = theme('primary');
+    } elseif ($tier === 'muted') {
+        $fill = theme('on-surface-variant');
+    } else {
+        $fill = (($entered_in ?? 'gregorian') === 'hijri') ? theme('accent') : theme('primary');
+    }
     $track = theme('progress-track');
     $text = theme('on-surface');
     $delay = ($index ?? 0) * 100;

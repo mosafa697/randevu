@@ -23,6 +23,7 @@
                                 @include('native.components.ring', [
                                     'pct' => $item['pct'],
                                     'days' => $item['days'],
+                                    'tier' => $item['tier'],
                                     'entered_in' => $item['entered_in'],
                                     'index' => $index,
                                 ])
@@ -30,6 +31,7 @@
                                 @include('native.components.ring', [
                                     'pct' => $item['pct'],
                                     'days' => $item['days'],
+                                    'tier' => $item['tier'],
                                     'entered_in' => $item['entered_in'],
                                     'index' => $index,
                                 ])

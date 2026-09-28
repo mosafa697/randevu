@@ -83,4 +83,15 @@ class RandevuTimeTest extends TestCase
         $this->assertSame(10, RandevuTime::dayCount('2026-10-03', $today));
         $this->assertSame(-10, RandevuTime::dayCount('2026-09-13', $today));
     }
+
+    public function test_urgency_tier_boundaries(): void
+    {
+        $this->assertSame('accent', RandevuTime::urgencyTier(0));
+        $this->assertSame('strong', RandevuTime::urgencyTier(1));
+        $this->assertSame('strong', RandevuTime::urgencyTier(7));
+        $this->assertSame('muted', RandevuTime::urgencyTier(8));
+        $this->assertSame('muted', RandevuTime::urgencyTier(365));
+        $this->assertSame('muted', RandevuTime::urgencyTier(-1));
+        $this->assertSame('muted', RandevuTime::urgencyTier(-40));
+    }
 }

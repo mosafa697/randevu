@@ -10,6 +10,7 @@ use App\NativeComponents\RandevuCreate;
 use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
+use App\Services\AppTheme;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -486,14 +487,101 @@ class PeriodDisplayTest extends TestCase
             ->set('month', 'April')
             ->set('day', '31');
 
-        // Read AFTER mount: AppTheme rewrites both config blocks on every
-        // apply (boot forces light first), so the dark value only lands
-        // in config once the mounted screen forces dark.
-        $muted = (string) config('native-ui.theme.dark.on-surface-variant');
+        // Read AFTER mount via the sanctioned token reader: AppTheme
+        // rewrites both config blocks on every apply (boot forces light
+        // first), so the dark value only resolves once the mounted
+        // screen forces dark.
+        $muted = AppTheme::token('on-surface-variant');
 
         // Forced dark: the preview placeholder must carry the dark block's
         // muted token, not the light one.
         $screen->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === 'Pick a valid date to see the distance')
             && (($n['props']['color'] ?? null) === $muted));
+    }
+
+    public function test_follow_cards_show_urgency_tiers(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(['title' => 'Now', 'occurs_on' => today()]);
+        Randevu::create(['title' => 'Soon', 'occurs_on' => today()->addDays(3)]);
+        Randevu::create(['title' => 'Later', 'occurs_on' => today()->addDays(40)]);
+
+        $screen = Native::test(Follow::class);
+
+        // Read AFTER mount via the sanctioned token reader: AppTheme
+        // rewrites both config blocks on every apply, so raw config paths
+        // can't be trusted here.
+        $accentBg = AppTheme::token('accent');
+        $accentFg = AppTheme::token('on-accent');
+        $strongBg = AppTheme::token('primary');
+        $strongFg = AppTheme::token('on-primary');
+        $mutedBg = AppTheme::token('surface-variant');
+        $mutedFg = AppTheme::token('on-surface');
+
+        $screen
+            ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === 'Today')
+                && (($n['style']['bg_color'] ?? null) === $accentBg)
+                && (($n['props']['color'] ?? null) === $accentFg))
+            ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === 'In 3 days')
+                && (($n['style']['bg_color'] ?? null) === $strongBg)
+                && (($n['props']['color'] ?? null) === $strongFg))
+            ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === RandevuTime::phraseFor(today()->addDays(40)->toDateString(), true, true, true, false))
+                && (($n['style']['bg_color'] ?? null) === $mutedBg)
+                && (($n['props']['color'] ?? null) === $mutedFg));
+    }
+
+    public function test_follow_rings_use_urgency_fill(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(['title' => 'Now', 'occurs_on' => today()]);
+        Randevu::create(['title' => 'Soon', 'occurs_on' => today()->addDays(3)]);
+        Randevu::create(['title' => 'Later', 'occurs_on' => today()->addDays(40)]);
+
+        $screen = Native::test(Follow::class);
+
+        $accent = AppTheme::token('accent');
+        $primary = AppTheme::token('primary');
+        $muted = AppTheme::token('on-surface-variant');
+
+        $screen
+            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), $accent)
+                && str_contains((string) ($n['props']['html'] ?? ''), '>0</text>'))
+            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), $primary)
+                && str_contains((string) ($n['props']['html'] ?? ''), '>3</text>'))
+            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), $muted)
+                && str_contains((string) ($n['props']['html'] ?? ''), '>40</text>'));
+    }
+
+    public function test_memories_cards_keep_calendar_pills(): void
+    {
+        Setting::set('locale', 'en');
+        $past = today()->subDays(40);
+
+        Randevu::create(['title' => 'Old days', 'occurs_on' => $past->toDateString()]);
+        Randevu::create(array_merge(
+            ['title' => 'Old hijri', 'occurs_on' => $past->toDateString(), 'entered_in' => 'hijri'],
+            Randevu::hijriTriple($past->toDateString())
+        ));
+
+        $screen = Native::test(Memories::class);
+
+        // Calendar pills (no tiers here), with the AA-safe filled pairs.
+        $primary = AppTheme::token('primary');
+        $onPrimary = AppTheme::token('on-primary');
+        $accent = AppTheme::token('accent');
+        $onAccent = AppTheme::token('on-accent');
+
+        $days = Randevu::where('title', 'Old days')->firstOrFail();
+        $hijri = Randevu::where('title', 'Old hijri')->firstOrFail();
+
+        $screen
+            ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === $days->relativePhrase())
+                && (($n['style']['bg_color'] ?? null) === $primary)
+                && (($n['props']['color'] ?? null) === $onPrimary))
+            ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === $hijri->relativePhrase())
+                && (($n['style']['bg_color'] ?? null) === $accent)
+                && (($n['props']['color'] ?? null) === $onAccent));
     }
 }

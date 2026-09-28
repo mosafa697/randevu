@@ -53,6 +53,7 @@ class Follow extends NativeComponent
             'is_today' => $randevu->isToday(),
             'days' => $days,
             'pct' => max(0.08, min(1.0, 1 - abs($days) / 30)),
+            'tier' => RandevuTime::urgencyTier($days),
             'entered_in' => $randevu->entered_in,
         ];
     }
