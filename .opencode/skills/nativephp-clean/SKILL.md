@@ -24,6 +24,7 @@ Write idiomatic NativePHP Mobile v4 (SuperNative + EDGE). The framework moves fa
 - `native:model="prop"` binds to a **public string property**. Select `:options` must reference a **public array prop** (`:options="$dayOptions"`), never a method call.
 - For binary/segmented choices (language, theme, calendar mode) use a row of `native:button` with bare `@press` methods + `:variant="$x === '…' ? 'primary' : 'ghost'"` highlighting — `@press` is the proven on-device path. Avoid `native:button-group` + `@change`: its `native:model` sync callback shares the single `on_change` slot (duplicate `_change` key — last wins at compile), and `@change` handlers that read the bound prop replay the stale selection, looking dead on device. Test interactions with `->press('method')`, which follows the same wire path as the device.
 - Every `native:text` gets an explicit theme token — colors do NOT inherit; unprefixed text renders black in dark mode.
+- `@php` raw blocks: ONE form per template — single-line `@php($x = ...)` statements OR one `@php ... @endphp` block, never both. Laravel pairs the first `@php` with the first `@endphp` textually (`BladeCompiler::storePhpBlocks`), so mixing swallows everything between into broken raw PHP (silently killed every card render in #61). Same reason: never write the literal text `@php`/`@endphp` inside a block — not even in a comment.
 
 ## Components
 
