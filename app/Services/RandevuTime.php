@@ -88,50 +88,68 @@ class RandevuTime
     /**
      * Per-appointment formatter: renders the distance using only the units
      * the user ticked for that randevu (any non-empty subset of
-     * years / months / days).
+     * years / months / days / hours).
      *
      * Rules (documented approximation basis):
-     * - Today / Tomorrow / Yesterday stay special regardless of units.
+     * - Today / Tomorrow / Yesterday stay special regardless of units —
+     *   unless the hours unit is on and a time-of-day is set, which
+     *   refines the phrase ("In 14 hours" instead of "Today").
      * - A single unit uses rounded totals: exact day count for days,
-     *   round(days / 30) for months, round(days / 365) for years (min 1).
+     *   round(days / 30) for months, round(days / 365) for years (min 1),
+     *   and for hours the full-hour span from the start of today —
+     *   days × 24 + time-of-day hours (min 1).
      * - Multiple units use the exact calendar breakdown (Carbon diff — real
      *   month lengths and leap years). A switched-off middle unit rolls
-     *   down nominally (years × 12 into months, months × 30 into days);
-     *   a switched-off days tail is dropped. When every shown part is
-     *   zero, the smallest shown unit renders rounded with a floor of 1.
+     *   down nominally (years × 12 into months, months × 30 into days,
+     *   days × 24 into hours); a switched-off days or hours tail is
+     *   dropped. With hours on, the breakdown measures from the start of
+     *   today to the target's time-of-day, so the hours part is the
+     *   remainder of that day. When every shown part is zero, the
+     *   smallest shown unit renders rounded with a floor of 1.
      * - All units off is invalid input; defensively falls back to `phrase()`.
+     * - A time-of-day only participates when the hours unit is on; without
+     *   it (or without a time) randevus phrase exactly as before.
      */
     public static function phraseFor(
         CarbonInterface|string $date,
         bool|int|null $showYears,
         bool|int|null $showMonths,
         bool|int|null $showDays,
+        bool|int|null $showHours = false,
+        CarbonInterface|string|null $occursTime = null,
         CarbonInterface|string|null $today = null,
     ): string {
         $showYears = (bool) $showYears;
         $showMonths = (bool) $showMonths;
         $showDays = (bool) $showDays;
+        $showHours = (bool) $showHours;
 
-        if (! $showYears && ! $showMonths && ! $showDays) {
+        if (! $showYears && ! $showMonths && ! $showDays && ! $showHours) {
             return self::phrase($date, $today);
         }
 
+        $time = $showHours && $occursTime !== null ? Carbon::parse($occursTime) : null;
         $days = self::dayCount($date, $today);
 
-        if ($days === 0) {
+        if ($days === 0 && $time === null) {
             return __('randevu.phrase_today');
         }
 
         $abs = abs($days);
-        $future = $days > 0;
+        // Today with a time stays future-side: the appointment is still ahead.
+        $future = $days >= 0;
 
-        if ($abs === 1) {
+        if ($abs === 1 && $time === null) {
             return $future ? __('randevu.phrase_tomorrow') : __('randevu.phrase_yesterday');
         }
 
-        $onCount = (int) $showYears + (int) $showMonths + (int) $showDays;
+        $onCount = (int) $showYears + (int) $showMonths + (int) $showDays + (int) $showHours;
 
         if ($onCount === 1) {
+            if ($showHours) {
+                return self::hoursPhrase($days, $time, $future);
+            }
+
             if ($showDays) {
                 return self::fill($future ? 'in_days' : 'days_ago', $abs, self::unit('day', $abs));
             }
@@ -145,6 +163,10 @@ class RandevuTime
 
         [$target, $base] = self::bounds($date, $today);
 
+        if ($time !== null) {
+            $target = $target->setTime($time->hour, $time->minute);
+        }
+
         $start = $future ? $base->copy() : $target->copy();
         $end = $future ? $target->copy() : $base->copy();
         $interval = $start->diff($end);
@@ -152,6 +174,7 @@ class RandevuTime
         $years = (int) $interval->y;
         $months = (int) $interval->m;
         $restDays = (int) $interval->d;
+        $hours = (int) $interval->h;
 
         if (! $showYears) {
             $months += $years * 12;
@@ -161,6 +184,11 @@ class RandevuTime
         if (! $showMonths) {
             $restDays += $months * 30;
             $months = 0;
+        }
+
+        if (! $showDays) {
+            $hours += $restDays * 24;
+            $restDays = 0;
         }
 
         $parts = [];
@@ -177,8 +205,16 @@ class RandevuTime
             $parts[] = self::combinedPart('day', $restDays);
         }
 
+        if ($showHours && $hours > 0) {
+            $parts[] = self::combinedPart('hour', $hours);
+        }
+
         if ($parts === []) {
             // Span smaller than the smallest shown unit: round it, min 1.
+            if ($showHours) {
+                return self::hoursPhrase($days, $time, $future);
+            }
+
             $smallest = $showDays ? 'day' : ($showMonths ? 'month' : 'year');
             $divisor = $smallest === 'day' ? 1 : ($smallest === 'month' ? 30 : 365);
 
@@ -188,6 +224,20 @@ class RandevuTime
         $joined = implode(__('randevu.combined_separator'), $parts);
 
         return __('randevu.'.($future ? 'combined_future' : 'combined_past'), ['parts' => $joined]);
+    }
+
+    /**
+     * Hours-only rendering: the full-hour span from the start of today to
+     * the target's time-of-day (days × 24 + hours, past days counted
+     * negatively so an afternoon in the past lands closer, not further).
+     * Floored, with a floor of 1 (never "0 hours").
+     */
+    private static function hoursPhrase(int $days, ?CarbonInterface $time, bool $future): string
+    {
+        $span = $days * 24 + ($time?->hour ?? 0) + ($time?->minute ?? 0) / 60;
+        $count = max(1, (int) floor(abs($span)));
+
+        return self::fill($future ? 'in_hours' : 'hours_ago', $count, self::unit('hour', $count));
     }
 
     /** Forced-unit rendering with a floor of 1 (never "0 months"). */

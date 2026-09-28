@@ -16,16 +16,21 @@ use Illuminate\Support\Carbon;
  */
 class Randevu extends Model
 {
-    protected $fillable = ['title', 'occurs_on', 'note', 'color', 'cover_path', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in', 'show_years', 'show_months', 'show_days'];
+    protected $fillable = ['title', 'occurs_on', 'occurs_time', 'note', 'color', 'cover_path', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in', 'show_years', 'show_months', 'show_days', 'show_hours'];
 
     protected $casts = [
         'occurs_on' => 'date',
+        // Custom datetime casts skip the connection's date format on write,
+        // so the raw 'H:i' string is stored as-is and reads back as a Carbon
+        // time-of-day (only hour/minute are meaningful).
+        'occurs_time' => 'datetime:H:i',
         'hijri_year' => 'integer',
         'hijri_month' => 'integer',
         'hijri_day' => 'integer',
         'show_years' => 'boolean',
         'show_months' => 'boolean',
         'show_days' => 'boolean',
+        'show_hours' => 'boolean',
     ];
 
     /** Tappable palette offered on the form. */
@@ -49,6 +54,7 @@ class Randevu extends Model
         return [
             'title' => 'required|string|max:255',
             'occurs_on' => 'required|date',
+            'occurs_time' => ['nullable', 'date_format:H:i'],
             'color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'cover_path' => 'nullable|string|max:2000',
             'note' => 'nullable|string|max:2000',
@@ -59,13 +65,14 @@ class Randevu extends Model
             'show_years' => 'boolean',
             'show_months' => 'boolean',
             'show_days' => 'boolean',
+            'show_hours' => 'boolean',
         ];
     }
 
     /** At least one distance unit must stay on. */
-    public static function hasAnyUnit(bool $years, bool $months, bool $days): bool
+    public static function hasAnyUnit(bool $years, bool $months, bool $days, bool $hours = false): bool
     {
-        return $years || $months || $days;
+        return $years || $months || $days || $hours;
     }
 
     /**
@@ -138,7 +145,14 @@ class Randevu extends Model
     /** Distance phrase rendered in this randevu's own chosen units. */
     public function relativePhrase(): string
     {
-        return RandevuTime::phraseFor($this->occurs_on, $this->show_years, $this->show_months, $this->show_days);
+        return RandevuTime::phraseFor(
+            $this->occurs_on,
+            $this->show_years,
+            $this->show_months,
+            $this->show_days,
+            $this->show_hours,
+            $this->occurs_time,
+        );
     }
 
     /** Hijri display label, e.g. "12 ربيع الثاني 1448". Null when unknown. */

@@ -34,6 +34,12 @@
                 @endif
             </native:row>
             <native:text class="text-base font-semibold text-theme-on-surface">{{ $randevu['phrase'] }}</native:text>
+            @php($detailsAccent = isset($randevu['color']) && is_string($randevu['color']) && preg_match('/^#[0-9A-Fa-f]{6}$/', $randevu['color']) ? $randevu['color'] : null)
+            @if($detailsAccent !== null)
+                <native:row class="w-full items-center">
+                    <native:column :bg="$detailsAccent" class="w-8 h-2 rounded-full" />
+                </native:row>
+            @endif
             <native:text class="text-sm text-theme-on-surface-variant">{{ __('randevu.exact_label') }}: {{ $randevu['exact'] }}</native:text>
             <native:divider class="w-full" />
             <native:text class="text-sm text-theme-on-surface">{{ __('randevu.gregorian_label') }}: {{ $randevu['absolute'] }}</native:text>

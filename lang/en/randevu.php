@@ -40,6 +40,9 @@ return [
     'day_label' => 'Day',
     'month_label' => 'Month',
     'year_label' => 'Year',
+    'hour_label' => 'Hour',
+    'minute_label' => 'Minute',
+    'time_none' => 'None',
     'mode_gregorian' => 'Gregorian',
     'mode_hijri' => 'Hijri',
     'form_hint' => 'Today or later becomes an appointment; earlier becomes a memory.',
@@ -59,6 +62,10 @@ return [
     'color_cyan' => 'Cyan',
     'color_brown' => 'Brown',
     'color_gray' => 'Gray',
+    'color_custom_label' => 'Custom color',
+    'color_channel_red' => 'Red',
+    'color_channel_green' => 'Green',
+    'color_channel_blue' => 'Blue',
 
     // Cover image (optional gallery pick)
     'cover_label' => 'Cover (optional)',
@@ -80,6 +87,8 @@ return [
     'months_ago' => ':count :unit ago',
     'in_years' => 'In :count :unit',
     'years_ago' => ':count :unit ago',
+    'in_hours' => 'In :count :unit',
+    'hours_ago' => ':count :unit ago',
     'exact_future' => ':count days',
     'exact_past' => ':count days ago',
 
@@ -96,6 +105,10 @@ return [
     'year_two' => 'years',
     'year_few' => 'years',
     'year_many' => 'years',
+    'hour_one' => 'hour',
+    'hour_two' => 'hours',
+    'hour_few' => 'hours',
+    'hour_many' => 'hours',
 
     // Gregorian months
     'months' => [
@@ -118,6 +131,7 @@ return [
     'period_days' => 'Days',
     'period_months' => 'Months',
     'period_years' => 'Years',
+    'period_hours' => 'Hours',
     'period_units_required' => 'Pick at least one unit.',
     'combined_future' => 'In :parts',
     'combined_past' => ':parts ago',

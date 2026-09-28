@@ -160,6 +160,9 @@ class RandevuScreensTest extends TestCase
         $screen->assertElement('chip', fn ($n) => ($n['props']['label'] ?? '') === 'Years');
         $screen->assertElement('chip', fn ($n) => ($n['props']['label'] ?? '') === 'Months');
         $screen->assertElement('chip', fn ($n) => ($n['props']['label'] ?? '') === 'Days');
+        $screen->assertElement('chip', fn ($n) => ($n['props']['label'] ?? '') === 'Hours');
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Hour');
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Minute');
     }
 
     public function test_create_calendar_buttons_switch_mode(): void
@@ -190,20 +193,18 @@ class RandevuScreensTest extends TestCase
             && ($n['layout']['flex_shrink'] ?? null) == 0;
         $wide = fn ($n) => ($n['layout']['flex_grow'] ?? null) == 1
             && ! isset($n['layout']['width']);
-        $year = fn ($n) => ($n['layout']['width'] ?? null) == 96
-            && ($n['layout']['flex_shrink'] ?? null) == 0;
 
         $screen = Native::test(RandevuCreate::class);
 
         $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $narrow($n));
         $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $wide($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $year($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $narrow($n));
 
         $screen->press('useHijri');
 
         $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $narrow($n));
         $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $wide($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $year($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $narrow($n));
 
         $randevu = Randevu::create(['title' => 'Weighted', 'occurs_on' => today()]);
 
@@ -211,7 +212,7 @@ class RandevuScreensTest extends TestCase
 
         $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $narrow($n));
         $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $wide($n));
-        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $year($n));
+        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $narrow($n));
     }
 
     public function test_create_chips_toggle_period_units(): void
@@ -312,6 +313,73 @@ class RandevuScreensTest extends TestCase
         $this->assertNull($randevu->fresh()->color);
     }
 
+    public function test_sliders_mix_custom_hex_on_create(): void
+    {
+        $date = today()->addDay();
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'Mixed')
+            ->set('day', (string) $date->day)
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->set('color_r', 255)
+            ->set('color_g', 99)
+            ->set('color_b', 71)
+            ->call('save')
+            ->assertReplacedWith('/follow');
+
+        $this->assertSame('#FF6347', Randevu::where('title', 'Mixed')->firstOrFail()->color);
+    }
+
+    public function test_preset_tap_moves_sliders_to_match(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)
+            ->call('pickBlue')
+            ->assertSet('color', '#2563EB')
+            ->assertSet('color_r', 37)
+            ->assertSet('color_g', 99)
+            ->assertSet('color_b', 235)
+            ->assertSee('#2563EB');
+    }
+
+    public function test_clear_color_resets_sliders_and_saves_null(): void
+    {
+        $date = today()->addDay();
+
+        $screen = Native::test(RandevuCreate::class)
+            ->set('title', 'Cleared')
+            ->set('day', (string) $date->day)
+            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->set('color_r', 255)
+            ->set('color_g', 99)
+            ->set('color_b', 71)
+            ->call('clearColor');
+
+        $screen
+            ->assertSet('color', '')
+            ->assertSet('color_r', 0)
+            ->assertSet('color_g', 0)
+            ->assertSet('color_b', 0);
+
+        $screen->call('save')->assertReplacedWith('/follow');
+
+        $this->assertNull(Randevu::where('title', 'Cleared')->firstOrFail()->color);
+    }
+
+    public function test_edit_prefills_sliders_from_custom_color(): void
+    {
+        $randevu = Randevu::create(['title' => 'Mixed', 'occurs_on' => today(), 'color' => '#FF6347']);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->assertSet('color', '#FF6347')
+            ->assertSet('color_r', 255)
+            ->assertSet('color_g', 99)
+            ->assertSet('color_b', 71);
+    }
+
     public function test_follow_card_data_and_dot_include_the_color(): void
     {
         Randevu::create(['title' => 'Colorful', 'occurs_on' => today()->addDay(), 'color' => '#DB2777']);
@@ -323,6 +391,56 @@ class RandevuScreensTest extends TestCase
             '#DB2777',
             collect($screen->get('appointments'))->firstWhere('title', 'Colorful')['color']
         );
+    }
+
+    public function test_follow_card_accent_only_for_colored_randevu(): void
+    {
+        Randevu::create(['title' => 'Colorful', 'occurs_on' => today()->addDay(), 'color' => '#DB2777']);
+        Randevu::create(['title' => 'Plain', 'occurs_on' => today()->addDays(2)]);
+
+        $tree = Native::test(Follow::class)->tree();
+
+        $accents = $this->collectBgColors($tree);
+
+        $this->assertContains('#DB2777', $accents);
+        $this->assertCount(1, array_keys($accents, '#DB2777', true));
+    }
+
+    public function test_details_presents_and_renders_color_accent(): void
+    {
+        $randevu = Randevu::create(['title' => 'Colorful', 'occurs_on' => today()->addDay(), 'color' => '#DB2777']);
+
+        $screen = Native::test(\App\NativeComponents\RandevuDetails::class, ['id' => $randevu->id]);
+
+        $this->assertSame('#DB2777', $screen->get('randevu')['color']);
+
+        $accents = $this->collectBgColors($screen->tree());
+
+        $this->assertContains('#DB2777', $accents);
+    }
+
+    /** @return list<string> */
+    private function collectBgColors(array $node): array
+    {
+        $colors = [];
+
+        $walk = function ($current) use (&$walk, &$colors): void {
+            if (! is_array($current)) {
+                return;
+            }
+
+            if (isset($current['style']['bg_color']) && is_string($current['style']['bg_color'])) {
+                $colors[] = $current['style']['bg_color'];
+            }
+
+            foreach ($current['children'] ?? [] as $child) {
+                $walk($child);
+            }
+        };
+
+        $walk($node);
+
+        return $colors;
     }
 
     public function test_follow_card_has_ring_webview_and_countdown_pill(): void
@@ -404,7 +522,7 @@ class RandevuScreensTest extends TestCase
             array_filter($tree['children'], fn ($node) => ($node['type'] ?? null) === 'bottom_nav_item'),
         ));
 
-        $this->assertSame(['Settings', 'Follow', 'New', 'Memories', 'Dashboard'], $labels);
+        $this->assertSame(['Dashboard', 'Follow', 'New', 'Memories', 'Settings'], $labels);
     }
 
     public function test_body_copy_is_not_heading_font(): void
@@ -590,8 +708,45 @@ class RandevuScreensTest extends TestCase
         $this->assertSame('webview', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
     }
 
-    /** Labels of the first row holding exactly 3 selects. */
-    private function selectRowLabels(array $tree): array
+    public function test_time_row_keeps_narrow_order_per_direction(): void
+    {
+        // Deliberately NOT mirrored: hour-then-minute reads the same in
+        // both directions. Labels hardcoded: the test process locale is
+        // unreliable for __() here.
+        $this->assertSame(
+            ['الساعة', 'الدقيقة'],
+            $this->selectRowLabels(Native::test(RandevuCreate::class)->tree(), 2)
+        );
+
+        // English (LTR): same order.
+        Setting::set('locale', 'en');
+
+        $this->assertSame(
+            ['Hour', 'Minute'],
+            $this->selectRowLabels(Native::test(RandevuCreate::class)->tree(), 2)
+        );
+    }
+
+    public function test_period_chips_mirror_per_direction(): void
+    {
+        // Arabic (RTL): mirrored DOM order, hours first (rightmost). Labels
+        // hardcoded: the test process locale is unreliable for __() here.
+        $this->assertSame(
+            ['ساعات', 'أيام', 'شهور', 'سنين'],
+            $this->chipRowLabels(Native::test(RandevuCreate::class)->tree())
+        );
+
+        // English (LTR): source order.
+        Setting::set('locale', 'en');
+
+        $this->assertSame(
+            ['Years', 'Months', 'Days', 'Hours'],
+            $this->chipRowLabels(Native::test(RandevuCreate::class)->tree())
+        );
+    }
+
+    /** Labels of the first row holding only chips (the period row). */
+    private function chipRowLabels(array $tree): array
     {
         foreach ($this->collectNodes($tree, 'row') as $row) {
             $children = [];
@@ -601,7 +756,33 @@ class RandevuScreensTest extends TestCase
                 }
             }
 
-            $allSelects = count($children) === 3;
+            $allChips = count($children) === 4;
+            foreach ($children as $child) {
+                $allChips = $allChips && (($child['type'] ?? null) === 'chip');
+            }
+
+            if ($allChips) {
+                return array_map(fn ($child) => $child['props']['label'] ?? '', $children);
+            }
+        }
+
+        $this->fail('No 4-chip row found in the rendered tree.');
+
+        return [];
+    }
+
+    /** Labels of the first row holding exactly the given selects count. */
+    private function selectRowLabels(array $tree, int $count = 3): array
+    {
+        foreach ($this->collectNodes($tree, 'row') as $row) {
+            $children = [];
+            foreach ($row['children'] ?? [] as $child) {
+                if (is_array($child)) {
+                    $children[] = $child;
+                }
+            }
+
+            $allSelects = count($children) === $count;
             foreach ($children as $child) {
                 $allSelects = $allSelects && (($child['type'] ?? null) === 'select');
             }
@@ -611,7 +792,7 @@ class RandevuScreensTest extends TestCase
             }
         }
 
-        $this->fail('No 3-select row found in the rendered tree.');
+        $this->fail("No {$count}-select row found in the rendered tree.");
 
         return [];
     }

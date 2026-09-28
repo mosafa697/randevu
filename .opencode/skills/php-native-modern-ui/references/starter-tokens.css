@@ -1,0 +1,54 @@
+/*
+  Starter design tokens — copy into assets/css/tokens.css and CUSTOMIZE.
+  These placeholder values exist to show the *shape* of a token system,
+  not to be shipped as-is. Replace colors/type per Step 2 of the skill.
+*/
+
+:root {
+  /* Color — replace with 4-6 named hex values chosen for THIS project */
+  --color-bg: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-text: #1a1a1a;
+  --color-text-muted: #5a5a5a;
+  --color-accent: #2b4c7e;      /* pick something that isn't Bootstrap-blue */
+  --color-accent-contrast: #ffffff;
+  --color-border: #dcdcdc;
+  --color-danger: #b3261e;
+  --color-success: #1f7a4d;
+
+  /* Type */
+  --font-body: "Inter", system-ui, sans-serif;   /* pick a deliberate face */
+  --font-display: var(--font-body);
+  --font-size-sm: clamp(0.8rem, 0.78rem + 0.1vw, 0.875rem);
+  --font-size-base: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --font-size-lg: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --font-size-xl: clamp(1.75rem, 1.5rem + 1.2vw, 2.5rem);
+  --line-height-base: 1.5;
+
+  /* Spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+
+  /* Layout */
+  --content-max-width: 72rem;
+  --form-max-width: 32rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #14161a;
+    --color-surface: #1d2026;
+    --color-text: #eaeaea;
+    --color-text-muted: #a3a3a3;
+    --color-border: #2c2f36;
+  }
+}

@@ -40,6 +40,9 @@ return [
     'day_label' => 'اليوم',
     'month_label' => 'الشهر',
     'year_label' => 'السنة',
+    'hour_label' => 'الساعة',
+    'minute_label' => 'الدقيقة',
+    'time_none' => 'بدون',
     'mode_gregorian' => 'ميلادي',
     'mode_hijri' => 'هجري',
     'form_hint' => 'النهاردة أو بعد كده يبقى ميعاد، وقبل كده يبقى ذكرى.',
@@ -59,6 +62,10 @@ return [
     'color_cyan' => 'سماوي',
     'color_brown' => 'بني',
     'color_gray' => 'رمادي',
+    'color_custom_label' => 'لون مخصص',
+    'color_channel_red' => 'أحمر',
+    'color_channel_green' => 'أخضر',
+    'color_channel_blue' => 'أزرق',
 
     // Cover image (optional gallery pick)
     'cover_label' => 'الغلاف (اختياري)',
@@ -80,6 +87,8 @@ return [
     'months_ago' => 'من :count :unit',
     'in_years' => 'بعد :count :unit',
     'years_ago' => 'من :count :unit',
+    'in_hours' => 'بعد :count :unit',
+    'hours_ago' => 'من :count :unit',
     'exact_future' => 'كمان :count :unit',
     'exact_past' => 'من :count :unit',
 
@@ -96,6 +105,10 @@ return [
     'year_two' => 'سنتين',
     'year_few' => 'سنين',
     'year_many' => 'سنة',
+    'hour_one' => 'ساعة',
+    'hour_two' => 'ساعتين',
+    'hour_few' => 'ساعات',
+    'hour_many' => 'ساعة',
 
     // Gregorian months (Egyptian usage)
     'months' => [
@@ -118,6 +131,7 @@ return [
     'period_days' => 'أيام',
     'period_months' => 'شهور',
     'period_years' => 'سنين',
+    'period_hours' => 'ساعات',
     'period_units_required' => 'لازم تختار وحدة واحدة على الأقل.',
     'combined_future' => 'بعد :parts',
     'combined_past' => 'من :parts',

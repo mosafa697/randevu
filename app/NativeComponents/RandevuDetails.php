@@ -73,6 +73,7 @@ class RandevuDetails extends NativeComponent
             'is_appointment' => $randevu->isAppointment(),
             'is_today' => $randevu->isToday(),
             'note' => $randevu->note,
+            'color' => $randevu->color,
             'cover' => CoverImage::src($randevu->cover_path),
         ];
     }

@@ -50,11 +50,17 @@ class RandevuEdit extends NativeComponent
 
     public string $h_year = '';
 
+    public string $hour = '';
+
+    public string $minute = '';
+
     public bool $show_years = true;
 
     public bool $show_months = true;
 
     public bool $show_days = true;
+
+    public bool $show_hours = false;
 
     /** @var list<string> */
     public array $dayOptions = [];
@@ -74,6 +80,12 @@ class RandevuEdit extends NativeComponent
     /** @var list<string> */
     public array $hYearOptions = [];
 
+    /** @var list<string> */
+    public array $hourOptions = [];
+
+    /** @var list<string> */
+    public array $minuteOptions = [];
+
     public bool $confirmingDelete = false;
 
     /** @var array<string,string> */
@@ -87,19 +99,25 @@ class RandevuEdit extends NativeComponent
         $randevu = $this->findOrFail();
         $this->title = $randevu->title;
         $this->note = (string) ($randevu->note ?? '');
-        $this->color = (string) ($randevu->color ?? '');
+        // setColor() also mirrors the hex into the slider channels.
+        $this->setColor((string) ($randevu->color ?? ''));
         $this->cover_path = (string) ($randevu->cover_path ?? '');
         $this->calendar_mode = $randevu->entered_in === 'hijri' ? 'hijri' : 'gregorian';
         $this->calendarIndex = $this->calendar_mode === 'hijri' ? 1 : 0;
         $this->show_years = (bool) $randevu->show_years;
         $this->show_months = (bool) $randevu->show_months;
         $this->show_days = (bool) $randevu->show_days;
+        $this->show_hours = (bool) $randevu->show_hours;
         $this->dayOptions = RandevuCreate::dayOptions();
         $this->monthOptions = RandevuTime::monthNames();
         $this->yearOptions = RandevuCreate::yearOptions();
         $this->hDayOptions = array_map(strval(...), range(1, 30));
         $this->hMonthOptions = RandevuHijri::MONTH_NAMES;
         $this->hYearOptions = RandevuHijri::yearOptions();
+        $this->hourOptions = RandevuCreate::hourOptions();
+        $this->minuteOptions = RandevuCreate::minuteOptions();
+        $this->hour = $randevu->occurs_time?->format('H') ?? __('randevu.time_none');
+        $this->minute = $randevu->occurs_time?->format('i') ?? __('randevu.time_none');
         $this->day = (string) $randevu->occurs_on->day;
         $this->month = RandevuTime::monthNames()[$randevu->occurs_on->month - 1];
         $this->year = (string) $randevu->occurs_on->year;
@@ -176,6 +194,7 @@ class RandevuEdit extends NativeComponent
     {
         $dates = $this->resolveDates();
         $color = Randevu::normalizeColor($this->color);
+        $time = $this->resolveTime();
         $cover = CoverImage::normalize($this->cover_path);
         $coverMime = CoverImage::normalizeMime($this->cover_mime);
         $coverError = CoverImage::validate($cover, $coverMime);
@@ -183,6 +202,7 @@ class RandevuEdit extends NativeComponent
         $validator = Validator::make([
             'title' => $this->title,
             'occurs_on' => $dates['occurs_on'] ?? null,
+            'occurs_time' => $time,
             'color' => $color,
             'cover_path' => $cover,
             'note' => $this->note ?: null,
@@ -190,9 +210,10 @@ class RandevuEdit extends NativeComponent
             'show_years' => $this->show_years,
             'show_months' => $this->show_months,
             'show_days' => $this->show_days,
+            'show_hours' => $this->show_hours,
         ], Randevu::rules());
 
-        if ($validator->fails() || $coverError !== null || ! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days)) {
+        if ($validator->fails() || $coverError !== null || ! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days, $this->show_hours)) {
             $this->errors = collect($validator->errors()->messages())
                 ->mapWithKeys(fn ($msgs, $field) => [$field => (string) $msgs[0]])
                 ->all();
@@ -203,7 +224,7 @@ class RandevuEdit extends NativeComponent
                     : $this->coverTypeMessage($cover, $coverMime);
             }
 
-            if (! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days)) {
+            if (! Randevu::hasAnyUnit($this->show_years, $this->show_months, $this->show_days, $this->show_hours)) {
                 $this->errors['period_units'] = __('randevu.period_units_required');
             }
 
@@ -220,6 +241,7 @@ class RandevuEdit extends NativeComponent
             $randevu->update([
                 'title' => trim($this->title),
                 'occurs_on' => $dates['occurs_on'],
+                'occurs_time' => $time,
                 'color' => $color,
                 'cover_path' => $cover,
                 'note' => $this->note !== '' ? trim($this->note) : null,
@@ -230,6 +252,7 @@ class RandevuEdit extends NativeComponent
                 'show_years' => $this->show_years,
                 'show_months' => $this->show_months,
                 'show_days' => $this->show_days,
+                'show_hours' => $this->show_hours,
             ]);
         } catch (\Throwable $e) {
             // Row untouched: an unchanged cover still backs it, only a fresh

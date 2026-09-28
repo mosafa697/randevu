@@ -1,5 +1,11 @@
 @php($rtl = $rtl ?? \App\Services\AppLocale::isRtl())
+@php($accent = isset($item['color']) && is_string($item['color']) && preg_match('/^#[0-9A-Fa-f]{6}$/', $item['color']) ? $item['color'] : null)
 <native:column class="flex-1 gap-1">
+    @if($accent !== null)
+        <native:row class="w-full items-center">
+            <native:column :bg="$accent" class="w-8 h-2 rounded-full" />
+        </native:row>
+    @endif
     @if(($item['is_today'] ?? false) && ($badge ?? false))
         <native:row class="w-full items-center gap-2">
             @if($rtl)
