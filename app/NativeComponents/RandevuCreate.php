@@ -237,7 +237,7 @@ class RandevuCreate extends NativeComponent
 
         $this->errors = [];
 
-        Randevu::create([
+        $randevu = Randevu::create([
             'title' => trim($this->title),
             'occurs_on' => $dates['occurs_on'],
             'occurs_time' => $time,
@@ -253,7 +253,7 @@ class RandevuCreate extends NativeComponent
             'show_hours' => $this->show_hours,
         ]);
 
-        $this->replace('/follow');
+        $this->replace('/details/'.$randevu->id);
     }
 
     public function render(): View

@@ -11,6 +11,7 @@ use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
 use App\Services\RandevuHijri;
+use App\Services\RandevuTime;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Native\Mobile\Testing\Native;
 use Tests\TestCase;
@@ -32,16 +33,16 @@ class PeriodDisplayTest extends TestCase
     {
         $date = today()->addDays(40);
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Trip')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('show_months', false)
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
 
         $randevu = Randevu::where('title', 'Trip')->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$randevu->id);
 
         $this->assertTrue($randevu->show_years);
         $this->assertFalse($randevu->show_months);
@@ -56,7 +57,7 @@ class PeriodDisplayTest extends TestCase
         $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Trip')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('show_years', false)
             ->set('show_months', false)
@@ -100,18 +101,18 @@ class PeriodDisplayTest extends TestCase
         Setting::set('locale', 'en');
         $date = today()->addDays(2);
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Meeting')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('hour', '14')
             ->set('minute', '30')
             ->set('show_hours', true)
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
 
         $randevu = Randevu::where('title', 'Meeting')->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$randevu->id);
 
         $this->assertSame('14:30', $randevu->occurs_time->format('H:i'));
         $this->assertTrue($randevu->show_hours);
@@ -123,16 +124,16 @@ class PeriodDisplayTest extends TestCase
     {
         $date = today()->addDays(2);
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Sharp')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('hour', '14')
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
 
         $randevu = Randevu::where('title', 'Sharp')->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$randevu->id);
 
         $this->assertSame('14:00', $randevu->occurs_time->format('H:i'));
         $this->assertFalse($randevu->show_hours);
@@ -143,15 +144,15 @@ class PeriodDisplayTest extends TestCase
         Setting::set('locale', 'en');
         $date = today()->addDays(40);
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Plain')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
 
         $randevu = Randevu::where('title', 'Plain')->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$randevu->id);
 
         $this->assertNull($randevu->occurs_time);
         $this->assertFalse($randevu->show_hours);
@@ -165,10 +166,10 @@ class PeriodDisplayTest extends TestCase
         Setting::set('locale', 'en');
         $date = today()->addDays(40);
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Countdown')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('hour', '14')
             ->set('minute', '30')
@@ -176,10 +177,10 @@ class PeriodDisplayTest extends TestCase
             ->set('show_months', false)
             ->set('show_days', false)
             ->set('show_hours', true)
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
 
         $randevu = Randevu::where('title', 'Countdown')->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$randevu->id);
 
         $this->assertTrue($randevu->show_hours);
         $this->assertSame('In 974 hours', $randevu->relativePhrase());
@@ -277,16 +278,16 @@ class PeriodDisplayTest extends TestCase
         $target = today()->addDays(30);
         [$hy, $hm, $hd] = RandevuHijri::fromGregorian($target->year, $target->month, $target->day);
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Hijri night')
             ->call('useHijri')
             ->set('h_day', (string) $hd)
             ->set('h_month', RandevuHijri::MONTH_NAMES[$hm - 1])
             ->set('h_year', (string) $hy)
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
 
         $randevu = Randevu::where('title', 'Hijri night')->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$randevu->id);
 
         // Both calendars stored from a Hijri-only entry.
         $this->assertSame($target->toDateString(), $randevu->occurs_on->toDateString());
