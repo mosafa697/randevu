@@ -67,6 +67,16 @@ return [
     'color_channel_green' => 'Green',
     'color_channel_blue' => 'Blue',
 
+    // Cover image (optional gallery pick)
+    'cover_label' => 'Cover (optional)',
+    'cover_pick' => 'Choose cover',
+    'cover_remove' => 'Remove',
+    'cover_close' => 'Close',
+    'cover_error_type' => 'That file (:label) is not a supported image — use JPG, PNG, GIF, WebP or HEIC.',
+    'cover_error_unknown' => 'Could not read that file — please pick an image from your gallery again.',
+    'cover_error_pick' => 'Could not open the gallery — please try again.',
+    'cover_error_size' => 'That image is too big — 5 MB max.',
+
     // Relative phrases
     'phrase_today' => 'Today',
     'phrase_tomorrow' => 'Tomorrow',

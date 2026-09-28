@@ -81,6 +81,8 @@
 
             @include('native.partials.color-picker', ['selected' => $color, 'errors' => $errors])
 
+            @include('native.partials.cover-picker')
+
             <native:button :label="__('randevu.save_changes')" @press="update" variant="primary" class="w-full rounded-lg" />
 
             @if(!$confirmingDelete)
