@@ -103,16 +103,18 @@ class CoverImageTest extends TestCase
         $cover = $this->tempImage();
         $date = today()->addDay();
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Covered')
             ->set('day', (string) $date->day)
             ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('cover_path', $cover)
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
 
-        $stored = Randevu::where('title', 'Covered')->firstOrFail()->cover_path;
+        $randevu = Randevu::where('title', 'Covered')->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$randevu->id);
+
+        $stored = $randevu->cover_path;
 
         $this->assertMatchesRegularExpression('#^covers/[0-9a-f-]{36}\.jpg$#', (string) $stored);
         $file = storage_path('app/'.$stored);
@@ -199,16 +201,18 @@ class CoverImageTest extends TestCase
         $cover = $this->tempGalleryCopy();
         $date = today()->addDay();
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Gallery cover')
             ->set('day', (string) $date->day)
             ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('cover_path', $cover)
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
 
-        $stored = Randevu::where('title', 'Gallery cover')->firstOrFail()->cover_path;
+        $randevu = Randevu::where('title', 'Gallery cover')->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$randevu->id);
+
+        $stored = $randevu->cover_path;
 
         // Extensionless Android picks get named from their MIME/bytes at
         // copy time — the stored ref always carries a real suffix.
@@ -226,16 +230,18 @@ class CoverImageTest extends TestCase
         $cover = '/data/data/app/cache/Gallery/gallery_selected_1759000000000';
         $date = today()->addDay();
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Jump cover')
             ->set('day', (string) $date->day)
             ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('cover_path', $cover)
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
 
-        $this->assertSame($cover, Randevu::where('title', 'Jump cover')->firstOrFail()->cover_path);
+        $randevu = Randevu::where('title', 'Jump cover')->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$randevu->id);
+
+        $this->assertSame($cover, $randevu->cover_path);
     }
 
     public function test_media_selected_rejection_names_detected_type(): void
