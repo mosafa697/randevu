@@ -74,6 +74,8 @@
                 <native:text class="text-sm text-theme-destructive">{{ $errors['period_units'] }}</native:text>
             @endif
 
+            @include('native.partials.phrase-preview', ['previewPhrase' => $this->previewPhrase()])
+
             <native:outlined-text-input :label="__('randevu.note_label')" native:model="note" multiline :min-lines="2" class="rounded-[14px]" />
             @if(!empty($errors['note']))
                 <native:text class="text-sm text-theme-destructive">{{ $errors['note'] }}</native:text>

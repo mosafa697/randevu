@@ -46,6 +46,8 @@ return [
     'mode_gregorian' => 'Gregorian',
     'mode_hijri' => 'Hijri',
     'form_hint' => 'Today or later becomes an appointment; earlier becomes a memory.',
+    'preview_label' => 'The card will say',
+    'preview_invalid' => 'Pick a valid date to see the distance',
 
     // Color
     'color_label' => 'Color (optional)',

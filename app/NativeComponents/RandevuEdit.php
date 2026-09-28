@@ -141,55 +141,6 @@ class RandevuEdit extends NativeComponent
         return __('randevu.edit_title');
     }
 
-    /** Gregorian Y-m-d string, or null when the selection is not a real date. */
-    public function gregorianDateString(): ?string
-    {
-        $month = RandevuTime::monthNumber($this->month);
-        $day = (int) $this->day;
-        $year = (int) $this->year;
-
-        if ($month === null || ! checkdate($month, $day, $year)) {
-            return null;
-        }
-
-        return sprintf('%04d-%02d-%02d', $year, $month, $day);
-    }
-
-    /**
-     * Resolve both calendars from the active entry mode.
-     *
-     * @return array{occurs_on: ?string, hijri_year: ?int, hijri_month: ?int, hijri_day: ?int}|null
-     */
-    public function resolveDates(): ?array
-    {
-        if ($this->calendar_mode === 'hijri') {
-            $month = RandevuHijri::monthNumber($this->h_month);
-            $day = (int) $this->h_day;
-            $year = (int) $this->h_year;
-
-            if ($month === null || ! RandevuHijri::valid($year, $month, $day)) {
-                return null;
-            }
-
-            [$gy, $gm, $gd] = RandevuHijri::toGregorian($year, $month, $day);
-
-            return [
-                'occurs_on' => sprintf('%04d-%02d-%02d', $gy, $gm, $gd),
-                'hijri_year' => $year,
-                'hijri_month' => $month,
-                'hijri_day' => $day,
-            ];
-        }
-
-        $date = $this->gregorianDateString();
-
-        if ($date === null) {
-            return null;
-        }
-
-        return array_merge(['occurs_on' => $date], Randevu::hijriTriple($date));
-    }
-
     public function update(): void
     {
         $dates = $this->resolveDates();

@@ -359,4 +359,141 @@ class PeriodDisplayTest extends TestCase
 
         Native::visit('/details/'.$randevu->id)->assertSee('التفاصيل');
     }
+
+    public function test_create_form_previews_live_phrase(): void
+    {
+        Setting::set('locale', 'en');
+        $date = today()->addDays(40);
+
+        $screen = Native::test(RandevuCreate::class)
+            ->assertSee('The card will say')
+            ->set('day', (string) $date->day)
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year);
+
+        // All units on: exact calendar breakdown.
+        $screen->assertSee(RandevuTime::phraseFor($date->toDateString(), true, true, true, false));
+
+        // Years off: months + days breakdown.
+        $screen->set('show_years', false)
+            ->assertSee(RandevuTime::phraseFor($date->toDateString(), false, true, true, false));
+
+        // Days only: exact day count.
+        $screen->set('show_months', false)
+            ->assertSee(RandevuTime::phraseFor($date->toDateString(), false, false, true, false));
+
+        // Months only: rounded single unit.
+        $screen->set('show_days', false)->set('show_months', true)
+            ->assertSee(RandevuTime::phraseFor($date->toDateString(), false, true, false, false));
+
+        // All units off: falls back to the plain phrase.
+        $screen->set('show_months', false)
+            ->assertSee(RandevuTime::phraseFor($date->toDateString(), false, false, false, false));
+    }
+
+    public function test_create_form_previews_hours_with_time(): void
+    {
+        Setting::set('locale', 'en');
+        $date = today()->addDays(2);
+
+        Native::test(RandevuCreate::class)
+            ->set('day', (string) $date->day)
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
+            ->set('year', (string) $date->year)
+            ->set('hour', '14')
+            ->set('minute', '30')
+            ->set('show_years', false)
+            ->set('show_months', false)
+            ->set('show_days', false)
+            ->set('show_hours', true)
+            ->assertSee(RandevuTime::phraseFor($date->toDateString(), false, false, false, true, '14:30'));
+    }
+
+    public function test_create_form_preview_shows_placeholder_for_invalid_date(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)
+            ->set('month', 'April')
+            ->set('day', '31')
+            ->assertSee('Pick a valid date to see the distance');
+    }
+
+    public function test_create_form_previews_hijri_selection(): void
+    {
+        Setting::set('locale', 'en');
+        $date = today()->addDays(40);
+        [$hy, $hm, $hd] = RandevuHijri::fromGregorian($date->year, $date->month, $date->day);
+
+        Native::test(RandevuCreate::class)
+            ->press('useHijri')
+            ->set('h_day', (string) $hd)
+            ->set('h_month', RandevuHijri::MONTH_NAMES[$hm - 1])
+            ->set('h_year', (string) $hy)
+            ->assertSee(RandevuTime::phraseFor($date->toDateString(), true, true, true, false));
+    }
+
+    public function test_edit_form_previews_stored_phrase(): void
+    {
+        Setting::set('locale', 'en');
+
+        $randevu = Randevu::create([
+            'title' => 'Trip',
+            'occurs_on' => today()->addDays(40),
+            'show_years' => false,
+            'show_months' => false,
+            'show_days' => true,
+        ]);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->assertSee('The card will say')
+            ->assertSee(RandevuTime::phraseFor($randevu->occurs_on->toDateString(), false, false, true, false));
+    }
+
+    public function test_edit_form_previews_hijri_entered_phrase(): void
+    {
+        Setting::set('locale', 'en');
+        $date = today()->addDays(40);
+        $triple = Randevu::hijriTriple($date->toDateString());
+
+        $randevu = Randevu::create([
+            'title' => 'Hijri trip',
+            'occurs_on' => $date->toDateString(),
+            'hijri_year' => $triple['hijri_year'],
+            'hijri_month' => $triple['hijri_month'],
+            'hijri_day' => $triple['hijri_day'],
+            'entered_in' => 'hijri',
+            'show_years' => false,
+            'show_months' => false,
+            'show_days' => true,
+        ]);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->assertSee(RandevuTime::phraseFor($date->toDateString(), false, false, true, false));
+    }
+
+    public function test_create_form_shows_preview_label_in_arabic(): void
+    {
+        Native::test(RandevuCreate::class)->assertSee('البطاقة هتقول');
+    }
+
+    public function test_create_form_preview_resolves_dark_palette(): void
+    {
+        Setting::set('theme', 'dark');
+        Setting::set('locale', 'en');
+
+        $screen = Native::test(RandevuCreate::class)
+            ->set('month', 'April')
+            ->set('day', '31');
+
+        // Read AFTER mount: AppTheme rewrites both config blocks on every
+        // apply (boot forces light first), so the dark value only lands
+        // in config once the mounted screen forces dark.
+        $muted = (string) config('native-ui.theme.dark.on-surface-variant');
+
+        // Forced dark: the preview placeholder must carry the dark block's
+        // muted token, not the light one.
+        $screen->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === 'Pick a valid date to see the distance')
+            && (($n['props']['color'] ?? null) === $muted));
+    }
 }

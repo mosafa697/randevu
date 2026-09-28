@@ -46,6 +46,8 @@ return [
     'mode_gregorian' => 'ميلادي',
     'mode_hijri' => 'هجري',
     'form_hint' => 'النهاردة أو بعد كده يبقى ميعاد، وقبل كده يبقى ذكرى.',
+    'preview_label' => 'البطاقة هتقول',
+    'preview_invalid' => 'اختار تاريخ مظبوط عشان تشوف المدة',
 
     // Color
     'color_label' => 'اللون (اختياري)',
