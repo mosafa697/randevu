@@ -16,7 +16,7 @@ use Illuminate\Support\Carbon;
  */
 class Randevu extends Model
 {
-    protected $fillable = ['title', 'occurs_on', 'occurs_time', 'note', 'color', 'cover_path', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in', 'show_years', 'show_months', 'show_days', 'show_hours'];
+    protected $fillable = ['title', 'occurs_on', 'occurs_time', 'occurs_time', 'note', 'color', 'cover_path', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in', 'show_years', 'show_months', 'show_days', 'show_hours', 'show_hours'];
 
     protected $casts = [
         'occurs_on' => 'date',
