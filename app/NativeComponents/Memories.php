@@ -5,6 +5,7 @@ namespace App\NativeComponents;
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
+use App\Services\CoverImage;
 use App\Services\RandevuTime;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
@@ -48,6 +49,7 @@ class Memories extends NativeComponent
             'phrase' => $randevu->relativePhrase(),
             'note' => $randevu->note,
             'color' => $randevu->color,
+            'cover' => CoverImage::src($randevu->cover_path),
             'days' => $days,
             'pct' => max(0.08, min(1.0, 1 - abs($days) / 30)),
             'entered_in' => $randevu->entered_in,

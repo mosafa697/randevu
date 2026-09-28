@@ -5,6 +5,7 @@ namespace App\NativeComponents;
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
+use App\Services\CoverImage;
 use App\Services\RandevuTime;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
@@ -23,6 +24,9 @@ class RandevuDetails extends NativeComponent
     /** @var array<string,mixed>|null */
     public ?array $randevu = null;
 
+    /** Full-size cover viewer overlay (opened by tapping the card image). */
+    public bool $show_full_cover = false;
+
     public function mount(): void
     {
         $this->applyLocale();
@@ -34,6 +38,18 @@ class RandevuDetails extends NativeComponent
     public function navTitle(): string
     {
         return __('randevu.details_title');
+    }
+
+    /** @press entry point — bare method only. */
+    public function openCover(): void
+    {
+        $this->show_full_cover = true;
+    }
+
+    /** @press entry point — bare method only. */
+    public function closeCover(): void
+    {
+        $this->show_full_cover = false;
     }
 
     public function refresh(): void
@@ -58,6 +74,7 @@ class RandevuDetails extends NativeComponent
             'is_today' => $randevu->isToday(),
             'note' => $randevu->note,
             'color' => $randevu->color,
+            'cover' => CoverImage::src($randevu->cover_path),
         ];
     }
 

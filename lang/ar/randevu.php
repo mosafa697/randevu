@@ -67,6 +67,16 @@ return [
     'color_channel_green' => 'أخضر',
     'color_channel_blue' => 'أزرق',
 
+    // Cover image (optional gallery pick)
+    'cover_label' => 'الغلاف (اختياري)',
+    'cover_pick' => 'اختار صورة',
+    'cover_remove' => 'امسح الصورة',
+    'cover_close' => 'اقفل',
+    'cover_error_type' => 'الملف ده (:label) مش صورة مدعومة — استخدم JPG أو PNG أو GIF أو WebP أو HEIC.',
+    'cover_error_unknown' => 'مش قادر أقرا الملف ده — اختار صورة من المعرض تاني.',
+    'cover_error_pick' => 'مش قادر أفتح المعرض — جرّب تاني.',
+    'cover_error_size' => 'الصورة دي كبيرة — 5 ميجا بالكتير.',
+
     // Relative phrases (Egyptian)
     'phrase_today' => 'النهاردة',
     'phrase_tomorrow' => 'بكرة',

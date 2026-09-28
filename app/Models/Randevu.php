@@ -16,7 +16,7 @@ use Illuminate\Support\Carbon;
  */
 class Randevu extends Model
 {
-    protected $fillable = ['title', 'occurs_on', 'occurs_time', 'note', 'color', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in', 'show_years', 'show_months', 'show_days', 'show_hours'];
+    protected $fillable = ['title', 'occurs_on', 'occurs_time', 'occurs_time', 'note', 'color', 'cover_path', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in', 'show_years', 'show_months', 'show_days', 'show_hours', 'show_hours'];
 
     protected $casts = [
         'occurs_on' => 'date',
@@ -56,6 +56,7 @@ class Randevu extends Model
             'occurs_on' => 'required|date',
             'occurs_time' => ['nullable', 'date_format:H:i'],
             'color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'cover_path' => 'nullable|string|max:2000',
             'note' => 'nullable|string|max:2000',
             'hijri_year' => 'nullable|integer|min:1',
             'hijri_month' => 'nullable|integer|min:1|max:12',

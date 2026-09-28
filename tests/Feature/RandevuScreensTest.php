@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Randevu;
 use App\Models\Setting;
+use App\NativeComponents\Dashboard;
 use App\NativeComponents\Follow;
+use App\NativeComponents\Memories;
 use App\NativeComponents\RandevuCreate;
 use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
@@ -189,31 +191,32 @@ class RandevuScreensTest extends TestCase
     {
         Setting::set('locale', 'en');
 
-        // Day and Year are fixed w-24 (96) since 601d1b5; Month stretches between them.
-        $fixed = fn ($n) => ($n['layout']['width'] ?? null) == 96
+        // Day rides at w-24 like Year since 601d1b5 ("Increase width of day
+        // select inputs"); Month stays the flex-1 wide one.
+        $narrow = fn ($n) => ($n['layout']['width'] ?? null) == 96
             && ($n['layout']['flex_shrink'] ?? null) == 0;
         $wide = fn ($n) => ($n['layout']['flex_grow'] ?? null) == 1
             && ! isset($n['layout']['width']);
 
         $screen = Native::test(RandevuCreate::class);
 
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $fixed($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $narrow($n));
         $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $wide($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $fixed($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $narrow($n));
 
         $screen->press('useHijri');
 
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $fixed($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $narrow($n));
         $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $wide($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $fixed($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $narrow($n));
 
         $randevu = Randevu::create(['title' => 'Weighted', 'occurs_on' => today()]);
 
         $edit = Native::test(RandevuEdit::class, ['id' => $randevu->id]);
 
-        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $fixed($n));
+        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $narrow($n));
         $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $wide($n));
-        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $fixed($n));
+        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $narrow($n));
     }
 
     public function test_create_chips_toggle_period_units(): void
@@ -722,7 +725,7 @@ class RandevuScreensTest extends TestCase
         $this->assertSame('webview', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
     }
 
-    public function test_time_row_keeps_fixed_order_per_direction(): void
+    public function test_time_row_keeps_narrow_order_per_direction(): void
     {
         // Deliberately NOT mirrored: hour-then-minute reads the same in
         // both directions. Labels hardcoded: the test process locale is
@@ -904,5 +907,26 @@ class RandevuScreensTest extends TestCase
     public function test_settings_route_resolves_via_visit(): void
     {
         Native::visit('/settings')->assertSee('اللغة');
+    }
+
+    public function test_follow_memories_settings_and_dashboard_scroll(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(['title' => 'Soon', 'occurs_on' => today()->addDay()]);
+        Randevu::create(['title' => 'Past', 'occurs_on' => today()->subDay()]);
+
+        Native::test(Follow::class)->assertElement('scroll_view');
+        Native::test(Memories::class)->assertElement('scroll_view');
+        Native::test(Settings::class)->assertElement('scroll_view');
+        Native::test(Dashboard::class)->assertElement('scroll_view');
+    }
+
+    public function test_follow_empty_state_stays_centered_without_scroll(): void
+    {
+        // No rows: the centered empty state renders directly — no scroll
+        // container that would break its flex-1 centering.
+        Native::test(Follow::class)->assertMissingElement('scroll_view');
+        Native::test(Memories::class)->assertMissingElement('scroll_view');
     }
 }
