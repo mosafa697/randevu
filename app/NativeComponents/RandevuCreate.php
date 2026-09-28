@@ -253,7 +253,7 @@ class RandevuCreate extends NativeComponent
         $cover = CoverImage::store($cover, $coverMime);
 
         try {
-            Randevu::create([
+            $randevu = Randevu::create([
                 'title' => trim($this->title),
                 'occurs_on' => $dates['occurs_on'],
                 'occurs_time' => $time,
@@ -268,15 +268,15 @@ class RandevuCreate extends NativeComponent
                 'show_months' => $this->show_months,
                 'show_days' => $this->show_days,
                 'show_hours' => $this->show_hours,
-        ]);
+                ]);
+
+            $this->replace("/details/$randevu->id");
         } catch (\Throwable $e) {
             // Row not written — the just-copied cover file would be orphaned.
             CoverImage::forget($cover);
 
             throw $e;
         }
-
-        $this->replace('/follow');
     }
 
     public function render(): View

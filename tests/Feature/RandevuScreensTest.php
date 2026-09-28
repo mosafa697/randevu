@@ -8,6 +8,7 @@ use App\NativeComponents\Dashboard;
 use App\NativeComponents\Follow;
 use App\NativeComponents\Memories;
 use App\NativeComponents\RandevuCreate;
+use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
 use App\Services\RandevuTime;
@@ -104,26 +105,28 @@ class RandevuScreensTest extends TestCase
     {
         Setting::set('locale', 'en');
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Feb meeting')
             ->set('day', '30')
             ->set('month', 'February')
             ->set('year', '2026')
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
+
+        $screen->assertReplacedWith('/details/'.Randevu::where('title', 'Feb meeting')->firstOrFail()->id);
 
         $this->assertSame(
             '2026-02-28',
             Randevu::where('title', 'Feb meeting')->firstOrFail()->occurs_on->toDateString()
         );
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'April deadline')
             ->set('day', '31')
             ->set('month', 'April')
             ->set('year', '2026')
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
+
+        $screen->assertReplacedWith('/details/'.Randevu::where('title', 'April deadline')->firstOrFail()->id);
 
         $this->assertSame(
             '2026-04-30',
@@ -135,13 +138,14 @@ class RandevuScreensTest extends TestCase
     {
         Setting::set('locale', 'en');
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Leap day')
             ->set('year', '2024')
             ->set('month', 'February')
             ->set('day', '29')
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
+
+        $screen->assertReplacedWith('/details/'.Randevu::where('title', 'Leap day')->firstOrFail()->id);
 
         $this->assertSame(
             '2024-02-29',
@@ -226,18 +230,25 @@ class RandevuScreensTest extends TestCase
         $this->assertTrue($screen->get('show_years'));
     }
 
-    public function test_create_saves_and_returns_to_follow(): void
+    public function test_create_saves_and_shows_new_details(): void
     {
         $date = today()->addDay();
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Dentist')
             ->set('day', (string) $date->day)
             ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('note', 'Second floor')
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
+
+        $randevu = Randevu::where('title', 'Dentist')->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$randevu->id);
+
+        // The landing screen actually renders the new appointment.
+        Native::visit('/details/'.$randevu->id)
+            ->assertSee('Dentist')
+            ->assertSee('Second floor');
 
         $this->assertDatabaseHas('randevus', ['title' => 'Dentist', 'note' => 'Second floor']);
         $this->assertSame(
@@ -250,14 +261,15 @@ class RandevuScreensTest extends TestCase
     {
         $date = today()->addDay();
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Colorful')
             ->set('day', (string) $date->day)
             ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('color', '2563eb')
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
+
+        $screen->assertReplacedWith('/details/'.Randevu::where('title', 'Colorful')->firstOrFail()->id);
 
         $this->assertSame('#2563EB', Randevu::where('title', 'Colorful')->firstOrFail()->color);
     }
@@ -317,16 +329,17 @@ class RandevuScreensTest extends TestCase
     {
         $date = today()->addDay();
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Mixed')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('color_r', 255)
             ->set('color_g', 99)
             ->set('color_b', 71)
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
+
+        $screen->assertReplacedWith('/details/'.Randevu::where('title', 'Mixed')->firstOrFail()->id);
 
         $this->assertSame('#FF6347', Randevu::where('title', 'Mixed')->firstOrFail()->color);
     }
@@ -351,7 +364,7 @@ class RandevuScreensTest extends TestCase
         $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Cleared')
             ->set('day', (string) $date->day)
-            ->set('month', \App\Services\RandevuTime::monthNames()[$date->month - 1])
+            ->set('month', RandevuTime::monthNames()[$date->month - 1])
             ->set('year', (string) $date->year)
             ->set('color_r', 255)
             ->set('color_g', 99)
@@ -364,7 +377,9 @@ class RandevuScreensTest extends TestCase
             ->assertSet('color_g', 0)
             ->assertSet('color_b', 0);
 
-        $screen->call('save')->assertReplacedWith('/follow');
+        $screen->call('save');
+
+        $screen->assertReplacedWith('/details/'.Randevu::where('title', 'Cleared')->firstOrFail()->id);
 
         $this->assertNull(Randevu::where('title', 'Cleared')->firstOrFail()->color);
     }
@@ -410,7 +425,7 @@ class RandevuScreensTest extends TestCase
     {
         $randevu = Randevu::create(['title' => 'Colorful', 'occurs_on' => today()->addDay(), 'color' => '#DB2777']);
 
-        $screen = Native::test(\App\NativeComponents\RandevuDetails::class, ['id' => $randevu->id]);
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
 
         $this->assertSame('#DB2777', $screen->get('randevu')['color']);
 
@@ -563,14 +578,15 @@ class RandevuScreensTest extends TestCase
 
     public function test_create_in_hijri_mode_stores_both_calendars(): void
     {
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Ramadan night')
             ->call('useHijri')
             ->set('h_day', '10')
             ->set('h_month', 'ربيع الثاني')
             ->set('h_year', '1448')
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
+
+        $screen->assertReplacedWith('/details/'.Randevu::where('title', 'Ramadan night')->firstOrFail()->id);
 
         $randevu = Randevu::where('title', 'Ramadan night')->firstOrFail();
 
@@ -582,14 +598,15 @@ class RandevuScreensTest extends TestCase
     public function test_create_clamps_impossible_hijri_day_and_saves(): void
     {
         // Safar has 29 days: picking it clamps h_day 30 → 29, then saves.
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->set('title', 'Safar night')
             ->call('useHijri')
             ->set('h_day', '30')
             ->set('h_month', 'صفر')
             ->set('h_year', '1448')
-            ->call('save')
-            ->assertReplacedWith('/follow');
+            ->call('save');
+
+        $screen->assertReplacedWith('/details/'.Randevu::where('title', 'Safar night')->firstOrFail()->id);
 
         $randevu = Randevu::where('title', 'Safar night')->firstOrFail();
 
