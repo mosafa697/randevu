@@ -94,6 +94,8 @@ return [
     'cover_error_unknown' => 'مش قادر أقرا الملف ده — اختار صورة من المعرض تاني.',
     'cover_error_pick' => 'مش قادر أفتح المعرض — جرّب تاني.',
     'cover_error_size' => 'الصورة دي كبيرة — 5 ميجا بالكتير.',
+    'cover_open' => 'افتح الغلاف',
+    'cover_alt' => 'الغلاف المختار',
 
     // Relative phrases (Egyptian)
     'phrase_today' => 'النهاردة',

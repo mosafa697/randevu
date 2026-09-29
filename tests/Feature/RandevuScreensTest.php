@@ -11,6 +11,7 @@ use App\NativeComponents\RandevuCreate;
 use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
+use App\Services\CoverImage;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -1134,5 +1135,75 @@ class RandevuScreensTest extends TestCase
 
         $randevu = Randevu::create(['title' => 'Old', 'occurs_on' => today()]);
         Native::test(RandevuEdit::class, ['id' => $randevu->id])->assertSee('+30 يوم');
+    }
+
+    public function test_color_picker_custom_dot_has_a11y_label(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)
+            ->assertElement('pressable', fn ($n) => (($n['props']['a11y_label'] ?? null) === 'None'));
+
+        Native::test(RandevuCreate::class)
+            ->set('color', '#123456')
+            ->assertElement('pressable', fn ($n) => (($n['props']['a11y_label'] ?? null) === 'Custom color'));
+    }
+
+    public function test_details_cover_has_a11y_label_and_alt(): void
+    {
+        Setting::set('locale', 'en');
+
+        $tmp = tempnam(sys_get_temp_dir(), 'cover');
+        file_put_contents($tmp, 'cover-bytes');
+        $stored = CoverImage::store($tmp);
+
+        $randevu = Randevu::create(['title' => 'Covered', 'occurs_on' => today()->addDays(5), 'cover_path' => $stored]);
+
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
+        $screen->assertElement('pressable', fn ($n) => (($n['props']['a11y_label'] ?? null) === 'Open cover'));
+
+        $screen->press('openCover');
+        $screen->assertElement('image', fn ($n) => (($n['props']['alt'] ?? null) === 'Selected cover'));
+
+        @unlink($tmp);
+    }
+
+    public function test_cover_picker_preview_has_alt(): void
+    {
+        Setting::set('locale', 'en');
+
+        $tmp = tempnam(sys_get_temp_dir(), 'cover');
+        file_put_contents($tmp, 'cover-bytes');
+        $stored = CoverImage::store($tmp);
+
+        Native::test(RandevuCreate::class)
+            ->set('cover_path', $stored)
+            ->assertElement('image', fn ($n) => (($n['props']['alt'] ?? null) === 'Selected cover'));
+
+        @unlink($tmp);
+    }
+
+    public function test_a11y_labels_render_in_arabic(): void
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'cover');
+        file_put_contents($tmp, 'cover-bytes');
+        $stored = CoverImage::store($tmp);
+
+        $randevu = Randevu::create(['title' => 'Covered', 'occurs_on' => today()->addDays(5), 'cover_path' => $stored]);
+
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
+        $screen->assertElement('pressable', fn ($n) => (($n['props']['a11y_label'] ?? null) === 'افتح الغلاف'));
+
+        $screen->press('openCover');
+        $screen->assertElement('image', fn ($n) => (($n['props']['alt'] ?? null) === 'الغلاف المختار'));
+
+        Native::test(RandevuCreate::class)
+            ->assertElement('pressable', fn ($n) => (($n['props']['a11y_label'] ?? null) === 'بدون'));
+
+        Native::test(RandevuCreate::class)
+            ->set('color', '#123456')
+            ->assertElement('pressable', fn ($n) => (($n['props']['a11y_label'] ?? null) === 'لون مخصص'));
+
+        @unlink($tmp);
     }
 }

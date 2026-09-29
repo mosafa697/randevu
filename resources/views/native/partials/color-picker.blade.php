@@ -22,9 +22,9 @@
 
 <native:row class="w-full gap-3 items-center">
     @if($selected !== '' && preg_match('/^#[0-9A-Fa-f]{6}$/', (string) $selected))
-        <native:pressable :bg="$selected" class="w-10 h-10 rounded-full shrink-0" />
+        <native:pressable :bg="$selected" :a11y-label="__('randevu.color_custom_label')" class="w-10 h-10 rounded-full shrink-0" />
     @else
-        <native:pressable class="w-10 h-10 rounded-full shrink-0 border border-theme-outline" />
+        <native:pressable :a11y-label="__('randevu.color_none')" class="w-10 h-10 rounded-full shrink-0 border border-theme-outline" />
     @endif
     <native:text class="text-sm text-theme-on-surface-variant">{{ $selected !== '' ? $selected : __('randevu.color_none') }}</native:text>
 </native:row>

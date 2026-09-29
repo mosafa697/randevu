@@ -2,7 +2,7 @@
 
 @php($coverSrc = \App\Services\CoverImage::src($cover_path ?? null))
 @if($coverSrc !== null)
-    <native:image :src="$coverSrc" class="w-full rounded-xl" :height="180" :fit="2" />
+    <native:image :src="$coverSrc" :alt="__('randevu.cover_alt')" class="w-full rounded-xl" :height="180" :fit="2" />
 @endif
 
 <native:row class="w-full gap-2">

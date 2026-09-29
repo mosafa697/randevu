@@ -94,6 +94,8 @@ return [
     'cover_error_unknown' => 'Could not read that file — please pick an image from your gallery again.',
     'cover_error_pick' => 'Could not open the gallery — please try again.',
     'cover_error_size' => 'That image is too big — 5 MB max.',
+    'cover_open' => 'Open cover',
+    'cover_alt' => 'Selected cover',
 
     // Relative phrases
     'phrase_today' => 'Today',

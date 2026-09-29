@@ -12,7 +12,7 @@
         <native:column class="w-full h-full bg-theme-background">
             <native:scroll-view class="w-full h-full">
                 <native:column class="w-full p-4 gap-4 items-center">
-                    <native:image :src="$randevu['cover']" class="w-full rounded-2xl" :height="560" :fit="1" />
+                    <native:image :src="$randevu['cover']" :alt="__('randevu.cover_alt')" class="w-full rounded-2xl" :height="560" :fit="1" />
                     <native:button :label="__('randevu.cover_close')" @press="closeCover" class="w-full" />
                 </native:column>
             </native:scroll-view>
@@ -20,7 +20,7 @@
     @else
         <native:column class="w-full p-4 gap-2 rounded-2xl bg-theme-surface">
             @if(!empty($randevu['cover']))
-                <native:pressable @press="openCover" class="w-full">
+                <native:pressable @press="openCover" :a11y-label="__('randevu.cover_open')" class="w-full">
                     <native:image :src="$randevu['cover']" class="w-full rounded-xl" :height="200" :fit="2" />
                 </native:pressable>
             @endif
