@@ -11,6 +11,7 @@ use App\NativeComponents\RandevuCreate;
 use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
+use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Native\Mobile\Testing\Native;
@@ -1074,5 +1075,55 @@ class RandevuScreensTest extends TestCase
             ->assertSee('الأقرب')
             ->assertSee('الأجدد')
             ->assertSee('أبجدي');
+    }
+
+    public function test_create_form_quick_set_chips_update_selects(): void
+    {
+        Setting::set('locale', 'en');
+
+        $screen = Native::test(RandevuCreate::class)
+            ->press('setPlus7');
+
+        $date = today()->addDays(7);
+        $screen
+            ->assertSet('day', (string) $date->day)
+            ->assertSet('month', RandevuTime::monthNames()[$date->month - 1])
+            ->assertSet('year', (string) $date->year);
+
+        [$hy, $hm, $hd] = RandevuHijri::fromGregorian($date->year, $date->month, $date->day);
+        $screen
+            ->assertSet('h_day', (string) $hd)
+            ->assertSet('h_month', RandevuHijri::MONTH_NAMES[$hm - 1])
+            ->assertSet('h_year', (string) $hy);
+
+        $screen->press('setToday');
+        $screen->assertSet('day', (string) today()->day);
+    }
+
+    public function test_edit_form_quick_set_chips_update_selects(): void
+    {
+        Setting::set('locale', 'en');
+
+        $randevu = Randevu::create(['title' => 'Old', 'occurs_on' => today()->subDays(40)]);
+
+        $screen = Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->press('setPlus30');
+
+        $date = today()->addDays(30);
+        $screen
+            ->assertSet('day', (string) $date->day)
+            ->assertSet('month', RandevuTime::monthNames()[$date->month - 1])
+            ->assertSet('year', (string) $date->year);
+    }
+
+    public function test_quick_set_chips_render_in_arabic(): void
+    {
+        Native::test(RandevuCreate::class)
+            ->assertSee('النهاردة')
+            ->assertSee('+7 أيام')
+            ->assertSee('+30 يوم');
+
+        $randevu = Randevu::create(['title' => 'Old', 'occurs_on' => today()]);
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])->assertSee('+30 يوم');
     }
 }

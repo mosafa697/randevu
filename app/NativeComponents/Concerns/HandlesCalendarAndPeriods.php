@@ -117,6 +117,45 @@ trait HandlesCalendarAndPeriods
         $this->show_hours = ! $this->show_hours;
     }
 
+    public function setToday(): void
+    {
+        $this->setDateChips(0);
+    }
+
+    public function setPlus7(): void
+    {
+        $this->setDateChips(7);
+    }
+
+    public function setPlus30(): void
+    {
+        $this->setDateChips(30);
+    }
+
+    /**
+     * Quick-set chip handler: writes the date N days out into BOTH
+     * calendars' props (same formats mount() prefills), so switching
+     * calendar mode afterwards still shows the chosen date. Refreshes
+     * both Day option lists for the written months — direct prop writes
+     * bypass the updated{Month,Year} hooks that normally do this.
+     */
+    protected function setDateChips(int $days): void
+    {
+        $date = now()->addDays($days);
+
+        $this->day = (string) $date->day;
+        $this->month = RandevuTime::monthNames()[$date->month - 1];
+        $this->year = (string) $date->year;
+
+        [$hy, $hm, $hd] = RandevuHijri::fromGregorian($date->year, $date->month, $date->day);
+        $this->h_day = (string) $hd;
+        $this->h_month = RandevuHijri::MONTH_NAMES[$hm - 1];
+        $this->h_year = (string) $hy;
+
+        $this->clampGregorianDay();
+        $this->clampHijriDay();
+    }
+
     /** Gregorian Y-m-d string, or null when the selection is not a real date. */
     public function gregorianDateString(): ?string
     {

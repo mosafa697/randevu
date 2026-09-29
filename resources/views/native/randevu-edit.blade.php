@@ -21,6 +21,18 @@
                 @endif
             </native:row>
 
+            <native:row class="w-full gap-2">
+                @if($rtl)
+                    <native:button :label="__('randevu.quick_plus30')" @press="setPlus30" />
+                    <native:button :label="__('randevu.quick_plus7')" @press="setPlus7" />
+                    <native:button :label="__('randevu.quick_today')" @press="setToday" />
+                @else
+                    <native:button :label="__('randevu.quick_today')" @press="setToday" />
+                    <native:button :label="__('randevu.quick_plus7')" @press="setPlus7" />
+                    <native:button :label="__('randevu.quick_plus30')" @press="setPlus30" />
+                @endif
+            </native:row>
+
             @if($calendar_mode === 'hijri')
                 <native:row class="w-full gap-2">
                     @if($rtl)
