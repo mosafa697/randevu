@@ -26,8 +26,16 @@ class RandevuScreensTest extends TestCase
             ->assertSee('ضيف أول ميعاد')
             ->assertSee('لسه مفيش مواعيد')
             ->assertSee('ضيف أول ميعاد عشان تتابعه هنا')
+            ->assertSee('المواعيد اللي تاريخها النهاردة أو بعد كده بتظهر هنا.')
+            ->assertSee('تلميح: تقدر تدخل التاريخ بالهجري من شاشة ميعاد جديد.')
             ->assertDontSee('مفيش مواعيد لسه')
             ->assertDontSee('عشان تتابعها');
+
+        Setting::set('locale', 'en');
+
+        Native::test(Follow::class)
+            ->assertSee('Appointments dated today or later show up here.')
+            ->assertSee('Tip: you can enter Hijri dates from the New screen.');
     }
 
     public function test_follow_lists_appointments_only_english(): void
@@ -80,7 +88,13 @@ class RandevuScreensTest extends TestCase
             ->assertSee('ضيف أول ميعاد')
             ->assertSee('لسه مفيش ذكريات محفوظة')
             ->assertSee('ضيف ميعاد عشان يظهر هنا بعد ما يعدى')
+            ->assertSee('المواعيد اللي عدت بتتحفظ هنا كذكريات.')
             ->assertDontSee('مفيش مواعيد لسه');
+
+        Setting::set('locale', 'en');
+
+        Native::visit('/memories')
+            ->assertSee('Past appointments are kept here as memories.');
     }
 
     public function test_create_rejects_invalid_input_and_keeps_values(): void

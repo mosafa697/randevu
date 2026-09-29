@@ -22,6 +22,9 @@ return [
     'follow_empty_support' => 'ضيف أول ميعاد عشان تتابعه هنا',
     'memories_empty_headline' => 'لسه مفيش ذكريات محفوظة',
     'memories_empty_support' => 'ضيف ميعاد عشان يظهر هنا بعد ما يعدى',
+    'follow_empty_classifier' => 'المواعيد اللي تاريخها النهاردة أو بعد كده بتظهر هنا.',
+    'memories_empty_classifier' => 'المواعيد اللي عدت بتتحفظ هنا كذكريات.',
+    'follow_empty_hint' => 'تلميح: تقدر تدخل التاريخ بالهجري من شاشة ميعاد جديد.',
 
     // Search + sort
     'search_label' => 'دوّر',

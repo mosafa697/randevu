@@ -5,6 +5,7 @@
             <native:text class="text-5xl text-theme-on-surface">🕰️</native:text>
             <native:text font="heading" class="text-lg font-bold text-theme-on-surface text-center">{{ __('randevu.memories_empty_headline') }}</native:text>
             <native:text class="text-sm text-theme-on-surface-variant text-center">{{ __('randevu.memories_empty_support') }}</native:text>
+            <native:text class="text-sm text-theme-on-surface-variant text-center">{{ __('randevu.memories_empty_classifier') }}</native:text>
             <native:button :label="__('randevu.empty_cta')" @navigate="'/create'" />
         </native:column>
     @else

@@ -22,6 +22,9 @@ return [
     'follow_empty_support' => 'Add your first appointment to start tracking',
     'memories_empty_headline' => 'No memories saved yet',
     'memories_empty_support' => 'Add an appointment and it will show up here once it passes',
+    'follow_empty_classifier' => 'Appointments dated today or later show up here.',
+    'memories_empty_classifier' => 'Past appointments are kept here as memories.',
+    'follow_empty_hint' => 'Tip: you can enter Hijri dates from the New screen.',
 
     // Search + sort
     'search_label' => 'Search',
