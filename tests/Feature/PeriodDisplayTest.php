@@ -636,6 +636,20 @@ class PeriodDisplayTest extends TestCase
             ->assertNotCalled('Share.Url');
     }
 
+    public function test_details_phrase_is_the_hero(): void
+    {
+        Setting::set('locale', 'en');
+
+        $randevu = Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDays(5)]);
+
+        // The relative phrase leads at 24pt; the title follows at 18pt.
+        Native::test(RandevuDetails::class, ['id' => $randevu->id])
+            ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === 'In 5 days')
+                && (($n['props']['font_size'] ?? null) == 24))
+            ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === 'Dentist')
+                && (($n['props']['font_size'] ?? null) == 18));
+    }
+
     public function test_details_duplicate_next_year_gregorian(): void
     {
         Setting::set('locale', 'en');

@@ -1116,6 +1116,15 @@ class RandevuScreensTest extends TestCase
             ->assertSet('year', (string) $date->year);
     }
 
+    public function test_follow_cards_use_token_radius(): void
+    {
+        Randevu::create(['title' => 'Dentist', 'occurs_on' => today()]);
+
+        // rounded-2xl resolves to the 16pt token radius (not an ignored class).
+        Native::test(Follow::class)
+            ->assertElement('pressable', fn ($n) => (($n['style']['border_radius'] ?? null) == 16));
+    }
+
     public function test_quick_set_chips_render_in_arabic(): void
     {
         Native::test(RandevuCreate::class)

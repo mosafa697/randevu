@@ -35,7 +35,7 @@
             <native:scroll-view class="w-full flex-1">
                 <native:column class="w-full p-4 gap-4">
                     @foreach($appointments as $index => $item)
-                        <native:pressable @navigate="'/details/'.$item['id']" class="w-full p-4 gap-3 rounded-[20px] bg-theme-surface border border-theme-outline-variant">
+                        <native:pressable @navigate="'/details/'.$item['id']" class="w-full p-4 gap-3 rounded-2xl bg-theme-surface border border-theme-outline-variant">
                             @if(!empty($item['cover']))
                                 <native:column class="w-full p-2">
                                     <native:image :src="$item['cover']" class="w-full rounded-xl" :height="160" :fit="2" />

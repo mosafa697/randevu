@@ -6,28 +6,28 @@
                     <native:text class="text-sm text-theme-on-surface-variant text-center">{{ __('randevu.dash_empty_support') }}</native:text>
                 </native:column>
             @else
-                <native:column class="w-full p-4 rounded-[20px] bg-theme-surface border border-theme-outline-variant items-center gap-1">
+                <native:column class="w-full p-4 rounded-2xl bg-theme-surface border border-theme-outline-variant items-center gap-1">
                     <native:text font="heading" class="text-4xl font-bold text-theme-on-surface">{{ $stats['total'] }}</native:text>
                     <native:text class="text-sm text-theme-on-surface-variant">{{ __('randevu.dash_total') }}</native:text>
                 </native:column>
 
                 <native:row class="w-full gap-4">
-                    <native:column class="flex-1 p-4 rounded-[20px] bg-theme-surface border border-theme-outline-variant items-center gap-1">
+                    <native:column class="flex-1 p-4 rounded-2xl bg-theme-surface border border-theme-outline-variant items-center gap-1">
                         <native:text font="heading" class="text-2xl font-bold text-theme-on-surface">{{ $stats['upcoming'] }}</native:text>
                         <native:text class="text-sm text-theme-on-surface-variant text-center">{{ __('randevu.dash_upcoming') }}</native:text>
                     </native:column>
-                    <native:column class="flex-1 p-4 rounded-[20px] bg-theme-surface border border-theme-outline-variant items-center gap-1">
+                    <native:column class="flex-1 p-4 rounded-2xl bg-theme-surface border border-theme-outline-variant items-center gap-1">
                         <native:text font="heading" class="text-2xl font-bold text-theme-on-surface">{{ $stats['memories'] }}</native:text>
                         <native:text class="text-sm text-theme-on-surface-variant text-center">{{ __('randevu.dash_memories') }}</native:text>
                     </native:column>
                 </native:row>
 
                 <native:row class="w-full gap-4">
-                    <native:column class="flex-1 p-4 rounded-[20px] bg-theme-surface border border-theme-outline-variant items-center gap-1">
+                    <native:column class="flex-1 p-4 rounded-2xl bg-theme-surface border border-theme-outline-variant items-center gap-1">
                         <native:text font="heading" class="text-2xl font-bold text-theme-on-surface">{{ $stats['today'] }}</native:text>
                         <native:text class="text-sm text-theme-on-surface-variant text-center">{{ __('randevu.dash_today') }}</native:text>
                     </native:column>
-                    <native:column class="flex-1 p-4 rounded-[20px] bg-theme-surface border border-theme-outline-variant items-center gap-1">
+                    <native:column class="flex-1 p-4 rounded-2xl bg-theme-surface border border-theme-outline-variant items-center gap-1">
                         <native:text font="heading" class="text-2xl font-bold text-theme-on-surface">{{ $stats['this_month'] }}</native:text>
                         <native:text class="text-sm text-theme-on-surface-variant text-center">{{ __('randevu.dash_this_month') }}</native:text>
                     </native:column>
@@ -35,7 +35,7 @@
 
                 <native:divider class="w-full" />
 
-                <native:column class="w-full p-4 rounded-[20px] bg-theme-surface border border-theme-outline-variant gap-1">
+                <native:column class="w-full p-4 rounded-2xl bg-theme-surface border border-theme-outline-variant gap-1">
                     <native:text font="heading" class="text-base font-bold text-theme-on-surface">{{ __('randevu.dash_split_headline') }}</native:text>
                     <native:text class="text-sm text-theme-on-surface-variant">{{ __('randevu.dash_split_support') }}</native:text>
                     @php
