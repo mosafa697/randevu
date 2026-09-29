@@ -5,6 +5,7 @@ namespace App\NativeComponents;
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
+use App\NativeComponents\Concerns\FiltersEntries;
 use App\Services\CoverImage;
 use App\Services\RandevuTime;
 use Illuminate\View\View;
@@ -14,6 +15,7 @@ class Memories extends NativeComponent
 {
     use AppliesLocale;
     use AppliesTheme;
+    use FiltersEntries;
 
     /** @var array<int,array<string,mixed>> */
     public array $memories = [];
@@ -32,7 +34,7 @@ class Memories extends NativeComponent
 
     public function refresh(): void
     {
-        $this->memories = Randevu::memories()->get()->map(fn (Randevu $r) => $this->present($r))->all();
+        $this->memories = $this->applyEntryFilters(Randevu::memories())->get()->map(fn (Randevu $r) => $this->present($r))->all();
     }
 
     /** @return array<string,mixed> */

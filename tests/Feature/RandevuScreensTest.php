@@ -929,4 +929,136 @@ class RandevuScreensTest extends TestCase
         Native::test(Follow::class)->assertMissingElement('scroll_view');
         Native::test(Memories::class)->assertMissingElement('scroll_view');
     }
+
+    public function test_follow_search_filters_by_title(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDays(5)]);
+        Randevu::create(['title' => 'Birthday', 'occurs_on' => today()->addDays(10)]);
+
+        $screen = Native::test(Follow::class)
+            ->assertSee('Search')
+            ->assertSee('Nearest')
+            ->assertSee('Newest')
+            ->assertSee('A–Z');
+
+        // One character is already enough to filter.
+        $screen->set('search', 'b')->assertSee('Birthday')->assertDontSee('Dentist');
+        $screen->set('search', 'dent')->assertSee('Dentist')->assertDontSee('Birthday');
+
+        // Clearing the search restores the full list.
+        $screen->set('search', '')->assertSee('Dentist')->assertSee('Birthday');
+    }
+
+    public function test_follow_search_no_matches_state_and_clear(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDays(5)]);
+
+        $screen = Native::test(Follow::class)
+            ->set('search', 'zzz');
+
+        $screen
+            ->assertSee('No matches')
+            ->assertSee('Try another word or clear the search')
+            ->assertDontSee('Dentist')
+            ->assertDontSee('Add your first randevu');
+
+        $screen->press('clearSearch')->assertSee('Dentist')->assertDontSee('No matches');
+    }
+
+    public function test_follow_sort_orders_entries(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(['title' => 'Mango', 'occurs_on' => today()->addDays(30)]);
+        Randevu::create(['title' => 'apple', 'occurs_on' => today()->addDays(5)]);
+        Randevu::create(['title' => 'Zebra', 'occurs_on' => today()->addDays(10)]);
+
+        $screen = Native::test(Follow::class);
+
+        $titles = fn () => array_column($screen->get('appointments'), 'title');
+
+        // Default: nearest first (the upcoming scope).
+        $this->assertSame(['apple', 'Zebra', 'Mango'], $titles());
+
+        $screen->press('sortByNewest');
+        $this->assertSame(['Zebra', 'apple', 'Mango'], $titles());
+
+        $screen->press('sortByAlpha');
+        $this->assertSame(['apple', 'Mango', 'Zebra'], $titles());
+
+        $screen->press('sortByNearest');
+        $this->assertSame(['apple', 'Zebra', 'Mango'], $titles());
+    }
+
+    public function test_follow_search_matches_percent_literally(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(['title' => '100% sure', 'occurs_on' => today()->addDays(5)]);
+        Randevu::create(['title' => '1000 ideas', 'occurs_on' => today()->addDays(6)]);
+
+        Native::test(Follow::class)
+            ->set('search', '100%')
+            ->assertSee('100% sure')
+            ->assertDontSee('1000 ideas');
+    }
+
+    public function test_blank_search_on_empty_list_shows_first_run_state(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(Follow::class)
+            ->set('search', '   ')
+            ->assertSee('Add your first randevu')
+            ->assertDontSee('No matches');
+    }
+
+    public function test_memories_search_and_sort(): void
+    {
+        Setting::set('locale', 'en');
+
+        // Newer date first on purpose: nearest and newest must disagree.
+        Randevu::create(['title' => 'Mango', 'occurs_on' => today()->subDays(5)]);
+        Randevu::create(['title' => 'apple', 'occurs_on' => today()->subDays(10)]);
+        Randevu::create(['title' => 'Zebra', 'occurs_on' => today()->subDays(40)]);
+
+        $screen = Native::test(Memories::class);
+
+        $titles = fn () => array_column($screen->get('memories'), 'title');
+
+        // Default: nearest to today first (the memories scope).
+        $this->assertSame(['Mango', 'apple', 'Zebra'], $titles());
+
+        $screen->set('search', 'app');
+        $this->assertSame(['apple'], $titles());
+
+        $screen->set('search', '');
+        $screen->press('sortByNewest');
+        $this->assertSame(['Zebra', 'apple', 'Mango'], $titles());
+
+        $screen->press('sortByAlpha');
+        $this->assertSame(['apple', 'Mango', 'Zebra'], $titles());
+    }
+
+    public function test_list_toolbar_renders_in_arabic(): void
+    {
+        Randevu::create(['title' => 'Dentist', 'occurs_on' => today()]);
+        Randevu::create(['title' => 'Old', 'occurs_on' => today()->subDay()]);
+
+        Native::test(Follow::class)
+            ->assertSee('دوّر')
+            ->assertSee('الأقرب')
+            ->assertSee('الأجدد')
+            ->assertSee('أبجدي');
+
+        Native::test(Memories::class)
+            ->assertSee('دوّر')
+            ->assertSee('الأقرب')
+            ->assertSee('الأجدد')
+            ->assertSee('أبجدي');
+    }
 }

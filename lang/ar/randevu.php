@@ -23,6 +23,16 @@ return [
     'memories_empty_headline' => 'لسه مفيش ذكريات محفوظة',
     'memories_empty_support' => 'ضيف ميعاد عشان يظهر هنا بعد ما يعدى',
 
+    // Search + sort
+    'search_label' => 'دوّر',
+    'search_placeholder' => 'دوّر بعنوان الميعاد…',
+    'search_clear' => 'امسح البحث',
+    'sort_nearest' => 'الأقرب',
+    'sort_newest' => 'الأجدد',
+    'sort_alpha' => 'أبجدي',
+    'no_matches_headline' => 'مفيش نتائج',
+    'no_matches_support' => 'جرّب كلمة تانية أو امسح البحث',
+
     // Buttons
     'new' => '+ جديد',
     'back' => 'رجوع',

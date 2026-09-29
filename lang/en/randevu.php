@@ -23,6 +23,16 @@ return [
     'memories_empty_headline' => 'No memories saved yet',
     'memories_empty_support' => 'Add an appointment and it will show up here once it passes',
 
+    // Search + sort
+    'search_label' => 'Search',
+    'search_placeholder' => 'Search by title…',
+    'search_clear' => 'Clear search',
+    'sort_nearest' => 'Nearest',
+    'sort_newest' => 'Newest',
+    'sort_alpha' => 'A–Z',
+    'no_matches_headline' => 'No matches',
+    'no_matches_support' => 'Try another word or clear the search',
+
     // Buttons
     'new' => '+ New',
     'back' => 'Back',
