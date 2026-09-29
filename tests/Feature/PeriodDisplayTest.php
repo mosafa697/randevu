@@ -11,6 +11,7 @@ use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
 use App\Services\AppTheme;
+use App\Services\CoverImage;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -583,5 +584,136 @@ class PeriodDisplayTest extends TestCase
             ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === $hijri->relativePhrase())
                 && (($n['style']['bg_color'] ?? null) === $accent)
                 && (($n['props']['color'] ?? null) === $onAccent));
+    }
+
+    public function test_details_share_sends_composed_text(): void
+    {
+        Setting::set('locale', 'en');
+
+        $randevu = Randevu::create(array_merge(
+            ['title' => 'Dentist', 'occurs_on' => today()->addDays(5), 'note' => 'Bring card'],
+            Randevu::hijriTriple(today()->addDays(5)->toDateString())
+        ));
+
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
+        $screen->press('shareRandevu');
+
+        $presented = $screen->get('randevu');
+        $expected = "Dentist\n{$presented['phrase']} — {$presented['absolute']} ({$presented['hijri']} هـ)\nBring card";
+
+        $screen->assertCalled(
+            'Share.Url',
+            fn ($p) => $p['title'] === 'Dentist' && $p['text'] === $expected && $p['url'] === ''
+        );
+    }
+
+    public function test_details_share_without_note_or_hijri(): void
+    {
+        Setting::set('locale', 'en');
+
+        $randevu = Randevu::create(['title' => 'Plain', 'occurs_on' => today()->addDays(5)]);
+
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
+        $screen->press('shareRandevu');
+
+        $presented = $screen->get('randevu');
+        $expected = "Plain\n{$presented['phrase']} — {$presented['absolute']}";
+
+        $screen->assertCalled(
+            'Share.Url',
+            fn ($p) => $p['title'] === 'Plain' && $p['text'] === $expected && $p['url'] === ''
+        );
+    }
+
+    public function test_details_share_missing_randevu_does_nothing(): void
+    {
+        Setting::set('locale', 'en');
+
+        // No share button renders for a missing row, so the guard is only
+        // reachable through a direct call — exactly what it defends.
+        Native::test(RandevuDetails::class, ['id' => 99999])
+            ->call('shareRandevu')
+            ->assertNotCalled('Share.Url');
+    }
+
+    public function test_details_duplicate_next_year_gregorian(): void
+    {
+        Setting::set('locale', 'en');
+
+        $tmp = tempnam(sys_get_temp_dir(), 'cover');
+        file_put_contents($tmp, 'cover-bytes');
+        $stored = CoverImage::store($tmp);
+
+        $randevu = Randevu::create([
+            'title' => 'Trip',
+            'occurs_on' => today()->addDays(40),
+            'occurs_time' => '14:30',
+            'note' => 'Pack light',
+            'color' => '#DB2777',
+            'cover_path' => $stored,
+            'show_years' => false,
+            'show_months' => false,
+            'show_days' => true,
+            'show_hours' => true,
+        ]);
+
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
+        $screen->press('duplicateNextYear');
+
+        $copy = Randevu::where('title', 'Trip')->where('id', '!=', $randevu->id)->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$copy->id);
+
+        $expectedDate = today()->addDays(40)->addYear()->toDateString();
+        $this->assertSame($expectedDate, $copy->occurs_on->toDateString());
+        $this->assertSame(Randevu::hijriTriple($expectedDate), [
+            'hijri_year' => $copy->hijri_year,
+            'hijri_month' => $copy->hijri_month,
+            'hijri_day' => $copy->hijri_day,
+        ]);
+        $this->assertSame('gregorian', $copy->entered_in);
+        $this->assertSame('14:30', $copy->occurs_time->format('H:i'));
+        $this->assertSame('Pack light', $copy->note);
+        $this->assertSame('#DB2777', $copy->color);
+        $this->assertFalse((bool) $copy->show_years);
+        $this->assertFalse((bool) $copy->show_months);
+        $this->assertTrue((bool) $copy->show_days);
+        $this->assertTrue((bool) $copy->show_hours);
+
+        // The copy owns its own cover file — same bytes, different ref.
+        $this->assertNotSame($stored, $copy->cover_path);
+        $this->assertFileExists(storage_path('app/'.$copy->cover_path));
+        $this->assertSame('cover-bytes', file_get_contents(storage_path('app/'.$copy->cover_path)));
+
+        @unlink($tmp);
+    }
+
+    public function test_details_duplicate_next_year_hijri(): void
+    {
+        Setting::set('locale', 'en');
+        $triple = Randevu::hijriTriple(today()->addDays(40)->toDateString());
+        [$gy, $gm, $gd] = RandevuHijri::toGregorian($triple['hijri_year'], $triple['hijri_month'], 15);
+
+        $randevu = Randevu::create(array_merge(
+            [
+                'title' => 'Hijri trip',
+                'occurs_on' => sprintf('%04d-%02d-%02d', $gy, $gm, $gd),
+                'entered_in' => 'hijri',
+            ],
+            ['hijri_year' => $triple['hijri_year'], 'hijri_month' => $triple['hijri_month'], 'hijri_day' => 15]
+        ));
+
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
+        $screen->press('duplicateNextYear');
+
+        $copy = Randevu::where('title', 'Hijri trip')->where('id', '!=', $randevu->id)->firstOrFail();
+        $screen->assertReplacedWith('/details/'.$copy->id);
+
+        [$ey, $em, $ed] = RandevuHijri::toGregorian($triple['hijri_year'] + 1, $triple['hijri_month'], 15);
+        $this->assertSame(sprintf('%04d-%02d-%02d', $ey, $em, $ed), $copy->occurs_on->toDateString());
+        $this->assertSame($triple['hijri_year'] + 1, $copy->hijri_year);
+        $this->assertSame($triple['hijri_month'], $copy->hijri_month);
+        $this->assertSame(15, $copy->hijri_day);
+        $this->assertSame('hijri', $copy->entered_in);
+        $this->assertNull($copy->cover_path);
     }
 }

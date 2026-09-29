@@ -55,5 +55,7 @@
         </native:column>
 
         <native:button :label="__('randevu.edit_cta')" @navigate="'/edit/'.$randevu['id']" />
+        <native:button :label="__('randevu.share_cta')" @press="shareRandevu" variant="ghost" />
+        <native:button :label="__('randevu.duplicate_cta')" @press="duplicateNextYear" variant="ghost" />
     @endif
 </native:column>

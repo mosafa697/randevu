@@ -9,6 +9,7 @@ use App\Services\CoverImage;
 use App\Services\RandevuTime;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
+use Native\Mobile\Facades\Share;
 
 /**
  * Read-only full view of one randevu. Cards link here; editing stays on
@@ -52,6 +53,35 @@ class RandevuDetails extends NativeComponent
         $this->show_full_cover = false;
     }
 
+    /** @press entry point — bare method only. */
+    public function shareRandevu(): void
+    {
+        if ($this->randevu === null) {
+            return;
+        }
+
+        $lines = [$this->randevu['title'], $this->randevu['phrase'].' — '.$this->randevu['absolute']];
+
+        if (! empty($this->randevu['hijri'])) {
+            $lines[1] .= ' ('.$this->randevu['hijri'].' هـ)';
+        }
+
+        if (! empty($this->randevu['note'])) {
+            $lines[] = $this->randevu['note'];
+        }
+
+        // No URL exists in this serverless app — the sheet shares text.
+        Share::url($this->randevu['title'], implode("\n", $lines), '');
+    }
+
+    /** @press entry point — bare method only. */
+    public function duplicateNextYear(): void
+    {
+        $copy = $this->findOrFail()->duplicateNextYear();
+
+        $this->replace('/details/'.$copy->id);
+    }
+
     public function refresh(): void
     {
         $randevu = Randevu::find($this->randevuId);
@@ -81,5 +111,10 @@ class RandevuDetails extends NativeComponent
     public function render(): View
     {
         return view('native.randevu-details');
+    }
+
+    private function findOrFail(): Randevu
+    {
+        return Randevu::findOrFail($this->randevuId);
     }
 }

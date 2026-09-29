@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CoverImage;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\Database\Eloquent\Builder;
@@ -168,5 +169,62 @@ class Randevu extends Model
     public function exactDayCount(): int
     {
         return RandevuTime::dayCount($this->occurs_on);
+    }
+
+    /**
+     * The "again next year" shift, resolved in the calendar the randevu
+     * was entered in: Gregorian entries move a Gregorian year ahead
+     * (Hijri re-derived); Hijri entries move a Hijri year ahead
+     * (Gregorian re-derived). The day clamps to the target month length
+     * both ways (Feb 29 → Feb 28; a 30-day Hijri month into 29).
+     *
+     * @return array{occurs_on: string, hijri_year: int, hijri_month: int, hijri_day: int, entered_in: string}
+     */
+    public function nextYearDates(): array
+    {
+        if ($this->entered_in === 'hijri' && $this->hijri_year !== null && $this->hijri_month !== null && $this->hijri_day !== null) {
+            $year = $this->hijri_year + 1;
+            $day = min($this->hijri_day, RandevuHijri::daysInMonth($year, $this->hijri_month));
+            [$gy, $gm, $gd] = RandevuHijri::toGregorian($year, $this->hijri_month, $day);
+
+            return [
+                'occurs_on' => sprintf('%04d-%02d-%02d', $gy, $gm, $gd),
+                'hijri_year' => $year,
+                'hijri_month' => $this->hijri_month,
+                'hijri_day' => $day,
+                'entered_in' => 'hijri',
+            ];
+        }
+
+        $month = $this->occurs_on->month;
+        $year = $this->occurs_on->year + 1;
+        $day = min($this->occurs_on->day, Carbon::create($year, $month, 1)->daysInMonth);
+        $date = sprintf('%04d-%02d-%02d', $year, $month, $day);
+
+        return array_merge(
+            ['occurs_on' => $date, 'entered_in' => $this->entered_in ?? 'gregorian'],
+            self::hijriTriple($date)
+        );
+    }
+
+    /**
+     * A copy of this randevu one year later: same title, time, note,
+     * color, units and a duplicated cover file (each copy owns its file,
+     * so deleting one never pulls it out from under the other), with
+     * both calendars shifted per nextYearDates().
+     */
+    public function duplicateNextYear(): static
+    {
+        return self::create(array_merge($this->nextYearDates(), [
+            'title' => $this->title,
+            'occurs_time' => $this->occurs_time?->format('H:i'),
+            'note' => $this->note,
+            'color' => $this->color,
+            'cover_path' => CoverImage::duplicate($this->cover_path),
+            'show_years' => $this->show_years,
+            'show_months' => $this->show_months,
+            'show_days' => $this->show_days,
+            'show_hours' => $this->show_hours,
+        ]));
     }
 }

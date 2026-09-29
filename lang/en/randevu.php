@@ -140,6 +140,8 @@ return [
     'kind_appointment' => 'Appointment',
     'kind_memory' => 'Memory',
     'edit_cta' => 'Edit',
+    'share_cta' => 'Share',
+    'duplicate_cta' => 'Again next year',
 
     // Per-appointment distance units
     'period_label' => 'Show distance as',

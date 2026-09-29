@@ -140,6 +140,8 @@ return [
     'kind_appointment' => 'ميعاد',
     'kind_memory' => 'ذكرى',
     'edit_cta' => 'عدّل',
+    'share_cta' => 'شارك',
+    'duplicate_cta' => 'عيدها السنة الجاية',
 
     // Per-appointment distance units
     'period_label' => 'إظهار المدة بـ',

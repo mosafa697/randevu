@@ -229,6 +229,41 @@ class CoverImage
     }
 
     /**
+     * Duplicate a stored cover so a copied row owns its own file —
+     * sharing one managed ref would let either row's forget() pull the
+     * file out from under the other. Raw (non-managed) paths pass
+     * through as-is; a missing file duplicates to null.
+     */
+    public static function duplicate(?string $value): ?string
+    {
+        $value = self::normalize($value);
+
+        if ($value === null || ! self::managed($value)) {
+            return $value;
+        }
+
+        $file = self::managedFile($value);
+
+        if ($file === null || ! is_file($file)) {
+            return null;
+        }
+
+        $dir = storage_path('app/'.self::COVERS_DIR);
+
+        if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {
+            return null;
+        }
+
+        $copy = $dir.'/'.Str::uuid()->toString().'.'.self::extensionFor($file);
+
+        if (! @copy($file, $copy)) {
+            return null;
+        }
+
+        return self::COVERS_DIR.'/'.basename($copy);
+    }
+
+    /**
      * Path safe to hand to `<native:image>` — null when unset or when the
      * file went missing (color-only fallback). Managed refs resolve against
      * the current `storage/app/` (survives container moves); absolute picks
