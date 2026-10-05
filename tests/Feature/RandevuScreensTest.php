@@ -322,6 +322,46 @@ class RandevuScreensTest extends TestCase
         $this->assertSame('New', $randevu->fresh()->title);
     }
 
+    public function test_create_prefills_today_with_values_present_in_options(): void
+    {
+        Setting::set('locale', 'en');
+
+        $screen = Native::test(RandevuCreate::class);
+        $today = today();
+
+        $this->assertSame((string) $today->day, $screen->get('day'));
+        $this->assertSame(RandevuTime::monthNames()[$today->month - 1], $screen->get('month'));
+        $this->assertSame((string) $today->year, $screen->get('year'));
+
+        // The prefilled value must be one of the dropdown options, or the
+        // native trigger cannot display/select it.
+        $this->assertContains($screen->get('day'), $screen->get('dayOptions'));
+        $this->assertContains($screen->get('month'), $screen->get('monthOptions'));
+        $this->assertContains($screen->get('year'), $screen->get('yearOptions'));
+        $this->assertContains($screen->get('h_day'), $screen->get('hDayOptions'));
+        $this->assertContains($screen->get('h_month'), $screen->get('hMonthOptions'));
+        $this->assertContains($screen->get('h_year'), $screen->get('hYearOptions'));
+
+        // Year lists are newest-first so the opened dropdown starts next to
+        // the current year instead of a century back.
+        $yearOptions = $screen->get('yearOptions');
+        $this->assertSame((string) ($today->year + 30), $yearOptions[0]);
+        $this->assertSame(30, array_search((string) $today->year, $yearOptions, true));
+    }
+
+    public function test_edit_prefill_matches_year_options(): void
+    {
+        Setting::set('locale', 'en');
+
+        $randevu = Randevu::create(['title' => 'Prefilled', 'occurs_on' => today()]);
+
+        $screen = Native::test(RandevuEdit::class, ['id' => $randevu->id]);
+
+        $this->assertSame((string) today()->year, $screen->get('year'));
+        $this->assertContains($screen->get('year'), $screen->get('yearOptions'));
+        $this->assertContains($screen->get('h_year'), $screen->get('hYearOptions'));
+    }
+
     public function test_edit_prefills_color_and_persists_changes(): void
     {
         $randevu = Randevu::create(['title' => 'Keep', 'occurs_on' => today(), 'color' => '#DB2777']);

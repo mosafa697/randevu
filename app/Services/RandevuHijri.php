@@ -74,12 +74,18 @@ class RandevuHijri
         return trim("{$day} {$name} {$year}");
     }
 
-    /** @return list<string> */
+    /**
+     * Newest-first, mirroring the Gregorian year list: the native
+     * dropdown opens at the top with no scroll-to-selection support,
+     * so the current Hijri year sits near the top.
+     *
+     * @return list<string>
+     */
     public static function yearOptions(): array
     {
         [$current] = self::fromGregorian((int) now()->year, (int) now()->month, (int) now()->day);
 
-        return array_map(strval(...), range($current - 100, $current + 30));
+        return array_map(strval(...), range($current + 30, $current - 100));
     }
 
     private static function gregorianToJd(int $year, int $month, int $day): int

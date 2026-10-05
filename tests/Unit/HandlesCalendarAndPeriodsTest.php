@@ -101,4 +101,28 @@ class HandlesCalendarAndPeriodsTest extends TestCase
             );
         });
     }
+
+    public function test_year_options_newest_first(): void
+    {
+        $year = (int) now()->year;
+        $options = RandevuCreate::yearOptions();
+
+        $this->assertCount(131, $options);
+        $this->assertSame((string) ($year + 30), $options[0]);
+        $this->assertSame((string) ($year - 100), $options[array_key_last($options)]);
+        // Current year near the top: the native dropdown opens at the top
+        // of the list with no scroll-to-selection support.
+        $this->assertSame(30, array_search((string) $year, $options, true));
+    }
+
+    public function test_hijri_year_options_newest_first(): void
+    {
+        [$current] = RandevuHijri::fromGregorian(now()->year, now()->month, now()->day);
+        $options = RandevuHijri::yearOptions();
+
+        $this->assertCount(131, $options);
+        $this->assertSame((string) ($current + 30), $options[0]);
+        $this->assertSame((string) ($current - 100), $options[array_key_last($options)]);
+        $this->assertSame(30, array_search((string) $current, $options, true));
+    }
 }

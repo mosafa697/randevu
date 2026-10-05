@@ -110,12 +110,19 @@ class RandevuCreate extends NativeComponent
         return array_map(strval(...), range(1, 31));
     }
 
-    /** @return list<string> */
+    /**
+     * Newest-first: the native dropdown opens at the top of the list with
+     * no scroll-to-selection support (4.5.2 Select API + renderers
+     * verified), so the current year sits near the top (index 30) instead
+     * of ~76% down an ascending century-long list.
+     *
+     * @return list<string>
+     */
     public static function yearOptions(): array
     {
         $year = now()->year;
 
-        return array_map(strval(...), range($year - 100, $year + 30));
+        return array_map(strval(...), range($year + 30, $year - 100));
     }
 
     /**
