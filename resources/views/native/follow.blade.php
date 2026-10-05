@@ -1,5 +1,4 @@
 <native:column class="w-full h-full bg-theme-background">
-    @php($rtl = \App\Services\AppLocale::isRtl())
     @if(count($appointments) === 0 && trim($search) === '')
         <native:column class="w-full flex-1 items-center justify-center gap-3 p-8">
             <native:text class="text-5xl text-theme-on-surface-variant">📅</native:text>
@@ -12,7 +11,7 @@
     @else
         <native:column class="w-full px-5 pt-3 gap-2">
             <native:outlined-text-input :label="__('randevu.search_label')" :placeholder="__('randevu.search_placeholder')" native:model="search" ios-leading-icon="magnifyingglass" android-leading-icon="search" />
-            @include('native.partials.segmented', ['name' => 'sort', 'selected' => $sort, 'rtl' => $rtl])
+            @include('native.partials.segmented', ['name' => 'sort', 'selected' => $sort])
         </native:column>
         @if(count($appointments) === 0)
             <native:column class="w-full flex-1 items-center justify-center gap-3 p-8">
@@ -28,7 +27,7 @@
                             <native:text font="label" class="text-sm text-theme-on-surface-variant">{{ __('randevu.today') }}</native:text>
                             @foreach($appointments as $index => $item)
                                 @if((bool) ($item['is_today'] ?? false))
-                                    @include('native.partials.randevu-card', ['item' => $item, 'index' => $index, 'rtl' => $rtl, 'badge' => true])
+                                    @include('native.partials.randevu-card', ['item' => $item, 'index' => $index, 'badge' => true])
                                 @endif
                             @endforeach
                         </native:column>
@@ -38,7 +37,7 @@
                             <native:text font="label" class="text-sm text-theme-on-surface-variant">{{ __('randevu.upcoming') }}</native:text>
                             @foreach($appointments as $index => $item)
                                 @if(!(bool) ($item['is_today'] ?? false))
-                                    @include('native.partials.randevu-card', ['item' => $item, 'index' => $index, 'rtl' => $rtl, 'badge' => true])
+                                    @include('native.partials.randevu-card', ['item' => $item, 'index' => $index, 'badge' => true])
                                 @endif
                             @endforeach
                         </native:column>

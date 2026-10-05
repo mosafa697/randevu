@@ -1,5 +1,4 @@
 <native:column class="w-full h-full bg-theme-background">
-    @php($rtl = \App\Services\AppLocale::isRtl())
     <native:scroll-view class="w-full h-full">
         <native:column class="w-full px-5 py-3 gap-6">
             @if(!$hasData)
@@ -42,31 +41,17 @@
                     <native:text font="heading" class="text-lg text-theme-on-surface leading-relaxed">{{ __('randevu.dash_split_headline') }}</native:text>
                     <native:text class="text-sm text-theme-on-surface-variant leading-relaxed">{{ __('randevu.dash_split_support') }}</native:text>
                     <native:row class="w-full items-center justify-center gap-6">
-                        @if($rtl)
-                            <native:column class="gap-2">
-                                <native:row class="gap-2 items-center">
-                                    <native:column class="w-3 h-3 rounded-sm bg-theme-primary" />
-                                    <native:text class="text-base text-theme-on-surface">{{ __('randevu.dash_gregorian') }} · {{ $gregorianCount }}</native:text>
-                                </native:row>
-                                <native:row class="gap-2 items-center">
-                                    <native:column class="w-3 h-3 rounded-sm bg-theme-accent" />
-                                    <native:text class="text-base text-theme-on-surface">{{ __('randevu.dash_hijri') }} · {{ $hijriCount }}</native:text>
-                                </native:row>
-                            </native:column>
-                            <native:webview class="w-28 h-28" :html="$this->splitDonutHtml()" />
-                        @else
-                            <native:webview class="w-28 h-28" :html="$this->splitDonutHtml()" />
-                            <native:column class="gap-2">
-                                <native:row class="gap-2 items-center">
-                                    <native:column class="w-3 h-3 rounded-sm bg-theme-primary" />
-                                    <native:text class="text-base text-theme-on-surface">{{ __('randevu.dash_gregorian') }} · {{ $gregorianCount }}</native:text>
-                                </native:row>
-                                <native:row class="gap-2 items-center">
-                                    <native:column class="w-3 h-3 rounded-sm bg-theme-accent" />
-                                    <native:text class="text-base text-theme-on-surface">{{ __('randevu.dash_hijri') }} · {{ $hijriCount }}</native:text>
-                                </native:row>
-                            </native:column>
-                        @endif
+                        <native:webview class="w-28 h-28" :html="$this->splitDonutHtml()" />
+                        <native:column class="gap-2">
+                            <native:row class="gap-2 items-center">
+                                <native:column class="w-3 h-3 rounded-sm bg-theme-primary" />
+                                <native:text class="text-base text-theme-on-surface">{{ __('randevu.dash_gregorian') }} · {{ $gregorianCount }}</native:text>
+                            </native:row>
+                            <native:row class="gap-2 items-center">
+                                <native:column class="w-3 h-3 rounded-sm bg-theme-accent" />
+                                <native:text class="text-base text-theme-on-surface">{{ __('randevu.dash_hijri') }} · {{ $hijriCount }}</native:text>
+                            </native:row>
+                        </native:column>
                     </native:row>
                 </native:column>
             @endif

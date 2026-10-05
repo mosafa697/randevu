@@ -829,20 +829,21 @@ class RandevuScreensTest extends TestCase
         $screen->assertElement('divider', fn ($n) => true);
     }
 
-    public function test_layout_mirrors_order_sensitive_rows_per_direction(): void
+    public function test_layout_keeps_identical_order_in_both_directions(): void
     {
         Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDay()]);
 
-        // Arabic (RTL): mirrored DOM order. Labels hardcoded: the test
-        // process locale is unreliable for __() here.
+        // Arabic (RTL): same canonical DOM order as English — structure
+        // never mirrors, only text content changes. Labels hardcoded: the
+        // test process locale is unreliable for __() here.
         $this->assertSame(
-            ['السنة', 'الشهر', 'اليوم'],
+            ['اليوم', 'الشهر', 'السنة'],
             $this->selectRowLabels(Native::test(RandevuCreate::class)->tree())
         );
-        $this->assertSame('English', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
-        $this->assertSame('webview', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
+        $this->assertSame('العربية', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
+        $this->assertSame('column', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
 
-        // English (LTR): source order.
+        // English (LTR): identical order.
         Setting::set('locale', 'en');
 
         $this->assertSame(
@@ -872,16 +873,16 @@ class RandevuScreensTest extends TestCase
         );
     }
 
-    public function test_period_chips_mirror_per_direction(): void
+    public function test_period_chips_keep_identical_order_in_both_directions(): void
     {
-        // Arabic (RTL): mirrored DOM order, hours first (rightmost). Labels
+        // Arabic (RTL): same canonical order (years first). Labels
         // hardcoded: the test process locale is unreliable for __() here.
         $this->assertSame(
-            ['ساعات', 'أيام', 'شهور', 'سنين'],
+            ['سنين', 'شهور', 'أيام', 'ساعات'],
             $this->chipRowLabels(Native::test(RandevuCreate::class)->tree())
         );
 
-        // English (LTR): source order.
+        // English (LTR): identical order.
         Setting::set('locale', 'en');
 
         $this->assertSame(

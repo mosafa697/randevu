@@ -25,11 +25,8 @@
                 </native:pressable>
             @endif
             <native:row class="w-full items-center justify-between">
-                @if($rtl && $randevu['is_today'])
-                    <native:badge :label="__('randevu.today')" variant="accent" />
-                @endif
                 <native:text font="heading" class="text-lg font-semibold text-theme-on-surface">{{ $randevu['title'] }}</native:text>
-                @if(!$rtl && $randevu['is_today'])
+                @if($randevu['is_today'])
                     <native:badge :label="__('randevu.today')" variant="accent" />
                 @endif
             </native:row>

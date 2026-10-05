@@ -11,43 +11,25 @@
                 <native:text class="text-sm text-theme-destructive">{{ $errors['title'] }}</native:text>
             @endif
 
-            @include('native.partials.segmented', ['name' => 'calendar', 'selected' => $calendar_mode, 'rtl' => $rtl])
+            @include('native.partials.segmented', ['name' => 'calendar', 'selected' => $calendar_mode])
 
             <native:row class="w-full gap-2">
-                @if($rtl)
-                    <native:button :label="__('randevu.quick_plus30')" variant="secondary" @press="setPlus30" class="flex-1 min-h-12" />
-                    <native:button :label="__('randevu.quick_plus7')" variant="secondary" @press="setPlus7" class="flex-1 min-h-12" />
-                    <native:button :label="__('randevu.quick_today')" variant="secondary" @press="setToday" class="flex-1 min-h-12" />
-                @else
-                    <native:button :label="__('randevu.quick_today')" variant="secondary" @press="setToday" class="flex-1 min-h-12" />
-                    <native:button :label="__('randevu.quick_plus7')" variant="secondary" @press="setPlus7" class="flex-1 min-h-12" />
-                    <native:button :label="__('randevu.quick_plus30')" variant="secondary" @press="setPlus30" class="flex-1 min-h-12" />
-                @endif
+                <native:button :label="__('randevu.quick_today')" variant="secondary" @press="setToday" class="flex-1 min-h-12" />
+                <native:button :label="__('randevu.quick_plus7')" variant="secondary" @press="setPlus7" class="flex-1 min-h-12" />
+                <native:button :label="__('randevu.quick_plus30')" variant="secondary" @press="setPlus30" class="flex-1 min-h-12" />
             </native:row>
 
             @if($calendar_mode === 'hijri')
                 <native:row class="w-full gap-2">
-                    @if($rtl)
-                        <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="flex-1" />
-                        <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="flex-1" />
-                        <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="flex-1" />
-                    @else
-                        <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="flex-1" />
-                        <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="flex-1" />
-                        <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="flex-1" />
-                    @endif
+                    <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="flex-1" />
+                    <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="flex-1" />
+                    <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="flex-1" />
                 </native:row>
             @else
                 <native:row class="w-full gap-2">
-                    @if($rtl)
-                        <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="flex-1" />
-                        <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="flex-1" />
-                        <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="flex-1" />
-                    @else
-                        <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="flex-1" />
-                        <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="flex-1" />
-                        <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="flex-1" />
-                    @endif
+                    <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="flex-1" />
+                    <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="flex-1" />
+                    <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="flex-1" />
                 </native:row>
             @endif
             @if(!empty($errors['occurs_on']))

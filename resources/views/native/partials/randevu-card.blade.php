@@ -3,7 +3,6 @@
     // block. Laravel pairs the first opener with the first closer it
     // finds anywhere in the file (even inside a comment), so a second
     // pair must never appear here.
-    $rtl = $rtl ?? \App\Services\AppLocale::isRtl();
     $accent = isset($item['color']) && is_string($item['color']) && preg_match('/^#[0-9A-Fa-f]{6}$/', $item['color']) ? $item['color'] : null;
     $isToday = (bool) ($item['is_today'] ?? false);
     $showBadge = (bool) ($badge ?? true);
@@ -26,15 +25,7 @@
         <native:image :src="$item['cover']" class="w-full rounded-xl" :height="160" :fit="2" />
     @endif
     <native:row class="w-full items-center gap-3">
-        @if($rtl)
-            @include('native.components.ring', [
-                'pct' => $item['pct'],
-                'days' => $item['days'],
-                'tier' => $item['tier'] ?? null,
-                'entered_in' => $item['entered_in'],
-                'index' => $index ?? 0,
-            ])
-        @elseif($accent !== null)
+        @if($accent !== null)
             <native:column :bg="$accent" class="w-1 rounded-full self-stretch" />
         @endif
         <native:column class="flex-1 gap-1">
@@ -55,18 +46,12 @@
                 <native:text class="text-sm px-3 py-1 rounded-full self-start {{ $pillClass }}">{{ $item['phrase'] }}</native:text>
             @endif
         </native:column>
-        @if($rtl)
-            @if($accent !== null)
-                <native:column :bg="$accent" class="w-1 rounded-full self-stretch" />
-            @endif
-        @else
-            @include('native.components.ring', [
-                'pct' => $item['pct'],
-                'days' => $item['days'],
-                'tier' => $item['tier'] ?? null,
-                'entered_in' => $item['entered_in'],
-                'index' => $index ?? 0,
-            ])
-        @endif
+        @include('native.components.ring', [
+            'pct' => $item['pct'],
+            'days' => $item['days'],
+            'tier' => $item['tier'] ?? null,
+            'entered_in' => $item['entered_in'],
+            'index' => $index ?? 0,
+        ])
     </native:row>
 </native:pressable>
