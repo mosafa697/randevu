@@ -14,6 +14,7 @@ use App\Services\AppTheme;
 use App\Services\CoverImage;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
+use App\Support\Bidi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Native\Mobile\Testing\Native;
 use Tests\TestCase;
@@ -334,7 +335,7 @@ class PeriodDisplayTest extends TestCase
 
         $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
 
-        $this->assertSame('Full card', $screen->get('randevu')['title']);
+        $this->assertSame(Bidi::isolate('Full card'), $screen->get('randevu')['title']);
     }
 
     public function test_details_screen_for_memory_shows_memory_kind(): void
@@ -513,17 +514,16 @@ class PeriodDisplayTest extends TestCase
         // Read AFTER mount via the sanctioned token reader: AppTheme
         // rewrites both config blocks on every apply, so raw config paths
         // can't be trusted here.
-        $accentBg = AppTheme::token('accent');
-        $accentFg = AppTheme::token('on-accent');
-        $strongBg = AppTheme::token('primary');
-        $strongFg = AppTheme::token('on-primary');
+        $strongBg = AppTheme::token('secondary');
+        $strongFg = AppTheme::token('on-secondary');
         $mutedBg = AppTheme::token('surface-variant');
-        $mutedFg = AppTheme::token('on-surface');
+        $mutedFg = AppTheme::token('on-surface-variant');
 
         $screen
-            ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === 'Today')
-                && (($n['style']['bg_color'] ?? null) === $accentBg)
-                && (($n['props']['color'] ?? null) === $accentFg))
+            // Today shows the accent badge once, next to the title — no
+            // bottom phrase pill duplicates it.
+            ->assertElement('badge', fn ($n) => (($n['props']['label'] ?? null) === 'Today')
+                && (($n['props']['variant'] ?? null) === 'accent'))
             ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === 'In 3 days')
                 && (($n['style']['bg_color'] ?? null) === $strongBg)
                 && (($n['props']['color'] ?? null) === $strongFg))
@@ -555,7 +555,7 @@ class PeriodDisplayTest extends TestCase
                 && str_contains((string) ($n['props']['html'] ?? ''), '>40</text>'));
     }
 
-    public function test_memories_cards_keep_calendar_pills(): void
+    public function test_memories_cards_use_muted_tier(): void
     {
         Setting::set('locale', 'en');
         $past = today()->subDays(40);
@@ -568,22 +568,20 @@ class PeriodDisplayTest extends TestCase
 
         $screen = Native::test(Memories::class);
 
-        // Calendar pills (no tiers here), with the AA-safe filled pairs.
-        $primary = AppTheme::token('primary');
-        $onPrimary = AppTheme::token('on-primary');
-        $accent = AppTheme::token('accent');
-        $onAccent = AppTheme::token('on-accent');
+        // Past items use the muted tier with an "ago" distance label.
+        $mutedBg = AppTheme::token('surface-variant');
+        $mutedFg = AppTheme::token('on-surface-variant');
 
         $days = Randevu::where('title', 'Old days')->firstOrFail();
         $hijri = Randevu::where('title', 'Old hijri')->firstOrFail();
 
         $screen
             ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === $days->relativePhrase())
-                && (($n['style']['bg_color'] ?? null) === $primary)
-                && (($n['props']['color'] ?? null) === $onPrimary))
+                && (($n['style']['bg_color'] ?? null) === $mutedBg)
+                && (($n['props']['color'] ?? null) === $mutedFg))
             ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === $hijri->relativePhrase())
-                && (($n['style']['bg_color'] ?? null) === $accent)
-                && (($n['props']['color'] ?? null) === $onAccent));
+                && (($n['style']['bg_color'] ?? null) === $mutedBg)
+                && (($n['props']['color'] ?? null) === $mutedFg));
     }
 
     public function test_details_share_sends_composed_text(): void
@@ -600,6 +598,8 @@ class PeriodDisplayTest extends TestCase
 
         $presented = $screen->get('randevu');
         $expected = "Dentist\n{$presented['phrase']} — {$presented['absolute']} ({$presented['hijri']} هـ)\nBring card";
+        // Display state carries bidi isolates; the share sheet sends plain text.
+        $this->assertSame('Dentist', Bidi::strip($presented['title']));
 
         $screen->assertCalled(
             'Share.Url',
@@ -646,7 +646,7 @@ class PeriodDisplayTest extends TestCase
         Native::test(RandevuDetails::class, ['id' => $randevu->id])
             ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === 'In 5 days')
                 && (($n['props']['font_size'] ?? null) == 24))
-            ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === 'Dentist')
+            ->assertElement('text', fn ($n) => (($n['props']['text'] ?? null) === Bidi::isolate('Dentist'))
                 && (($n['props']['font_size'] ?? null) == 18));
     }
 

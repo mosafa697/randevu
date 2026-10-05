@@ -60,18 +60,19 @@ class RandevuDetails extends NativeComponent
             return;
         }
 
-        $lines = [$this->randevu['title'], $this->randevu['phrase'].' — '.$this->randevu['absolute']];
+        // Display state carries bidi isolates — strip them for plain-text share.
+        $lines = [\App\Support\Bidi::strip($this->randevu['title']), $this->randevu['phrase'].' — '.$this->randevu['absolute']];
 
         if (! empty($this->randevu['hijri'])) {
             $lines[1] .= ' ('.$this->randevu['hijri'].' هـ)';
         }
 
         if (! empty($this->randevu['note'])) {
-            $lines[] = $this->randevu['note'];
+            $lines[] = \App\Support\Bidi::strip($this->randevu['note']);
         }
 
         // No URL exists in this serverless app — the sheet shares text.
-        Share::url($this->randevu['title'], implode("\n", $lines), '');
+        Share::url(\App\Support\Bidi::strip($this->randevu['title']), implode("\n", $lines), '');
     }
 
     /** @press entry point — bare method only. */
@@ -94,7 +95,7 @@ class RandevuDetails extends NativeComponent
 
         $this->randevu = [
             'id' => $randevu->id,
-            'title' => $randevu->title,
+            'title' => \App\Support\Bidi::isolate($randevu->title),
             'occurs_on' => $randevu->occurs_on->toDateString(),
             'absolute' => RandevuTime::absolute($randevu->occurs_on),
             'hijri' => $randevu->hijriLabel(),
@@ -102,7 +103,7 @@ class RandevuDetails extends NativeComponent
             'exact' => RandevuTime::exactSuffix($randevu->exactDayCount()),
             'is_appointment' => $randevu->isAppointment(),
             'is_today' => $randevu->isToday(),
-            'note' => $randevu->note,
+            'note' => \App\Support\Bidi::isolate($randevu->note),
             'color' => $randevu->color,
             'cover' => CoverImage::src($randevu->cover_path),
         ];

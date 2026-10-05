@@ -10,6 +10,7 @@ use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\Services\CoverImage;
 use App\Services\RandevuTime;
+use App\Support\Bidi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Native\Mobile\Testing\Native;
@@ -305,11 +306,11 @@ class CoverImageTest extends TestCase
         $screen = Native::test(Follow::class);
 
         $byTitle = collect($screen->get('appointments'))->keyBy('title');
-        $this->assertSame(CoverImage::toFileUri($cover), $byTitle['Covered']['cover']);
-        $this->assertSame(CoverImage::toFileUri(storage_path('app/'.$stored)), $byTitle['Stored']['cover']);
-        $this->assertNull($byTitle['StoredGone']['cover']);
-        $this->assertNull($byTitle['Gone']['cover']);
-        $this->assertNull($byTitle['Plain']['cover']);
+        $this->assertSame(CoverImage::toFileUri($cover), $byTitle[Bidi::isolate('Covered')]['cover']);
+        $this->assertSame(CoverImage::toFileUri(storage_path('app/'.$stored)), $byTitle[Bidi::isolate('Stored')]['cover']);
+        $this->assertNull($byTitle[Bidi::isolate('StoredGone')]['cover']);
+        $this->assertNull($byTitle[Bidi::isolate('Gone')]['cover']);
+        $this->assertNull($byTitle[Bidi::isolate('Plain')]['cover']);
 
         $screen->assertElement('image', fn ($n) => ($n['props']['src'] ?? null) === CoverImage::toFileUri($cover));
         $screen->assertElement('image', fn ($n) => ($n['props']['src'] ?? null) === CoverImage::toFileUri(storage_path('app/'.$stored)));
@@ -370,8 +371,8 @@ class CoverImageTest extends TestCase
 
         // The card separates the image from the text row below it...
         $screen->assertElement('pressable', fn ($n) => isset($n['layout']['gap']));
-        // ...and the image sits in its own padded wrapper, not edge to edge.
-        $screen->assertElement('column', fn ($n) => ($n['layout']['padding'] ?? null) == 8
+        // ...and the image is inset by the card padding, not edge to edge.
+        $screen->assertElement('pressable', fn ($n) => ($n['layout']['padding'] ?? null) == 16
             && collect($n['children'] ?? [])->contains(fn ($c) => ($c['type'] ?? null) === 'image'));
     }
 

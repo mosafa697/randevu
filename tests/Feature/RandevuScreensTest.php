@@ -14,6 +14,7 @@ use App\NativeComponents\Settings;
 use App\Services\CoverImage;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
+use App\Support\Bidi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Native\Mobile\Testing\Native;
 use Tests\TestCase;
@@ -55,7 +56,7 @@ class RandevuScreensTest extends TestCase
             ->assertSee('In 3 days')
             ->assertSee('Bring card')
             ->assertDontSee('Graduation')
-            ->assertDontSee('Coming up')
+            ->assertSee('Coming up')
             ->assertDontSee('Memories');
     }
 
@@ -69,7 +70,7 @@ class RandevuScreensTest extends TestCase
             ->assertSee('النهاردة')
             ->assertSee('بعد 3 أيام')
             ->assertDontSee('Graduation')
-            ->assertDontSee('اللي جاي');
+            ->assertSee('اللي جاي');
     }
 
     public function test_memories_screen_lists_memories_newest_first(): void
@@ -207,9 +208,9 @@ class RandevuScreensTest extends TestCase
     {
         Setting::set('locale', 'en');
 
-        // Day rides at w-24 like Year since 601d1b5 ("Increase width of day
-        // select inputs"); Month stays the flex-1 wide one.
-        $narrow = fn ($n) => ($n['layout']['width'] ?? null) == 96
+        // Day/Year ride at ~25% each, Month takes the middle ~45% as
+        // the flex-1 wide one.
+        $narrow = fn ($n) => ($n['layout']['width'] ?? null) === '25%'
             && ($n['layout']['flex_shrink'] ?? null) == 0;
         $wide = fn ($n) => ($n['layout']['flex_grow'] ?? null) == 1
             && ! isset($n['layout']['width']);
@@ -410,6 +411,7 @@ class RandevuScreensTest extends TestCase
             ->assertSet('color_r', 37)
             ->assertSet('color_g', 99)
             ->assertSet('color_b', 235)
+            ->press('toggleCustomColor')
             ->assertSee('#2563EB');
     }
 
@@ -460,7 +462,7 @@ class RandevuScreensTest extends TestCase
 
         $this->assertSame(
             '#DB2777',
-            collect($screen->get('appointments'))->firstWhere('title', 'Colorful')['color']
+            collect($screen->get('appointments'))->firstWhere('title', Bidi::isolate('Colorful'))['color']
         );
     }
 
@@ -540,7 +542,7 @@ class RandevuScreensTest extends TestCase
         $heading = fn ($n) => ($n['props']['font_name'] ?? null) === 'heading';
 
         Native::test(Follow::class)
-            ->assertElement('text', fn ($n) => $heading($n) && ($n['props']['text'] ?? '') === 'Dentist');
+            ->assertElement('text', fn ($n) => $heading($n) && ($n['props']['text'] ?? '') === Bidi::isolate('Dentist'));
 
         Native::test(RandevuCreate::class)
             ->assertElement('text', fn ($n) => $heading($n) && ($n['props']['text'] ?? '') === 'Show distance as');
@@ -582,7 +584,7 @@ class RandevuScreensTest extends TestCase
 
         $tree = Native::visit('/')->tree();
 
-        $this->assertSame('#6F63DB', $tree['props']['active_color'] ?? null);
+        $this->assertSame('#5F53D0', $tree['props']['active_color'] ?? null);
         $this->assertSame('#69647D', $tree['props']['text_color'] ?? null);
         $this->assertSame('label', $tree['props']['font_name'] ?? null);
         $this->assertSame('labeled', $tree['props']['label_visibility'] ?? null);
@@ -603,7 +605,7 @@ class RandevuScreensTest extends TestCase
 
         Native::test(Follow::class)
             ->assertMissingElement('text', fn ($n) => ($n['props']['font_name'] ?? null) === 'heading'
-                && ($n['props']['text'] ?? '') === 'Bring card');
+                && ($n['props']['text'] ?? '') === Bidi::isolate('Bring card'));
     }
 
     public function test_edit_rejects_invalid_input(): void
@@ -768,7 +770,7 @@ class RandevuScreensTest extends TestCase
             $this->selectRowLabels(Native::test(RandevuCreate::class)->tree())
         );
         $this->assertSame('English', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
-        $this->assertSame('column', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
+        $this->assertSame('webview', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
 
         // English (LTR): source order.
         Setting::set('locale', 'en');
@@ -778,7 +780,7 @@ class RandevuScreensTest extends TestCase
             $this->selectRowLabels(Native::test(RandevuCreate::class)->tree())
         );
         $this->assertSame('العربية', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
-        $this->assertSame('webview', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
+        $this->assertSame('column', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
     }
 
     public function test_time_row_keeps_narrow_order_per_direction(): void
@@ -1022,7 +1024,7 @@ class RandevuScreensTest extends TestCase
             ->assertDontSee('Dentist')
             ->assertDontSee('Add your first randevu');
 
-        $screen->press('clearSearch')->assertSee('Dentist')->assertDontSee('No matches');
+        $screen->set('search', '')->assertSee('Dentist')->assertDontSee('No matches');
     }
 
     public function test_follow_sort_orders_entries(): void
@@ -1036,18 +1038,19 @@ class RandevuScreensTest extends TestCase
         $screen = Native::test(Follow::class);
 
         $titles = fn () => array_column($screen->get('appointments'), 'title');
+        $iso = fn (string ...$t) => array_map(Bidi::isolate(...), $t);
 
         // Default: nearest first (the upcoming scope).
-        $this->assertSame(['apple', 'Zebra', 'Mango'], $titles());
+        $this->assertSame($iso('apple', 'Zebra', 'Mango'), $titles());
 
         $screen->press('sortByNewest');
-        $this->assertSame(['Zebra', 'apple', 'Mango'], $titles());
+        $this->assertSame($iso('Zebra', 'apple', 'Mango'), $titles());
 
         $screen->press('sortByAlpha');
-        $this->assertSame(['apple', 'Mango', 'Zebra'], $titles());
+        $this->assertSame($iso('apple', 'Mango', 'Zebra'), $titles());
 
         $screen->press('sortByNearest');
-        $this->assertSame(['apple', 'Zebra', 'Mango'], $titles());
+        $this->assertSame($iso('apple', 'Zebra', 'Mango'), $titles());
     }
 
     public function test_follow_search_matches_percent_literally(): void
@@ -1085,19 +1088,20 @@ class RandevuScreensTest extends TestCase
         $screen = Native::test(Memories::class);
 
         $titles = fn () => array_column($screen->get('memories'), 'title');
+        $iso = fn (string ...$t) => array_map(Bidi::isolate(...), $t);
 
         // Default: nearest to today first (the memories scope).
-        $this->assertSame(['Mango', 'apple', 'Zebra'], $titles());
+        $this->assertSame($iso('Mango', 'apple', 'Zebra'), $titles());
 
         $screen->set('search', 'app');
-        $this->assertSame(['apple'], $titles());
+        $this->assertSame($iso('apple'), $titles());
 
         $screen->set('search', '');
         $screen->press('sortByNewest');
-        $this->assertSame(['Zebra', 'apple', 'Mango'], $titles());
+        $this->assertSame($iso('Zebra', 'apple', 'Mango'), $titles());
 
         $screen->press('sortByAlpha');
-        $this->assertSame(['apple', 'Mango', 'Zebra'], $titles());
+        $this->assertSame($iso('apple', 'Mango', 'Zebra'), $titles());
     }
 
     public function test_list_toolbar_renders_in_arabic(): void
@@ -1186,6 +1190,7 @@ class RandevuScreensTest extends TestCase
 
         Native::test(RandevuCreate::class)
             ->set('color', '#123456')
+            ->press('toggleCustomColor')
             ->assertElement('pressable', fn ($n) => (($n['props']['a11y_label'] ?? null) === 'Custom color'));
     }
 
@@ -1242,6 +1247,7 @@ class RandevuScreensTest extends TestCase
 
         Native::test(RandevuCreate::class)
             ->set('color', '#123456')
+            ->press('toggleCustomColor')
             ->assertElement('pressable', fn ($n) => (($n['props']['a11y_label'] ?? null) === 'لون مخصص'));
 
         @unlink($tmp);

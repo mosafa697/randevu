@@ -44,12 +44,12 @@ class Follow extends NativeComponent
 
         return [
             'id' => $randevu->id,
-            'title' => $randevu->title,
+            'title' => \App\Support\Bidi::isolate($randevu->title),
             'occurs_on' => $randevu->occurs_on->toDateString(),
             'absolute' => RandevuTime::absolute($randevu->occurs_on),
             'hijri' => $randevu->hijriLabel(),
             'phrase' => $randevu->relativePhrase(),
-            'note' => $randevu->note,
+            'note' => \App\Support\Bidi::isolate($randevu->note === null ? null : \Illuminate\Support\Str::limit($randevu->note, 140)),
             'color' => $randevu->color,
             'cover' => CoverImage::src($randevu->cover_path),
             'is_today' => $randevu->isToday(),
