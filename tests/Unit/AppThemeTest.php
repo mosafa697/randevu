@@ -93,7 +93,7 @@ class AppThemeTest extends TestCase
         AppTheme::persist('dark');
 
         $this->assertSame('#14142A', AppTheme::token('background'));
-        $this->assertSame('#F3F1FB', AppTheme::token('on-background'));
+        $this->assertSame('#E8E5F6', AppTheme::token('on-background'));
         $this->assertSame('#FBF9F4', AppTheme::token('missing', '#FBF9F4'));
 
         AppTheme::persist('light');

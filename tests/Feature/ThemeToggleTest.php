@@ -31,7 +31,7 @@ class ThemeToggleTest extends TestCase
         $this->assertNull($this->actionIcon($tree));
         $this->assertSame('#FBF9F4', $this->chromeProp($tree, 'nav_background_color'));
         $this->assertSame('#2B2740', $this->chromeProp($tree, 'nav_text_color'));
-        $this->assertSame('#6F63DB', $this->chromeProp($tree, 'active_color'));
+        $this->assertSame('#5F53D0', $this->chromeProp($tree, 'active_color'));
         $this->assertSame('#69647D', $this->chromeProp($tree, 'text_color'));
         $this->assertSame('label', $this->chromeProp($tree, 'font_name'));
         $this->assertSame('heading', $this->chromeProp($tree, 'nav_font_name'));
@@ -44,10 +44,10 @@ class ThemeToggleTest extends TestCase
         $this->assertSame('#14142A', $this->effectiveBackground($tree));
         $this->assertNull($this->actionIcon($tree));
         $this->assertSame('#14142A', $this->chromeProp($tree, 'nav_background_color'));
-        $this->assertSame('#F3F1FB', $this->chromeProp($tree, 'nav_text_color'));
+        $this->assertSame('#E8E5F6', $this->chromeProp($tree, 'nav_text_color'));
         $this->assertTrue($this->chromeProp($tree, 'dark'));
-        $this->assertSame('#8E8AB5', $this->chromeProp($tree, 'text_color'));
-        $this->assertSame('#9C90F5', $this->chromeProp($tree, 'active_color'));
+        $this->assertSame('#A19EC6', $this->chromeProp($tree, 'text_color'));
+        $this->assertSame('#9488EF', $this->chromeProp($tree, 'active_color'));
 
         // dark → light: the authored light palette returns.
         Native::test(Settings::class)->press('useLight');

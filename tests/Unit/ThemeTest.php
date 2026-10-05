@@ -8,8 +8,10 @@ class ThemeTest extends TestCase
 {
     /** @var list<string> */
     private const TOKENS = [
-        'primary', 'on-primary', 'primary-soft',
-        'accent', 'on-accent', 'accent-soft',
+        'primary', 'on-primary', 'primary-soft', 'primary-on-soft',
+        'secondary', 'on-secondary',
+        'accent', 'on-accent', 'accent-soft', 'accent-text',
+        'field-border',
         'surface', 'on-surface', 'background', 'on-background',
         'surface-variant', 'on-surface-variant',
         'outline', 'outline-variant', 'progress-track',
@@ -30,8 +32,8 @@ class ThemeTest extends TestCase
 
     public function test_brand_primary_is_randevu_violet(): void
     {
-        $this->assertSame('#6F63DB', config('native-ui.authored-theme.light.primary'));
-        $this->assertSame('#9C90F5', config('native-ui.authored-theme.dark.primary'));
+        $this->assertSame('#5F53D0', config('native-ui.authored-theme.light.primary'));
+        $this->assertSame('#9488EF', config('native-ui.authored-theme.dark.primary'));
     }
 
     public function test_accent_is_hijri_amber(): void
@@ -44,6 +46,23 @@ class ThemeTest extends TestCase
     {
         $this->assertSame('#14142A', config('native-ui.authored-theme.dark.background'));
         $this->assertSame('#1E1E3A', config('native-ui.authored-theme.dark.surface'));
+    }
+
+    public function test_new_aa_tokens_exist_in_both_modes(): void
+    {
+        $this->assertSame('#9A4F0E', config('native-ui.authored-theme.light.accent-text'));
+        $this->assertSame('#F0A868', config('native-ui.authored-theme.dark.accent-text'));
+        $this->assertSame('#8B869E', config('native-ui.authored-theme.light.field-border'));
+        $this->assertSame('#6F6C98', config('native-ui.authored-theme.dark.field-border'));
+        $this->assertSame('#5348C2', config('native-ui.authored-theme.light.primary-on-soft'));
+        $this->assertSame('#A79DFF', config('native-ui.authored-theme.dark.primary-on-soft'));
+    }
+
+    public function test_reduced_glare_dark_on_colors(): void
+    {
+        $this->assertSame('#E8E5F6', config('native-ui.authored-theme.dark.on-surface'));
+        $this->assertSame('#E8E5F6', config('native-ui.authored-theme.dark.on-background'));
+        $this->assertSame('#A19EC6', config('native-ui.authored-theme.dark.on-surface-variant'));
     }
 
     public function test_amiri_is_body_font_with_amiri_bold_headings(): void
