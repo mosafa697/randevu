@@ -703,6 +703,55 @@ class RandevuScreensTest extends TestCase
             ->assertSee('AH');
     }
 
+    public function test_back_buttons_use_directional_chevron_per_language(): void
+    {
+        // Arabic (RTL): the back chevron points forward (truly directional).
+        Native::test(RandevuCreate::class)->assertSee('› رجوع');
+
+        $randevu = Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDay()]);
+        Native::test(RandevuDetails::class, ['id' => $randevu->id])->assertSee('› رجوع');
+
+        // English (LTR): same ghost button, chevron flipped.
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)->assertSee('‹ Back');
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])->assertSee('‹ Back');
+        Native::test(RandevuDetails::class, ['id' => $randevu->id])->assertSee('‹ Back');
+    }
+
+    public function test_action_buttons_are_full_width_with_touch_target(): void
+    {
+        $randevu = Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDay()]);
+
+        // Details actions stretch full width so AR/EN label lengths can't
+        // change the button look; every button keeps the 48pt touch target.
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
+
+        foreach (['edit_cta', 'share_cta', 'duplicate_cta'] as $key) {
+            $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === __('randevu.'.$key)
+                && ($n['layout']['width'] ?? '') === 'fill'
+                && isset($n['layout']['min_height']));
+        }
+
+        // Empty-state CTA (Memories is empty here): full width + touch
+        // target, identical in both languages.
+        Native::test(Memories::class)->assertElement('button', fn ($n) => ($n['layout']['width'] ?? '') === 'fill'
+            && isset($n['layout']['min_height']));
+    }
+
+    public function test_back_buttons_keep_minimum_width(): void
+    {
+        // "‹ Back" vs "› رجوع" differ in length: min-w-24 (96pt) covers
+        // both, so the ghost back button never changes size per language.
+        Native::test(RandevuCreate::class)->assertElement('button', fn ($n) => ($n['layout']['min_width'] ?? 0) == 96
+            && isset($n['layout']['min_height']));
+
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)->assertElement('button', fn ($n) => ($n['layout']['min_width'] ?? 0) == 96
+            && isset($n['layout']['min_height']));
+    }
+
     public function test_settings_switches_language_and_persists(): void
     {
         $screen = Native::test(Settings::class)

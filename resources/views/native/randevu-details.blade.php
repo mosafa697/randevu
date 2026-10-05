@@ -2,7 +2,7 @@
     @php($rtl = \App\Services\AppLocale::isRtl())
     @if($randevu === null || !($show_full_cover && !empty($randevu['cover'])))
         <native:row class="w-full">
-            <native:button :label="__('randevu.back')" @navigate.back />
+            <native:button :label="$rtl ? '› '.__('randevu.back') : '‹ '.__('randevu.back')" variant="ghost" @navigate.back class="min-h-12 min-w-24" />
         </native:row>
     @endif
 
@@ -13,7 +13,7 @@
             <native:scroll-view class="w-full h-full">
                 <native:column class="w-full p-4 gap-4 items-center">
                     <native:image :src="$randevu['cover']" :alt="__('randevu.cover_alt')" class="w-full rounded-2xl" :height="560" :fit="1" />
-                    <native:button :label="__('randevu.cover_close')" @press="closeCover" class="w-full" />
+                    <native:button :label="__('randevu.cover_close')" @press="closeCover" class="w-full min-h-12" />
                 </native:column>
             </native:scroll-view>
         </native:column>
@@ -54,8 +54,8 @@
             @endif
         </native:column>
 
-        <native:button :label="__('randevu.edit_cta')" @navigate="'/edit/'.$randevu['id']" />
-        <native:button :label="__('randevu.share_cta')" @press="shareRandevu" variant="ghost" />
-        <native:button :label="__('randevu.duplicate_cta')" @press="duplicateNextYear" variant="ghost" />
+        <native:button :label="__('randevu.edit_cta')" @navigate="'/edit/'.$randevu['id']" class="w-full min-h-12" />
+        <native:button :label="__('randevu.share_cta')" @press="shareRandevu" variant="ghost" class="w-full min-h-12" />
+        <native:button :label="__('randevu.duplicate_cta')" @press="duplicateNextYear" variant="ghost" class="w-full min-h-12" />
     @endif
 </native:column>

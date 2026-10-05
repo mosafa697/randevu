@@ -66,7 +66,7 @@
     </native:pressable>
 </native:row>
 
-<native:button :label="$show_custom_color ? __('randevu.color_custom_hide') : __('randevu.color_custom_label')" variant="ghost" @press="toggleCustomColor" class="min-h-12" />
+<native:button :label="$show_custom_color ? __('randevu.color_custom_hide') : __('randevu.color_custom_label')" variant="ghost" @press="toggleCustomColor" class="w-full min-h-12" />
 
 @if($show_custom_color)
     <native:row class="w-full gap-3 items-center">

@@ -1,7 +1,7 @@
 <native:column class="w-full h-full bg-theme-background">
     @php($rtl = \App\Services\AppLocale::isRtl())
     <native:row class="w-full px-5 pt-3">
-        <native:button :label="$rtl ? '› '.__('randevu.back') : '‹ '.__('randevu.back')" variant="ghost" @navigate.back />
+        <native:button :label="$rtl ? '› '.__('randevu.back') : '‹ '.__('randevu.back')" variant="ghost" @navigate.back class="min-h-12 min-w-24" />
     </native:row>
 
     <native:scroll-view class="w-full flex-1">

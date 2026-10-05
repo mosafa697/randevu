@@ -7,7 +7,7 @@
             <native:text class="text-sm text-theme-on-surface-variant text-center leading-relaxed">{{ __('randevu.follow_empty_support') }}</native:text>
             <native:text class="text-sm text-theme-on-surface-variant text-center leading-relaxed">{{ __('randevu.follow_empty_classifier') }}</native:text>
             <native:text class="text-sm text-theme-on-surface-variant text-center leading-relaxed">{{ __('randevu.follow_empty_hint') }}</native:text>
-            <native:button :label="__('randevu.empty_cta')" font="label" @navigate="'/create'" />
+            <native:button :label="__('randevu.empty_cta')" font="label" @navigate="'/create'" class="w-full min-h-12" />
         </native:column>
     @else
         <native:column class="w-full px-5 pt-3 gap-2">
