@@ -16,6 +16,7 @@ use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use App\Support\Bidi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Native\Mobile\Testing\Native;
 use Tests\TestCase;
 
@@ -144,24 +145,29 @@ class PeriodDisplayTest extends TestCase
 
     public function test_create_without_time_stores_null_time(): void
     {
-        Setting::set('locale', 'en');
-        $date = today()->addDays(40);
+        // Pinned clock: Sep 4 + 40 days = Oct 14, an exact 1 month + 10
+        // days breakdown. Floating today() drifts (e.g. Oct 5 + 40 = Nov
+        // 14 → 1 month, 9 days) and breaks the hardcoded expectation.
+        $this->travelTo(Carbon::parse('2026-09-04'), function (): void {
+            Setting::set('locale', 'en');
+            $date = today()->addDays(40);
 
-        $screen = Native::test(RandevuCreate::class)
-            ->set('title', 'Plain')
-            ->set('day', (string) $date->day)
-            ->set('month', RandevuTime::monthNames()[$date->month - 1])
-            ->set('year', (string) $date->year)
-            ->call('save');
+            $screen = Native::test(RandevuCreate::class)
+                ->set('title', 'Plain')
+                ->set('day', (string) $date->day)
+                ->set('month', RandevuTime::monthNames()[$date->month - 1])
+                ->set('year', (string) $date->year)
+                ->call('save');
 
-        $randevu = Randevu::where('title', 'Plain')->firstOrFail();
-        $screen->assertReplacedWith('/details/'.$randevu->id);
+            $randevu = Randevu::where('title', 'Plain')->firstOrFail();
+            $screen->assertReplacedWith('/details/'.$randevu->id);
 
-        $this->assertNull($randevu->occurs_time);
-        $this->assertFalse($randevu->show_hours);
+            $this->assertNull($randevu->occurs_time);
+            $this->assertFalse($randevu->show_hours);
 
-        // Time-less keeps the day-precision breakdown for the default units.
-        $this->assertSame('In 1 month, 10 days', $randevu->relativePhrase());
+            // Time-less keeps the day-precision breakdown for the default units.
+            $this->assertSame('In 1 month, 10 days', $randevu->relativePhrase());
+        });
     }
 
     public function test_create_allows_hours_as_the_only_unit(): void
