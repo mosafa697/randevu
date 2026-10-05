@@ -20,6 +20,12 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/nativephp/credentials/
+/nativephp/android/
+*.keystore
+*.jks
+*-service-account*.json
+google-service-account*.json
 /vendor
 _ide_helper.php
 Homestead.json
