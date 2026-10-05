@@ -204,36 +204,34 @@ class RandevuScreensTest extends TestCase
         $this->assertSame(0, $screen->get('calendarIndex'));
     }
 
-    public function test_date_selects_weight_month_wider_than_day(): void
+    public function test_date_selects_share_equal_width(): void
     {
         Setting::set('locale', 'en');
 
-        // Day/Year ride at ~25% each, Month takes the middle ~45% as
-        // the flex-1 wide one.
-        $narrow = fn ($n) => ($n['layout']['width'] ?? null) === '25%'
-            && ($n['layout']['flex_shrink'] ?? null) == 0;
-        $wide = fn ($n) => ($n['layout']['flex_grow'] ?? null) == 1
+        // Balanced thirds on both forms: every date select is flex-1
+        // with no fixed width.
+        $third = fn ($n) => ($n['layout']['flex_grow'] ?? null) == 1
             && ! isset($n['layout']['width']);
 
         $screen = Native::test(RandevuCreate::class);
 
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $narrow($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $wide($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $narrow($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $third($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $third($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $third($n));
 
         $screen->press('useHijri');
 
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $narrow($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $wide($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $narrow($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $third($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $third($n));
+        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $third($n));
 
         $randevu = Randevu::create(['title' => 'Weighted', 'occurs_on' => today()]);
 
         $edit = Native::test(RandevuEdit::class, ['id' => $randevu->id]);
 
-        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $narrow($n));
-        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $wide($n));
-        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $narrow($n));
+        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $third($n));
+        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $third($n));
+        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $third($n));
     }
 
     public function test_create_chips_toggle_period_units(): void
