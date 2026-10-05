@@ -1,4 +1,4 @@
-<native:text font="heading" class="text-sm font-semibold text-theme-on-surface">{{ __('randevu.cover_label') }}</native:text>
+<native:text font="heading" class="text-sm text-theme-on-surface">{{ __('randevu.cover_label') }}</native:text>
 
 @php($coverSrc = \App\Services\CoverImage::src($cover_path ?? null))
 @if($coverSrc !== null)
@@ -6,9 +6,9 @@
 @endif
 
 <native:row class="w-full gap-2">
-    <native:button :label="__('randevu.cover_pick')" @press="pickCover" />
+    <native:button :label="__('randevu.cover_pick')" variant="ghost" @press="pickCover" ios="photo" android="image" class="flex-1 min-h-12" />
     @if(!empty($cover_path))
-        <native:button :label="__('randevu.cover_remove')" @press="removeCover" variant="destructive" />
+        <native:button :label="__('randevu.cover_remove')" variant="ghost" @press="removeCover" class="flex-1 min-h-12" />
     @endif
 </native:row>
 
