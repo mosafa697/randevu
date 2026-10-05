@@ -28,6 +28,11 @@ class Settings extends NativeComponent
         return __('randevu.settings_title');
     }
 
+    public function appVersion(): string
+    {
+        return '1.0.0';
+    }
+
     public function useArabic(): void
     {
         $this->locale = AppLocale::persist('ar');

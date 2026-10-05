@@ -57,6 +57,27 @@ class Dashboard extends NativeComponent
         $this->hijriCount = Randevu::where('entered_in', 'hijri')->count();
     }
 
+    /**
+     * Entry-calendar donut (ring only — the legend is native text beside
+     * it). Built at render so slice colors always track the active
+     * forced palette.
+     */
+    public function splitDonutHtml(): string
+    {
+        $splitTotal = $this->gregorianCount + $this->hijriCount;
+        $r = 44;
+        $c = 2 * M_PI * $r;
+        $gregLen = $splitTotal > 0 ? $c * ($this->gregorianCount / $splitTotal) : 0;
+
+        return '<!DOCTYPE html><html><head><meta name="viewport" content="width=112,initial-scale=1"><style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}svg{display:block}</style></head><body>'
+            .'<svg width="112" height="112" viewBox="0 0 112 112">'
+            .'<circle cx="56" cy="56" r="'.$r.'" fill="none" stroke="'.theme('progress-track').'" stroke-width="16"/>'
+            .'<circle cx="56" cy="56" r="'.$r.'" fill="none" stroke="'.theme('primary').'" stroke-width="16" stroke-dasharray="'.$gregLen.' '.$c.'" transform="rotate(-90 56 56)"/>'
+            .'<circle cx="56" cy="56" r="'.$r.'" fill="none" stroke="'.theme('accent').'" stroke-width="16" stroke-dasharray="'.($c - $gregLen).' '.$c.'" stroke-dashoffset="'.(-$gregLen).'" transform="rotate(-90 56 56)"/>'
+            .'<text x="56" y="57" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="700" fill="'.theme('on-surface').'" font-family="system-ui,sans-serif">'.$splitTotal.'</text>'
+            .'</svg></body></html>';
+    }
+
     public function render(): View
     {
         return view('native.dashboard');
