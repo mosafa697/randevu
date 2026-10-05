@@ -44,7 +44,7 @@
             <native:divider class="w-full" />
             <native:text class="text-sm text-theme-on-surface">{{ __('randevu.gregorian_label') }}: {{ $randevu['absolute'] }}</native:text>
             @if(!empty($randevu['hijri']))
-                <native:text class="text-sm text-theme-on-surface">{{ __('randevu.hijri_label') }}: {{ $randevu['hijri'] }} هـ</native:text>
+                <native:text class="text-sm text-theme-on-surface">{{ __('randevu.hijri_label') }}: {{ $randevu['hijri'] }} {{ \App\Services\RandevuHijri::hijriSuffix() }}</native:text>
             @endif
             <native:text class="text-sm text-theme-on-surface-variant">
                 {{ $randevu['is_appointment'] ? __('randevu.kind_appointment') : __('randevu.kind_memory') }}

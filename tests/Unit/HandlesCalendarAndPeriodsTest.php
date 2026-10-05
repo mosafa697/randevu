@@ -51,7 +51,7 @@ class HandlesCalendarAndPeriodsTest extends TestCase
 
         [$hy, $hm, $hd] = RandevuHijri::fromGregorian($date->year, $date->month, $date->day);
         $this->assertSame((string) $hd, $form->h_day);
-        $this->assertSame(RandevuHijri::MONTH_NAMES[$hm - 1], $form->h_month);
+        $this->assertSame(RandevuHijri::monthName($hm), $form->h_month);
         $this->assertSame((string) $hy, $form->h_year);
     }
 
@@ -71,7 +71,7 @@ class HandlesCalendarAndPeriodsTest extends TestCase
 
             [$hy, $hm, $hd] = RandevuHijri::fromGregorian(2027, 1, 19);
             $this->assertSame((string) $hd, $form->h_day);
-            $this->assertSame(RandevuHijri::MONTH_NAMES[$hm - 1], $form->h_month);
+            $this->assertSame(RandevuHijri::monthName($hm), $form->h_month);
             $this->assertSame((string) $hy, $form->h_year);
 
             $form->setToday();

@@ -136,6 +136,14 @@ return [
         'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
     ],
 
+    // Hijri months (calendar order, same as RandevuHijri::MONTH_NAMES)
+    'hijri_months' => [
+        'محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني',
+        'جمادى الأولى', 'جمادى الثانية', 'رجب', 'شعبان',
+        'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة',
+    ],
+    'hijri_suffix' => 'هـ',
+
     // Details screen
     'details_title' => 'التفاصيل',
     'details_missing' => 'الميعاد ده مش موجود.',

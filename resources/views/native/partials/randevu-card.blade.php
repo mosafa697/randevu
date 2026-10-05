@@ -46,7 +46,7 @@
             </native:row>
             <native:text class="text-sm text-theme-on-surface-variant leading-relaxed">{{ $item['absolute'] }}</native:text>
             @if(!empty($item['hijri']))
-                <native:text class="text-sm text-theme-on-surface-variant leading-relaxed">{{ $item['hijri'] }} هـ</native:text>
+                <native:text class="text-sm text-theme-on-surface-variant leading-relaxed">{{ $item['hijri'] }} {{ \App\Services\RandevuHijri::hijriSuffix() }}</native:text>
             @endif
             @if(!empty($item['note']))
                 <native:text class="text-sm text-theme-on-surface-variant leading-relaxed">{{ $item['note'] }}</native:text>

@@ -93,7 +93,7 @@ class RandevuCreate extends NativeComponent
         $this->year = (string) $today->year;
         [$hy, $hm, $hd] = RandevuHijri::fromGregorian($today->year, $today->month, $today->day);
         $this->h_day = (string) $hd;
-        $this->h_month = RandevuHijri::MONTH_NAMES[$hm - 1];
+        $this->h_month = RandevuHijri::monthName($hm);
         $this->h_year = (string) $hy;
         $this->hour = __('randevu.time_none');
         $this->minute = __('randevu.time_none');
@@ -159,7 +159,7 @@ class RandevuCreate extends NativeComponent
         $this->monthOptions = RandevuTime::monthNames();
         $this->yearOptions = self::yearOptions();
         $this->hDayOptions = array_map(strval(...), range(1, 30));
-        $this->hMonthOptions = RandevuHijri::MONTH_NAMES;
+        $this->hMonthOptions = RandevuHijri::monthNames();
         $this->hYearOptions = RandevuHijri::yearOptions();
         $this->hourOptions = self::hourOptions();
         $this->minuteOptions = self::minuteOptions();

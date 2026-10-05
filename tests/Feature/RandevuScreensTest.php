@@ -680,6 +680,29 @@ class RandevuScreensTest extends TestCase
         Native::test(Follow::class)->assertSee(Randevu::firstOrFail()->hijriLabel());
     }
 
+    public function test_hijri_picker_and_labels_use_english_in_english(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)
+            ->assertSet('hMonthOptions', RandevuHijri::monthNames())
+            ->call('useHijri')
+            ->assertSee('Ramadan')
+            ->assertSee("Rabi' al-Awwal");
+
+        $randevu = Randevu::create(array_merge(
+            ['title' => 'Trip', 'occurs_on' => today()->addDays(3)],
+            Randevu::hijriTriple(today()->addDays(3)->toDateString()),
+            ['entered_in' => 'gregorian']
+        ));
+
+        Native::test(Follow::class)->assertSee($randevu->hijriLabel());
+
+        Native::test(RandevuDetails::class, ['id' => $randevu->id])
+            ->assertSee($randevu->hijriLabel())
+            ->assertSee('AH');
+    }
+
     public function test_settings_switches_language_and_persists(): void
     {
         $screen = Native::test(Settings::class)
@@ -1136,7 +1159,7 @@ class RandevuScreensTest extends TestCase
         [$hy, $hm, $hd] = RandevuHijri::fromGregorian($date->year, $date->month, $date->day);
         $screen
             ->assertSet('h_day', (string) $hd)
-            ->assertSet('h_month', RandevuHijri::MONTH_NAMES[$hm - 1])
+            ->assertSet('h_month', RandevuHijri::monthName($hm))
             ->assertSet('h_year', (string) $hy);
 
         $screen->press('setToday');

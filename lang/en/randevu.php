@@ -136,6 +136,14 @@ return [
         'July', 'August', 'September', 'October', 'November', 'December',
     ],
 
+    // Hijri months (calendar order, transliterated)
+    'hijri_months' => [
+        'Muharram', 'Safar', "Rabi' al-Awwal", "Rabi' al-Thani",
+        'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', "Sha'ban",
+        'Ramadan', 'Shawwal', "Dhu al-Qi'dah", "Dhu al-Hijjah",
+    ],
+    'hijri_suffix' => 'AH',
+
     // Details screen
     'details_title' => 'Details',
     'details_missing' => 'This randevu no longer exists.',

@@ -149,7 +149,7 @@ trait HandlesCalendarAndPeriods
 
         [$hy, $hm, $hd] = RandevuHijri::fromGregorian($date->year, $date->month, $date->day);
         $this->h_day = (string) $hd;
-        $this->h_month = RandevuHijri::MONTH_NAMES[$hm - 1];
+        $this->h_month = RandevuHijri::monthName($hm);
         $this->h_year = (string) $hy;
 
         $this->clampGregorianDay();

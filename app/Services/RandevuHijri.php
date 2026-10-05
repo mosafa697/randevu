@@ -25,8 +25,60 @@ class RandevuHijri
     /** Leap years within each 30-year cycle. */
     public const LEAP_YEARS = [2, 5, 7, 10, 13, 16, 18, 21, 24, 26, 29];
 
+    /**
+     * Hijri month names for the current locale. Falls back to the Arabic
+     * names when the translation is missing or incomplete — same pattern
+     * as RandevuTime::monthNames() for Gregorian months.
+     *
+     * @return list<string>
+     */
+    public static function monthNames(): array
+    {
+        try {
+            $names = (array) __('randevu.hijri_months');
+        } catch (\Throwable) {
+            // No translator booted (plain unit context): Arabic fallback.
+            return self::MONTH_NAMES;
+        }
+
+        $valid = count($names) === 12;
+
+        foreach ($names as $name) {
+            $valid = $valid && is_string($name) && $name !== '';
+        }
+
+        return $valid ? array_values($names) : self::MONTH_NAMES;
+    }
+
+    /** Locale-aware month name (1-12), Arabic fallback. Empty when out of range. */
+    public static function monthName(int $month): string
+    {
+        return self::monthNames()[$month - 1] ?? '';
+    }
+
+    /** Era suffix for display ("هـ" / "AH"), Arabic fallback. */
+    public static function hijriSuffix(): string
+    {
+        try {
+            $suffix = __('randevu.hijri_suffix');
+        } catch (\Throwable) {
+            return 'هـ';
+        }
+
+        return is_string($suffix) && $suffix !== '' && $suffix !== 'randevu.hijri_suffix'
+            ? $suffix
+            : 'هـ';
+    }
+
     public static function monthNumber(string $name): ?int
     {
+        $index = array_search($name, self::monthNames(), true);
+
+        if ($index !== false) {
+            return $index + 1;
+        }
+
+        // Stale selection or missing translation: resolve the Arabic name.
         $index = array_search($name, self::MONTH_NAMES, true);
 
         return $index === false ? null : $index + 1;
@@ -67,9 +119,13 @@ class RandevuHijri
         return self::jdToGregorian(self::islamicToJd($year, $month, $day));
     }
 
+    /**
+     * "12 ربيع الثاني 1448" in Arabic, "12 Rabi' al-Thani 1448" in
+     * English. Western digits in both modes (matches existing display).
+     */
     public static function format(int $year, int $month, int $day): string
     {
-        $name = self::MONTH_NAMES[$month - 1] ?? '';
+        $name = self::monthName($month);
 
         return trim("{$day} {$name} {$year}");
     }

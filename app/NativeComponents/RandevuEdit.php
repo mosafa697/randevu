@@ -112,7 +112,7 @@ class RandevuEdit extends NativeComponent
         $this->monthOptions = RandevuTime::monthNames();
         $this->yearOptions = RandevuCreate::yearOptions();
         $this->hDayOptions = array_map(strval(...), range(1, 30));
-        $this->hMonthOptions = RandevuHijri::MONTH_NAMES;
+        $this->hMonthOptions = RandevuHijri::monthNames();
         $this->hYearOptions = RandevuHijri::yearOptions();
         $this->hourOptions = RandevuCreate::hourOptions();
         $this->minuteOptions = RandevuCreate::minuteOptions();
@@ -124,14 +124,14 @@ class RandevuEdit extends NativeComponent
 
         if ($randevu->hijri_year !== null && $randevu->hijri_month !== null && $randevu->hijri_day !== null) {
             $this->h_day = (string) $randevu->hijri_day;
-            $this->h_month = RandevuHijri::MONTH_NAMES[$randevu->hijri_month - 1];
+            $this->h_month = RandevuHijri::monthName($randevu->hijri_month);
             $this->h_year = (string) $randevu->hijri_year;
         } else {
             [$hy, $hm, $hd] = RandevuHijri::fromGregorian(
                 $randevu->occurs_on->year, $randevu->occurs_on->month, $randevu->occurs_on->day
             );
             $this->h_day = (string) $hd;
-            $this->h_month = RandevuHijri::MONTH_NAMES[$hm - 1];
+            $this->h_month = RandevuHijri::monthName($hm);
             $this->h_year = (string) $hy;
         }
     }

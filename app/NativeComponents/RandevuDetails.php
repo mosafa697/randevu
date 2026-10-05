@@ -6,6 +6,7 @@ use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
 use App\Services\CoverImage;
+use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
@@ -64,7 +65,7 @@ class RandevuDetails extends NativeComponent
         $lines = [\App\Support\Bidi::strip($this->randevu['title']), $this->randevu['phrase'].' — '.$this->randevu['absolute']];
 
         if (! empty($this->randevu['hijri'])) {
-            $lines[1] .= ' ('.$this->randevu['hijri'].' هـ)';
+            $lines[1] .= ' ('.$this->randevu['hijri'].' '.RandevuHijri::hijriSuffix().')';
         }
 
         if (! empty($this->randevu['note'])) {

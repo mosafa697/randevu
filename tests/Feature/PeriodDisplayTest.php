@@ -597,7 +597,7 @@ class PeriodDisplayTest extends TestCase
         $screen->press('shareRandevu');
 
         $presented = $screen->get('randevu');
-        $expected = "Dentist\n{$presented['phrase']} — {$presented['absolute']} ({$presented['hijri']} هـ)\nBring card";
+        $expected = "Dentist\n{$presented['phrase']} — {$presented['absolute']} ({$presented['hijri']} AH)\nBring card";
         // Display state carries bidi isolates; the share sheet sends plain text.
         $this->assertSame('Dentist', Bidi::strip($presented['title']));
 
