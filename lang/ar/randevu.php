@@ -184,4 +184,13 @@ return [
     'theme_light' => 'فاتح',
     'theme_dark' => 'غامق',
     'theme_toggle_a11y' => 'تبديل المظهر',
+
+    // Settings polish
+    'settings_language_helper' => 'لغة الواجهة واتجاه الكتابة',
+    'settings_theme_helper' => 'اختار المظهر المريح لعينك',
+    'app_version' => 'الإصدار :version',
+
+    // Card ring unit + color picker
+    'ring_unit_days' => 'يوم',
+    'color_custom_hide' => 'اقفل اللون المخصص',
 ];

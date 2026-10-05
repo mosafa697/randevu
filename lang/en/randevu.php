@@ -184,4 +184,13 @@ return [
     'theme_light' => 'Light',
     'theme_dark' => 'Dark',
     'theme_toggle_a11y' => 'Toggle theme',
+
+    // Settings polish
+    'settings_language_helper' => 'Interface language and writing direction',
+    'settings_theme_helper' => 'Choose the appearance that suits your eyes',
+    'app_version' => 'Version :version',
+
+    // Card ring unit + color picker
+    'ring_unit_days' => 'days',
+    'color_custom_hide' => 'Hide custom color',
 ];

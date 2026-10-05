@@ -25,6 +25,15 @@ trait PicksColor
 
     public int $color_b = 0;
 
+    /** Collapsible custom-color section (RGB sliders). */
+    public bool $show_custom_color = false;
+
+    /** @press entry point — bare method only. */
+    public function toggleCustomColor(): void
+    {
+        $this->show_custom_color = ! $this->show_custom_color;
+    }
+
     /** Swatch taps — @press needs a bare method per color. */
     public function pickBlue(): void
     {
