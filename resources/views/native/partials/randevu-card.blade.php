@@ -52,6 +52,7 @@
             'tier' => $item['tier'] ?? null,
             'entered_in' => $item['entered_in'],
             'index' => $index ?? 0,
+            'color' => $accent,
         ])
     </native:row>
 </native:pressable>

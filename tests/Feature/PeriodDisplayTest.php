@@ -590,6 +590,29 @@ class PeriodDisplayTest extends TestCase
                 && (($n['props']['color'] ?? null) === $mutedFg));
     }
 
+    public function test_colored_counters_use_selected_color(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(array_merge(
+            ['title' => 'Pink soon', 'occurs_on' => today()->addDays(3)->toDateString(), 'color' => '#DB2777'],
+            Randevu::hijriTriple(today()->addDays(3)->toDateString())
+        ));
+        Randevu::create(array_merge(
+            ['title' => 'Green past', 'occurs_on' => today()->subDays(5)->toDateString(), 'color' => '#059669'],
+            Randevu::hijriTriple(today()->subDays(5)->toDateString())
+        ));
+
+        // A selected color overrides the urgency/calendar ring fill in both tabs.
+        Native::test(Follow::class)
+            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), '#DB2777')
+                && str_contains((string) ($n['props']['html'] ?? ''), '>3</text>'));
+
+        Native::test(Memories::class)
+            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), '#059669')
+                && str_contains((string) ($n['props']['html'] ?? ''), '>5</text>'));
+    }
+
     public function test_details_share_sends_composed_text(): void
     {
         Setting::set('locale', 'en');

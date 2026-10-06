@@ -3,9 +3,13 @@
     $c = 2 * M_PI * $r;
     $offset = $c * (1 - ($pct ?? 1));
     // Follow cards pass an urgency tier; Memories cards don't and keep
-    // the entered-calendar fill exactly as before.
+    // the entered-calendar fill exactly as before. A valid selected
+    // color overrides both, so the counter matches the card accent.
     $tier = $tier ?? null;
-    if ($tier === 'accent') {
+    $colorOverride = isset($color) && is_string($color) && preg_match('/^#[0-9A-Fa-f]{6}$/', $color) ? $color : null;
+    if ($colorOverride !== null) {
+        $fill = $colorOverride;
+    } elseif ($tier === 'accent') {
         $fill = theme('accent');
     } elseif ($tier === 'strong') {
         $fill = theme('primary');
