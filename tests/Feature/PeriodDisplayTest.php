@@ -631,8 +631,8 @@ class PeriodDisplayTest extends TestCase
         $this->assertSame('Dentist', Bidi::strip($presented['title']));
 
         $screen->assertCalled(
-            'Share.Url',
-            fn ($p) => $p['title'] === 'Dentist' && $p['text'] === $expected && $p['url'] === ''
+            'Share.File',
+            fn ($p) => $p['title'] === 'Dentist' && $p['message'] === $expected && $p['filePath'] === ''
         );
     }
 
@@ -649,8 +649,8 @@ class PeriodDisplayTest extends TestCase
         $expected = "Plain\n{$presented['phrase']} — {$presented['absolute']}";
 
         $screen->assertCalled(
-            'Share.Url',
-            fn ($p) => $p['title'] === 'Plain' && $p['text'] === $expected && $p['url'] === ''
+            'Share.File',
+            fn ($p) => $p['title'] === 'Plain' && $p['message'] === $expected && $p['filePath'] === ''
         );
     }
 
@@ -662,7 +662,7 @@ class PeriodDisplayTest extends TestCase
         // reachable through a direct call — exactly what it defends.
         Native::test(RandevuDetails::class, ['id' => 99999])
             ->call('shareRandevu')
-            ->assertNotCalled('Share.Url');
+            ->assertNotCalled('Share.File');
     }
 
     public function test_details_phrase_is_the_hero(): void

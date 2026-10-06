@@ -72,8 +72,12 @@ class RandevuDetails extends NativeComponent
             $lines[] = \App\Support\Bidi::strip($this->randevu['note']);
         }
 
-        // No URL exists in this serverless app — the sheet shares text.
-        Share::url(\App\Support\Bidi::strip($this->randevu['title']), implode("\n", $lines), '');
+        // No URL exists in this serverless app — Share::file() with an
+        // empty path is the documented text-only share (Share::url()
+        // with an empty URL is ignored on device, which is why the
+        // button used to do nothing). Requires nativephp/mobile-share,
+        // registered in NativeServiceProvider::plugins().
+        Share::file(\App\Support\Bidi::strip($this->randevu['title']), implode("\n", $lines), '');
     }
 
     /** @press entry point — bare method only. */
