@@ -1,6 +1,6 @@
 # Randevu Deploy Tracker (Android / Google Play)
 
-Target: `com.randevu.app` — permanent after first Play upload. Never change it.
+Target: `randevu.app` — permanent after first Play upload. Never change it.
 Build path: Bifrost cloud (this PC has no Android Studio/Gradle per `native:debug`).
 First track: Internal. NativePHP Mobile 4.5.2.
 
@@ -11,7 +11,7 @@ First track: Internal. NativePHP Mobile 4.5.2.
   - Android theme colors → brand violet `#5F53D0` / night `#9488EF`
   - `cleanup_env_keys` += `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_PASSWORD`, `APP_STORE_*`
   - Orientation portrait-only, `status_bar_style: auto` (unchanged, correct)
-- [x] `.env.example` += `NATIVEPHP_APP_ID=com.randevu.app`, `NATIVEPHP_APP_VERSION=1.0.0`,
+- [x] `.env.example` += `NATIVEPHP_APP_ID=randevu.app`, `NATIVEPHP_APP_VERSION=1.0.0`,
       `NATIVEPHP_APP_VERSION_CODE=1`, `ANDROID_*` placeholders, SDK comments
 - [x] `.gitignore` += `/nativephp/credentials/`, `/nativephp/android/`, `*.keystore`, `*.jks`, service-account JSONs
 - [x] Icon/splash present: `public/icon.png`, `public/splash.png`, `public/splash-dark.png`
@@ -22,7 +22,7 @@ First track: Internal. NativePHP Mobile 4.5.2.
 ## Release — TODO (needs secrets, run at release time)
 
 - [ ] `cp .env .env.local-backup` (keep dev env)
-- [ ] Fill `.env`: `NATIVEPHP_APP_ID=com.randevu.app`
+- [ ] Fill `.env`: `NATIVEPHP_APP_ID=randevu.app`
 - [ ] `php artisan native:credentials android` (writes `nativephp/credentials/android/` + `.env`, git-ignored)
 - [ ] `php artisan native:release minor` → sets `NATIVEPHP_APP_VERSION=1.0.0`, bumps `VERSION_CODE`
 - [ ] Production `.env`: `APP_ENV=production`, `APP_DEBUG=false`
@@ -35,7 +35,7 @@ First track: Internal. NativePHP Mobile 4.5.2.
 
 ## Google Play — TODO (Play Console, $25 one-time account)
 
-- [ ] Create app with package `com.randevu.app`
+- [ ] Create app with package `randevu.app`
 - [ ] Store listing: icon, feature graphic, screenshots (light + dark), ar + en descriptions, category, contact email
 - [ ] Compliance: content rating, target audience, Data Safety (offline SQLite → no data collected/shared),
       privacy-policy URL (required even for offline apps), declarations
