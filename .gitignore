@@ -23,6 +23,7 @@
 /storage/pail
 /nativephp/credentials/
 /nativephp/android/
+/credentials/
 *.keystore
 *.jks
 *-service-account*.json
