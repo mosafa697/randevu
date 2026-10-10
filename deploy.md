@@ -1,7 +1,7 @@
 # Randevu Deploy Tracker (Android / Google Play)
 
 Target: `randevu.app` — permanent after first Play upload. Never change it.
-Build path: Bifrost cloud (this PC has no Android Studio/Gradle per `native:debug`).
+Build path: LOCAL (free) — Android Studio + SDK + Gradle on this PC (chosen over Bifrost cloud, paid).
 First track: Internal. NativePHP Mobile 4.5.2.
 
 ## Deploy config — DONE
@@ -13,7 +13,7 @@ First track: Internal. NativePHP Mobile 4.5.2.
   - Orientation portrait-only, `status_bar_style: auto` (unchanged, correct)
 - [x] `.env.example` += `NATIVEPHP_APP_ID=randevu.app`, `NATIVEPHP_APP_VERSION=1.0.0`,
       `NATIVEPHP_APP_VERSION_CODE=1`, `ANDROID_*` placeholders, SDK comments
-- [x] `.gitignore` += `/nativephp/credentials/`, `/nativephp/android/`, `*.keystore`, `*.jks`, service-account JSONs
+- [x] `.gitignore` += `/nativephp/credentials/`, `/nativephp/android/`, `/credentials/`, `*.keystore`, `*.jks`, service-account JSONs
 - [x] Icon/splash present: `public/icon.png`, `public/splash.png`, `public/splash-dark.png`
 - [x] Tests: 231/231 pass (2026-10-08, production env). Old note: 217/218 with 1 pre-existing
       date-sensitive failure on clean `main` is now fixed (pin-clock commit).
@@ -31,9 +31,27 @@ First track: Internal. NativePHP Mobile 4.5.2.
       (Staging/tester builds: `APP_ENV=staging` — locked to internal/alpha, can never go production.)
 - [x] `php artisan test --compact` green — DONE, 231/231 pass in production env
 - [ ] Jump check in light AND dark mode
-- [ ] Bifrost cloud build → signed `app-release.aab`
-      (Local alternative, not recommended here: install Android Studio + SDK + Gradle,
-      then `php artisan native:package android --build-type=bundle`)
+- [ ] Local build → signed `app-release.aab` (FREE path, no Bifrost)
+  - [ ] Step 1 — Install Android Studio (2024.2.1+, `developer.android.com/studio`, defaults)
+  - [ ] Step 2 — SDK Manager: **SDK Platforms** → Android 16 (API 36, covers `compile_sdk 36`);
+        **SDK Tools** → Build-Tools + Platform-Tools. SDK path default:
+        `C:\Users\<you>\AppData\Local\Android\Sdk`
+  - [ ] Step 3 — Install 7-Zip to default `C:\Program Files\7-Zip\7z.exe`
+        (Windows requirement, already wired in `config/nativephp.php`)
+  - [ ] Step 4 — Env vars (Windows): `ANDROID_HOME=<sdk path>`,
+        `PATH=%PATH%;%ANDROID_HOME%\platform-tools`.
+        `JAVA_HOME` only if Gradle complains (PC has Java 19; Gradle pairs best with 17,
+        Studio's bundled JBR is the fallback via `NATIVEPHP_GRADLE_PATH`)
+  - [ ] Step 5 — Verify: `java -version`, `adb devices`, `php artisan native:debug`
+        (Studio + Gradle must flip from "Not found" to version numbers;
+        else set `NATIVEPHP_ANDROID_SDK_LOCATION=<sdk path>` in `.env`)
+  - [ ] Step 6 — `php artisan native:install` (creates git-ignored `nativephp/` project,
+        downloads embedded PHP — first run is slow, leave the terminal alone)
+  - [ ] Step 7 — `php artisan native:package android --build-type=bundle`
+        (signs with `credentials/app-release-key.jks` from `.env` `ANDROID_*` keys)
+  - [ ] Step 8 — Confirm artifact:
+        `nativephp/android/app/build/outputs/bundle/release/app-release.aab`
+        (Cloud alternative, paid: Bifrost `bifrost.nativephp.com` — packs from $5/5 builds.)
 
 ## Google Play — TODO (Play Console, $25 one-time account)
 
