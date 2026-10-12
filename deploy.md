@@ -32,26 +32,31 @@ First track: Internal. NativePHP Mobile 4.5.2.
 - [x] `php artisan test --compact` green — DONE, 231/231 pass in production env
 - [ ] Jump check in light AND dark mode
 - [ ] Local build → signed `app-release.aab` (FREE path, no Bifrost)
-  - [ ] Step 1 — Install Android Studio (2024.2.1+, `developer.android.com/studio`, defaults)
-  - [ ] Step 2 — SDK Manager: **SDK Platforms** → Android 16 (API 36, covers `compile_sdk 36`);
+  - [x] Step 1 — Install Android Studio (2024.2.1+, `developer.android.com/studio`, defaults) — DONE (Custom setup)
+  - [x] Step 2 — SDK Manager: **SDK Platforms** → Android 16 (API 36, covers `compile_sdk 36`);
         **SDK Tools** → Build-Tools + Platform-Tools. SDK path default:
-        `C:\Users\<you>\AppData\Local\Android\Sdk`
-  - [ ] Step 3 — Install 7-Zip to default `C:\Program Files\7-Zip\7z.exe`
+        `C:\Users\<you>\AppData\Local\Android\Sdk` — DONE (`platforms/android-36`,
+        `build-tools/36.0.0`, `platform-tools/adb.exe` verified on disk)
+  - [x] Step 3 — Install 7-Zip to default `C:\Program Files\7-Zip\7z.exe`
         (Windows requirement, already wired in `config/nativephp.php`)
-  - [ ] Step 4 — Env vars (Windows): `ANDROID_HOME=<sdk path>`,
-        `PATH=%PATH%;%ANDROID_HOME%\platform-tools`.
+  - [x] Step 4 — Env vars (Windows): `ANDROID_HOME=<sdk path>`,
+        `PATH=%PATH%;%ANDROID_HOME%\platform-tools`. — DONE (2026-10-12,
+        `ANDROID_HOME=C:\Users\Mostafa\AppData\Local\Android\Sdk` User-level via `setx`,
+        `platform-tools` appended to User `PATH`; restart terminal to pick up).
         `JAVA_HOME` only if Gradle complains (PC has Java 19; Gradle pairs best with 17,
         Studio's bundled JBR is the fallback via `NATIVEPHP_GRADLE_PATH`)
-  - [ ] Step 5 — Verify: `java -version`, `adb devices`, `php artisan native:debug`
-        (Studio + Gradle must flip from "Not found" to version numbers;
-        else set `NATIVEPHP_ANDROID_SDK_LOCATION=<sdk path>` in `.env`)
-  - [ ] Step 6 — `php artisan native:install` (creates git-ignored `nativephp/` project,
-        downloads embedded PHP — first run is slow, leave the terminal alone)
-  - [ ] Step 7 — `php artisan native:package android --build-type=bundle`
-        (signs with `credentials/app-release-key.jks` from `.env` `ANDROID_*` keys)
-  - [ ] Step 8 — Confirm artifact:
-        `nativephp/android/app/build/outputs/bundle/release/app-release.aab`
-        (Cloud alternative, paid: Bifrost `bifrost.nativephp.com` — packs from $5/5 builds.)
+  - [x] Step 5 — Verify: `java -version`, `adb devices`, `php artisan native:debug` — DONE (2026-10-12:
+        Java 19.0.1 OK, `adb devices` daemon OK / empty list normal, `native:debug` Studio 2026.2.1 found;
+        Gradle "Not found" + Embedded PHP "Not installed" expected until Step 6 `native:install`)
+  - [x] Step 6 — `php artisan native:install` (creates git-ignored `nativephp/` project,
+        downloads embedded PHP — first run is slow, leave the terminal alone) — DONE (2026-10-12:
+        Embedded PHP 8.3.35, Gradle 8.14.5 now found, `nativephp/{android,binaries,resources}` created)
+  - [x] Step 7 — `php artisan native:package android --build-type=bundle`
+        (signs with `credentials/app-release-key.jks` from `.env` `ANDROID_*` keys) — DONE (2026-10-12:
+        fixed `.env` `ANDROID_KEYSTORE_FILE=credentials/app-release-key.jks` — vendor wrote bare filename,
+        packager needs the relative path; BUILD SUCCESSFUL in ~3m, NDK 27 + CMake 3.22 + Build-Tools 35 auto-installed)
+  - [x] Step 8 — Confirm artifact:
+        `nativephp/android/app/build/outputs/bundle/release/app-release.aab` — DONE (2026-10-12, 34.99 MB)
 
 ## Google Play — TODO (Play Console, $25 one-time account)
 
