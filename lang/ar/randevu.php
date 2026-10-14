@@ -183,7 +183,7 @@ return [
     // Settings
     'language_label' => 'اللغة',
     'lang_arabic' => 'مصري',
-    'lang_fusha' => 'العربية الفصحى',
+    'lang_fusha' => 'العربية',
     'lang_english' => 'English',
 
     // Theme
