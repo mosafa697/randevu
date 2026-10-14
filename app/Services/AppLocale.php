@@ -8,13 +8,14 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Applies the device-stored language, falling back to the configured default.
- * Fresh installs default to Arabic (config), English is the fallback locale.
+ * Fresh installs default to Egyptian Arabic (config), English is the fallback locale.
+ * Modern Standard Arabic ('ar_fusha') sits alongside Egyptian ('ar').
  */
 class AppLocale
 {
     public const KEY = 'locale';
 
-    public const SUPPORTED = ['ar', 'en'];
+    public const SUPPORTED = ['ar', 'ar_fusha', 'en'];
 
     public static function current(): string
     {
@@ -52,7 +53,12 @@ class AppLocale
 
     public static function isRtl(?string $locale = null): bool
     {
-        return ($locale ?? self::current()) === 'ar';
+        return self::isArabic($locale);
+    }
+
+    public static function isArabic(?string $locale = null): bool
+    {
+        return in_array($locale ?? self::current(), ['ar', 'ar_fusha'], true);
     }
 
     private static function storeAvailable(): bool

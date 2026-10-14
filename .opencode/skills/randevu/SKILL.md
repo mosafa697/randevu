@@ -22,7 +22,7 @@ Android-first NativePHP Mobile v4 app. Users track future appointments and past 
 - Validation: `Randevu::rules()` — title required max 255, occurs_on required date, color nullable `#RRGGBB` regex, note nullable max 2000, hijri_* nullable ints, entered_in in:gregorian,hijri, show_* booleans.
 - Model `App\Models\Setting`: per-device key/value store (`get`/`set`), string key primary, no timestamps.
 - Service `App\Services\AppTheme` + `AppliesTheme` concern: per-device `light|dark` (default light), `current/apply/persist/toggle/token`. Forces the authored palette into BOTH blocks (the renderer otherwise follows the system scheme) from the `native-ui.authored-theme` snapshot, then clears the process-lifetime `TailwindParser` class cache — without that, the first render's colors win forever.
-- Service `App\Services\AppLocale` + `AppliesLocale` concern: per-device `ar|en` (config default `ar`), `current/apply/persist/isRtl`. UI strings live in `lang/{ar,en}/randevu.php` and `validation.php`.
+- Service `App\Services\AppLocale` + `AppliesLocale` concern: per-device `ar` (Egyptian) | `ar_fusha` (MSA) | `en` (config default `ar`), `current/apply/persist/isRtl/isArabic`. UI strings live in `lang/{ar,ar_fusha,en}/randevu.php` and `validation.php`.
 
 ## Where code lives
 
@@ -32,7 +32,7 @@ Android-first NativePHP Mobile v4 app. Users track future appointments and past 
 - Screens `app/NativeComponents/`: `Follow.php`, `Memories.php`, `RandevuCreate.php`, `RandevuDetails.php`, `RandevuEdit.php`, `Settings.php`, `Layouts/RandevuLayout.php`, `Concerns/` (`AppliesTheme`, `AppliesLocale`, `PicksColor`).
 - Views `resources/views/native/`: `follow.blade.php`, `memories.blade.php`, `randevu-create.blade.php`, `randevu-details.blade.php`, `randevu-edit.blade.php`, `settings.blade.php`, `partials/color-picker.blade.php`.
 - Routes `routes/mobile.php` (all `Route::native(...)->layout(RandevuLayout::class)`): `/` Follow, `/create` Create, `/memories` Memories, `/details/{id}` Details, `/edit/{id}` Edit, `/settings` Settings.
-- Translation: `lang/{ar,en}/randevu.php`, `lang/{ar,en}/validation.php`.
+- Translation: `lang/{ar,ar_fusha,en}/randevu.php`, `lang/{ar,ar_fusha,en}/validation.php`.
 - Tests: `tests/Unit/` `RandevuTimeTest`, `RandevuHijriTest`, `PeriodDisplayTest`, `AppThemeTest`, `ThemeTest`, `AppNameTest`; `tests/Feature/` `RandevuTest`, `RandevuScreensTest`, `PeriodDisplayTest`, `ThemeToggleTest`, `HealthTest`.
 
 ## UI conventions (EDGE / SuperNative)
@@ -44,7 +44,7 @@ Android-first NativePHP Mobile v4 app. Users track future appointments and past 
 - Layout: `RandevuLayout` — NavBar title via `navTitle()` plus a sun/moon `toggleTheme()` action, tabs Follow/Memories/New/Settings. Drawn chrome colors come from `AppTheme::token()` literals. Screens declare `navTitle()`; keep inline Back buttons on forms, no inline title rows.
 - Follow view: Today section first, then Coming up (soonest first). Memories screen lists past entries newest first. Each card: relative phrase + absolute date (`d M Y`) + Hijri line + exact day count + note (+ optional `color` accent). Empty states invite the first randevu.
 - Color: forms use the `PicksColor` trait + `partials/color-picker.blade.php`, storing uppercase `#RRGGBB` (presets in `Randevu::COLOR_PRESETS`); clearing sets null.
-- Locale/RTL: all user-visible text via `__('randevu.*')`; Arabic is the default and RTL; every screen applies `AppLocale` on mount.
+- Locale/RTL: all user-visible text via `__('randevu.*')`; Arabic (Egyptian `ar` default, MSA `ar_fusha`) is RTL; every screen applies `AppLocale` on mount.
 - Forms keep old values on validation failure (public props persist), show per-field `$errors`.
 - Verify Blade with the TRUE native precompile (`NativeTagPrecompiler::setActive(true)` + `compileString` + `php -l`): `view:cache` bypasses the precompiler and gives false confidence. Always `view:clear` after so the device recompiles fresh.
 

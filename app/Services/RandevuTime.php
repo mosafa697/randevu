@@ -52,8 +52,8 @@ class RandevuTime
      * Rounded human phrase plus exact count stays available via dayCount().
      *
      * Ranges: today/tomorrow/yesterday, days (2-29), months (30-364),
-     * years (365+). Nouns follow the active locale (Egyptian Arabic shapes
-     * included: يوم/يومين/أيام/يوم ...).
+     * years (365+). Nouns follow the active locale (both Arabic variants
+     * use singular/dual shapes: يوم/يومين/أيام ...).
      */
     public static function phrase(CarbonInterface|string $date, CarbonInterface|string|null $today = null): string
     {
@@ -260,7 +260,7 @@ class RandevuTime
     {
         $unit = self::unit($type, $count);
 
-        if (app()->getLocale() === 'ar' && $count <= 2) {
+        if (AppLocale::isArabic() && $count <= 2) {
             return $unit;
         }
 
@@ -296,7 +296,7 @@ class RandevuTime
         $template = __("randevu.{$key}");
 
         // Arabic singular/dual absorb the numeral: "بعد شهر", "بعد يومين".
-        if (app()->getLocale() === 'ar' && $count <= 2) {
+        if (AppLocale::isArabic() && $count <= 2) {
             $template = trim(str_replace(':count', '', $template));
             $template = (string) preg_replace('/\s+/', ' ', $template);
 

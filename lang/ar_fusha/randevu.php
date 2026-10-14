@@ -1,0 +1,203 @@
+<?php
+
+return [
+    // Navigation + tabs
+    'follow_title' => 'المواعيد',
+    'create_title' => 'موعد جديد',
+    'edit_title' => 'تعديل الموعد',
+    'settings_title' => 'الإعدادات',
+    'tab_follow' => 'المواعيد',
+    'tab_new' => 'جديد',
+    'tab_memories' => 'ذكريات',
+    'memories_title' => 'ذكريات',
+    'tab_dashboard' => 'نظرة عامة',
+    'tab_settings' => 'الإعدادات',
+
+    // Follow sections
+    'today' => 'اليوم',
+    'upcoming' => 'القادم',
+    'memories' => 'ذكريات',
+    'empty_cta' => 'أضف أول موعد',
+    'follow_empty_headline' => 'لا توجد مواعيد بعد',
+    'follow_empty_support' => 'أضف أول موعد لمتابعته هنا',
+    'memories_empty_headline' => 'لا توجد ذكريات محفوظة بعد',
+    'memories_empty_support' => 'أضف موعدًا وسيظهر هنا بعد انقضائه',
+    'follow_empty_classifier' => 'المواعيد التي تاريخها اليوم أو بعده تظهر هنا.',
+    'memories_empty_classifier' => 'المواعيد المنقضية تُحفظ هنا كذكريات.',
+    'follow_empty_hint' => 'تلميح: يمكنك إدخال التاريخ بالهجري من شاشة موعد جديد.',
+
+    // Search + sort
+    'search_label' => 'بحث',
+    'search_placeholder' => 'ابحث بعنوان الموعد…',
+    'search_clear' => 'مسح البحث',
+    'sort_nearest' => 'الأقرب',
+    'sort_newest' => 'الأحدث',
+    'sort_alpha' => 'أبجدي',
+    'no_matches_headline' => 'لا توجد نتائج',
+    'no_matches_support' => 'جرّب كلمة أخرى أو امسح البحث',
+
+    // Buttons
+    'new' => '+ جديد',
+    'back' => 'رجوع',
+    'save' => 'احفظ الموعد',
+    'save_changes' => 'احفظ التعديل',
+    'delete' => 'احذف',
+    'keep' => 'إبقاء',
+    'delete_confirm' => 'هل تريد حذف هذا الموعد؟',
+
+    // Form
+    'title_label' => 'العنوان',
+    'title_placeholder' => 'طبيب، عيد ميلاد…',
+    'note_label' => 'ملاحظة (اختياري)',
+    'note_placeholder' => 'أين، مع من…',
+    'day_label' => 'اليوم',
+    'month_label' => 'الشهر',
+    'year_label' => 'السنة',
+    'hour_label' => 'الساعة',
+    'minute_label' => 'الدقيقة',
+    'time_none' => 'بدون',
+    'mode_gregorian' => 'ميلادي',
+    'mode_hijri' => 'هجري',
+    'quick_today' => 'اليوم',
+    'quick_plus7' => '+7 أيام',
+    'quick_plus30' => '+30 يوم',
+    'form_hint' => 'اليوم أو بعده موعد، وقبله ذكرى.',
+    'preview_label' => 'ستعرض البطاقة',
+    'preview_invalid' => 'اختر تاريخًا صحيحًا لعرض المدة',
+
+    // Color
+    'color_label' => 'اللون (اختياري)',
+    'color_none' => 'بدون',
+    'color_blue' => 'أزرق',
+    'color_indigo' => 'نيلي',
+    'color_purple' => 'بنفسجي',
+    'color_pink' => 'وردي',
+    'color_red' => 'أحمر',
+    'color_orange' => 'برتقالي',
+    'color_amber' => 'كهرماني',
+    'color_green' => 'أخضر',
+    'color_teal' => 'فيروزي',
+    'color_cyan' => 'سماوي',
+    'color_brown' => 'بني',
+    'color_gray' => 'رمادي',
+    'color_custom_label' => 'لون مخصص',
+    'color_channel_red' => 'أحمر',
+    'color_channel_green' => 'أخضر',
+    'color_channel_blue' => 'أزرق',
+
+    // Cover image (optional gallery pick)
+    'cover_label' => 'الغلاف (اختياري)',
+    'cover_pick' => 'اختر صورة',
+    'cover_remove' => 'احذف الصورة',
+    'cover_close' => 'أغلق',
+    'cover_error_type' => 'هذا الملف (:label) ليس صورة مدعومة — استخدم JPG أو PNG أو GIF أو WebP أو HEIC.',
+    'cover_error_unknown' => 'تعذّر قراءة هذا الملف — اختر صورة أخرى من المعرض.',
+    'cover_error_pick' => 'تعذّر فتح المعرض — حاول مجددًا.',
+    'cover_error_size' => 'هذه الصورة كبيرة — 5 ميجابايت كحد أقصى.',
+    'cover_open' => 'افتح الغلاف',
+    'cover_alt' => 'الغلاف المختار',
+
+    // Relative phrases (Modern Standard Arabic)
+    'phrase_today' => 'اليوم',
+    'phrase_tomorrow' => 'غدًا',
+    'phrase_yesterday' => 'أمس',
+    'in_days' => 'بعد :count :unit',
+    'days_ago' => 'منذ :count :unit',
+    'in_months' => 'بعد :count :unit',
+    'months_ago' => 'منذ :count :unit',
+    'in_years' => 'بعد :count :unit',
+    'years_ago' => 'منذ :count :unit',
+    'in_hours' => 'بعد :count :unit',
+    'hours_ago' => 'منذ :count :unit',
+    'exact_future' => 'بعد :count :unit',
+    'exact_past' => 'منذ :count :unit',
+
+    // Unit nouns by count shape
+    'day_one' => 'يوم',
+    'day_two' => 'يومين',
+    'day_few' => 'أيام',
+    'day_many' => 'يومًا',
+    'month_one' => 'شهر',
+    'month_two' => 'شهران',
+    'month_few' => 'أشهر',
+    'month_many' => 'شهرًا',
+    'year_one' => 'سنة',
+    'year_two' => 'سنتان',
+    'year_few' => 'سنوات',
+    'year_many' => 'سنةً',
+    'hour_one' => 'ساعة',
+    'hour_two' => 'ساعتان',
+    'hour_few' => 'ساعات',
+    'hour_many' => 'ساعةً',
+
+    // Gregorian months
+    'months' => [
+        'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+    ],
+
+    // Hijri months (calendar order, same as RandevuHijri::MONTH_NAMES)
+    'hijri_months' => [
+        'محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني',
+        'جمادى الأولى', 'جمادى الثانية', 'رجب', 'شعبان',
+        'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة',
+    ],
+    'hijri_suffix' => 'هـ',
+
+    // Details screen
+    'details_title' => 'التفاصيل',
+    'details_missing' => 'هذا الموعد غير موجود.',
+    'gregorian_label' => 'ميلادي',
+    'hijri_label' => 'هجري',
+    'exact_label' => 'بالضبط',
+    'kind_appointment' => 'موعد',
+    'kind_memory' => 'ذكرى',
+    'edit_cta' => 'عدّل',
+    'share_cta' => 'شارك',
+    'duplicate_cta' => 'تكراره العام القادم',
+
+    // Per-appointment distance units
+    'period_label' => 'عرض المدة بـ',
+    'period_days' => 'أيام',
+    'period_months' => 'أشهر',
+    'period_years' => 'سنوات',
+    'period_hours' => 'ساعات',
+    'period_units_required' => 'يجب اختيار وحدة واحدة على الأقل.',
+    'combined_future' => 'بعد :parts',
+    'combined_past' => 'منذ :parts',
+    'combined_separator' => '، ',
+
+    // Dashboard
+    'dashboard_title' => 'نظرة عامة',
+    'dash_total' => 'الإجمالي',
+    'dash_upcoming' => 'القادم',
+    'dash_memories' => 'ذكريات',
+    'dash_today' => 'اليوم',
+    'dash_this_month' => 'هذا الشهر',
+    'dash_split_headline' => 'طريقة الإدخال',
+    'dash_split_support' => 'ميلادي أم هجري',
+    'dash_gregorian' => 'ميلادي',
+    'dash_hijri' => 'هجري',
+    'dash_empty_support' => 'أضف موعدًا لعرض الإحصائيات هنا',
+
+    // Settings
+    'language_label' => 'اللغة',
+    'lang_arabic' => 'المصرية',
+    'lang_fusha' => 'العربية الفصحى',
+    'lang_english' => 'English',
+
+    // Theme
+    'theme_label' => 'المظهر',
+    'theme_light' => 'فاتح',
+    'theme_dark' => 'داكن',
+    'theme_toggle_a11y' => 'تبديل المظهر',
+
+    // Settings polish
+    'settings_language_helper' => 'لغة الواجهة واتجاه الكتابة',
+    'settings_theme_helper' => 'اختر المظهر المريح لعينيك',
+    'app_version' => 'الإصدار :version',
+
+    // Card ring unit + color picker
+    'ring_unit_days' => 'يوم',
+    'color_custom_hide' => 'إخفاء اللون المخصص',
+];

@@ -11,6 +11,7 @@ use App\NativeComponents\RandevuCreate;
 use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
+use App\Services\AppLocale;
 use App\Services\CoverImage;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
@@ -771,6 +772,29 @@ class RandevuScreensTest extends TestCase
         $this->assertSame('ar', Setting::get('locale'));
     }
 
+    public function test_settings_switches_to_fusha_and_persists(): void
+    {
+        $screen = Native::test(Settings::class)
+            ->assertSet('locale', 'ar')
+            ->assertSee('اللغة');
+
+        $screen->call('useFusha')
+            ->assertSet('locale', 'ar_fusha')
+            ->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'العربية الفصحى'
+                && ($n['props']['variant'] ?? '') === 'primary');
+
+        $this->assertSame('ar_fusha', Setting::get('locale'));
+        $this->assertTrue(AppLocale::isRtl());
+        $this->assertTrue(AppLocale::isRtl('ar_fusha'));
+        $this->assertFalse(AppLocale::isRtl('en'));
+
+        // A fresh mount picks up the stored language without restart.
+        Native::test(Follow::class)->assertSee('أضف أول موعد');
+
+        $screen->call('useArabic')->assertSet('locale', 'ar');
+        $this->assertSame('ar', Setting::get('locale'));
+    }
+
     public function test_settings_theme_switch_persists(): void
     {
         $screen = Native::test(Settings::class)
@@ -820,7 +844,8 @@ class RandevuScreensTest extends TestCase
 
         $screen = Native::test(Settings::class);
 
-        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'العربية');
+        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Egyptian');
+        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Modern Standard Arabic');
         $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'English');
         $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Light'
             && ($n['props']['variant'] ?? '') === 'primary');
@@ -840,7 +865,7 @@ class RandevuScreensTest extends TestCase
             ['اليوم', 'الشهر', 'السنة'],
             $this->selectRowLabels(Native::test(RandevuCreate::class)->tree())
         );
-        $this->assertSame('العربية', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
+        $this->assertSame('مصري', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
         $this->assertSame('column', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
 
         // English (LTR): identical order.
@@ -850,7 +875,7 @@ class RandevuScreensTest extends TestCase
             ['Day', 'Month', 'Year'],
             $this->selectRowLabels(Native::test(RandevuCreate::class)->tree())
         );
-        $this->assertSame('العربية', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
+        $this->assertSame('Egyptian', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
         $this->assertSame('column', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
     }
 
@@ -943,7 +968,7 @@ class RandevuScreensTest extends TestCase
         return [];
     }
 
-    /** Label of the first button in the first 2-button row. */
+    /** Label of the first button in the first all-button row. */
     private function firstButtonLabel(array $tree): string
     {
         foreach ($this->collectNodes($tree, 'row') as $row) {
@@ -954,7 +979,7 @@ class RandevuScreensTest extends TestCase
                 }
             }
 
-            $allButtons = count($children) === 2;
+            $allButtons = count($children) >= 2;
             foreach ($children as $child) {
                 $allButtons = $allButtons && (($child['type'] ?? null) === 'button');
             }
@@ -964,7 +989,7 @@ class RandevuScreensTest extends TestCase
             }
         }
 
-        $this->fail('No 2-button row found in the rendered tree.');
+        $this->fail('No button row found in the rendered tree.');
 
         return '';
     }

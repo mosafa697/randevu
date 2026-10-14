@@ -182,9 +182,8 @@ return [
 
     // Settings
     'language_label' => 'Language',
-    'current_arabic' => 'اللغة الحالية: العربية',
-    'current_english' => 'Current language: English',
-    'lang_arabic' => 'العربية',
+    'lang_arabic' => 'Egyptian',
+    'lang_fusha' => 'Modern Standard Arabic',
     'lang_english' => 'English',
 
     // Theme

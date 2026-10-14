@@ -1,6 +1,7 @@
 <native:row class="w-full gap-1 p-1 rounded-full bg-theme-surface-variant">
     @if(($name ?? '') === 'language')
         <native:button :label="__('randevu.lang_arabic')" :variant="($selected ?? '') === 'ar' ? 'primary' : 'ghost'" @press="useArabic" class="flex-1 min-h-12 rounded-full" />
+        <native:button :label="__('randevu.lang_fusha')" :variant="($selected ?? '') === 'ar_fusha' ? 'primary' : 'ghost'" @press="useFusha" class="flex-1 min-h-12 rounded-full" />
         <native:button :label="__('randevu.lang_english')" :variant="($selected ?? '') === 'en' ? 'primary' : 'ghost'" @press="useEnglish" class="flex-1 min-h-12 rounded-full" />
     @elseif(($name ?? '') === 'theme')
         <native:button :label="__('randevu.theme_light')" :variant="($selected ?? '') === 'light' ? 'primary' : 'ghost'" @press="useLight" class="flex-1 min-h-12 rounded-full" />

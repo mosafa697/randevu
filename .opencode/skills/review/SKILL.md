@@ -38,7 +38,7 @@ Review the real diff against the issue contract and NativePHP clean code. Never 
 - Validation uses `Randevu::rules()`; per-field `$errors` shown; old values survive failed saves; `hasAnyUnit()` blocks saving with all distance units off.
 - Color: only via `COLOR_PRESETS` + `normalizeColor()` (uppercase `#RRGGBB`, empty → null); never raw unvalidated input.
 - Theme: mode is per-device via `AppTheme` (light|dark) — forced palette in both blocks + `TailwindParser::clearCache()`; toggling must stay lossless. No raw palette classes in Blade; drawn chrome uses `AppTheme::token()`.
-- Locale: per-device via `AppLocale` (ar|en, ar default); all visible strings through `__('randevu.*')`; `Setting` is the only per-device store.
+- Locale: per-device via `AppLocale` (ar|ar_fusha|en, ar default); all visible strings through `__('randevu.*')`; `Setting` is the only per-device store.
 
 ## 5. Verification evidence (re-run it; never trust a summary)
 

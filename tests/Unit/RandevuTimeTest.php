@@ -55,6 +55,30 @@ class RandevuTimeTest extends TestCase
         $this->assertSame('بعد سنة', RandevuTime::phrase('2027-09-23', $today));
     }
 
+    public function test_phrases_fusha(): void
+    {
+        App::setLocale('ar_fusha');
+        $today = Carbon::parse('2026-09-23');
+
+        $this->assertSame('اليوم', RandevuTime::phrase('2026-09-23', $today));
+        $this->assertSame('غدًا', RandevuTime::phrase('2026-09-24', $today));
+        $this->assertSame('أمس', RandevuTime::phrase('2026-09-22', $today));
+        $this->assertSame('بعد 5 أيام', RandevuTime::phrase('2026-09-28', $today));
+        $this->assertSame('منذ 5 أيام', RandevuTime::phrase('2026-09-18', $today));
+        $this->assertSame('23 سبتمبر 2026', RandevuTime::absolute(Carbon::parse('2026-09-23')));
+    }
+
+    public function test_fusha_unit_shapes(): void
+    {
+        App::setLocale('ar_fusha');
+        $today = Carbon::parse('2026-09-23');
+
+        $this->assertSame('بعد يومين', RandevuTime::phrase('2026-09-25', $today));
+        $this->assertSame('منذ 15 يومًا', RandevuTime::phrase('2026-09-08', $today));
+        $this->assertSame('بعد شهر', RandevuTime::phrase('2026-10-23', $today));
+        $this->assertSame('بعد سنة', RandevuTime::phrase('2027-09-23', $today));
+    }
+
     public function test_month_names_follow_locale(): void
     {
         App::setLocale('en');

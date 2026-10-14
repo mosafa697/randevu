@@ -38,6 +38,11 @@ class Settings extends NativeComponent
         $this->locale = AppLocale::persist('ar');
     }
 
+    public function useFusha(): void
+    {
+        $this->locale = AppLocale::persist('ar_fusha');
+    }
+
     public function useEnglish(): void
     {
         $this->locale = AppLocale::persist('en');
