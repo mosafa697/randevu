@@ -43,7 +43,7 @@
                 <native:text class="text-sm text-theme-on-surface-variant leading-relaxed">{{ $item['note'] }}</native:text>
             @endif
             @if(!$isToday)
-                <native:text class="text-sm px-3 py-1 rounded-full self-start {{ $pillClass }}">{{ $item['phrase'] }}</native:text>
+                <native:text class="text-base font-semibold px-3 py-1.5 rounded-full self-start {{ $pillClass }}">{{ $item['phrase'] }}</native:text>
             @endif
         </native:column>
         @include('native.components.ring', [
