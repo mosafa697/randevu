@@ -63,7 +63,6 @@
     </native:scroll-view>
 
     <native:column class="w-full px-5 py-3 bg-theme-background safe-area-bottom">
-        <native:divider />
         <native:button :label="__('randevu.save')" font="label" @press="save" variant="primary" class="w-full min-h-12" />
     </native:column>
 </native:column>
