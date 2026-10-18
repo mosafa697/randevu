@@ -19,7 +19,6 @@
         $fill = (($entered_in ?? 'gregorian') === 'hijri') ? theme('accent') : theme('primary');
     }
     $track = theme('progress-track');
-    $unitLabel = __('randevu.ring_unit_days');
     $delay = ($index ?? 0) * 100;
     $n = abs($days ?? 0);
     $html = '<!DOCTYPE html><html><head><meta name="viewport" content="width=64,initial-scale=1"><style>'
@@ -36,8 +35,7 @@
 @endphp
 <native:stack class="w-16 h-16">
     <native:webview class="w-16 h-16" :html="$html" />
-    <native:column class="absolute inset-0 items-center justify-center">
+    <native:column fill center>
         <native:text font="heading" class="{{ \App\Services\AppFonts::pointClass(17) }} font-bold text-theme-on-surface">{{ $n }}</native:text>
-        <native:text font="body" class="{{ \App\Services\AppFonts::pointClass(10) }} text-theme-on-surface-variant">{{ $unitLabel }}</native:text>
     </native:column>
 </native:stack>

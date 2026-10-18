@@ -525,8 +525,32 @@ class RandevuScreensTest extends TestCase
         $screen->assertElement('webview', fn ($n) => isset($n['props']['html']) && str_contains($n['props']['html'], '<svg'));
         $screen->assertElement('text', fn ($n) => ($n['props']['font_name'] ?? null) === 'heading'
             && ($n['props']['font_size'] ?? null) === 18.0);
-        $screen->assertElement('text', fn ($n) => ($n['props']['font_name'] ?? null) === 'body'
-            && ($n['props']['font_size'] ?? null) === 11.0);
+        $screen->assertMissingElement('text', fn ($n) => ($n['props']['text'] ?? null) === __('randevu.ring_unit_days'));
+
+        $findRingOverlay = null;
+        $findRingOverlay = function (array $nodes) use (&$findRingOverlay): ?array {
+            foreach ($nodes as $node) {
+                $children = $node['children'] ?? [];
+                if (($node['type'] ?? null) === 'stack'
+                    && count($children) === 2
+                    && ($children[0]['type'] ?? null) === 'webview'
+                    && ($children[1]['type'] ?? null) === 'column') {
+                    return $children[1];
+                }
+                if ($overlay = $findRingOverlay($children)) {
+                    return $overlay;
+                }
+            }
+
+            return null;
+        };
+
+        $overlay = $findRingOverlay([$screen->tree()]);
+        $this->assertNotNull($overlay);
+        $this->assertSame('fill', $overlay['layout']['width'] ?? null);
+        $this->assertSame('fill', $overlay['layout']['height'] ?? null);
+        $this->assertSame(1, $overlay['layout']['align_items'] ?? null);
+        $this->assertSame(1, $overlay['layout']['justify_content'] ?? null);
         $screen->assertSee('بعد 5 أيام');
     }
 
