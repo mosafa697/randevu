@@ -553,12 +553,15 @@ class PeriodDisplayTest extends TestCase
         $muted = AppTheme::token('on-surface-variant');
 
         $screen
-            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), $accent)
-                && str_contains((string) ($n['props']['html'] ?? ''), '>0</text>'))
-            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), $primary)
-                && str_contains((string) ($n['props']['html'] ?? ''), '>3</text>'))
-            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), $muted)
-                && str_contains((string) ($n['props']['html'] ?? ''), '>40</text>'));
+            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), $accent))
+            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), $primary))
+            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), $muted))
+            ->assertElement('text', fn ($n) => (string) ($n['props']['text'] ?? '') === '0'
+                && ($n['props']['font_name'] ?? null) === 'heading')
+            ->assertElement('text', fn ($n) => (string) ($n['props']['text'] ?? '') === '3'
+                && ($n['props']['font_name'] ?? null) === 'heading')
+            ->assertElement('text', fn ($n) => (string) ($n['props']['text'] ?? '') === '40'
+                && ($n['props']['font_name'] ?? null) === 'heading');
     }
 
     public function test_memories_cards_use_muted_tier(): void
@@ -605,12 +608,14 @@ class PeriodDisplayTest extends TestCase
 
         // A selected color overrides the urgency/calendar ring fill in both tabs.
         Native::test(Follow::class)
-            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), '#DB2777')
-                && str_contains((string) ($n['props']['html'] ?? ''), '>3</text>'));
+            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), '#DB2777'))
+            ->assertElement('text', fn ($n) => (string) ($n['props']['text'] ?? '') === '3'
+                && ($n['props']['font_name'] ?? null) === 'heading');
 
         Native::test(Memories::class)
-            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), '#059669')
-                && str_contains((string) ($n['props']['html'] ?? ''), '>5</text>'));
+            ->assertElement('webview', fn ($n) => str_contains((string) ($n['props']['html'] ?? ''), '#059669'))
+            ->assertElement('text', fn ($n) => (string) ($n['props']['text'] ?? '') === '5'
+                && ($n['props']['font_name'] ?? null) === 'heading');
     }
 
     public function test_details_share_sends_composed_text(): void

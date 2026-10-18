@@ -194,7 +194,7 @@ return [
     'fonts' => [
         'default' => 'Amiri-Regular',
         'heading' => 'Amiri-Bold',
-        'label' => 'Tajawal-Bold',
+        'label' => 'Amiri-Bold',
         'body' => 'Amiri-Regular',
     ],
 

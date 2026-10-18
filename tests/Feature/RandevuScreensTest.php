@@ -11,6 +11,7 @@ use App\NativeComponents\RandevuCreate;
 use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
+use App\Services\AppFonts;
 use App\Services\AppLocale;
 use App\Services\CoverImage;
 use App\Services\RandevuHijri;
@@ -522,6 +523,10 @@ class RandevuScreensTest extends TestCase
         $screen = Native::test(Follow::class);
 
         $screen->assertElement('webview', fn ($n) => isset($n['props']['html']) && str_contains($n['props']['html'], '<svg'));
+        $screen->assertElement('text', fn ($n) => ($n['props']['font_name'] ?? null) === 'heading'
+            && ($n['props']['font_size'] ?? null) === 18.0);
+        $screen->assertElement('text', fn ($n) => ($n['props']['font_name'] ?? null) === 'body'
+            && ($n['props']['font_size'] ?? null) === 11.0);
         $screen->assertSee('بعد 5 أيام');
     }
 
@@ -533,7 +538,7 @@ class RandevuScreensTest extends TestCase
             ->assertElement('webview', fn ($n) => isset($n['props']['html']) && str_contains($n['props']['html'], '<svg'));
     }
 
-    public function test_titles_and_section_headers_render_in_amiri_bold(): void
+    public function test_titles_and_section_headers_use_semantic_font_roles(): void
     {
         Setting::set('locale', 'en');
         Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDay()]);
@@ -550,7 +555,46 @@ class RandevuScreensTest extends TestCase
             ->assertElement('text', fn ($n) => $heading($n) && ($n['props']['text'] ?? '') === 'Language');
 
         Native::visit('/')
-            ->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_font_name'] ?? null) === 'heading');
+            ->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_font_name'] ?? null) === 'System');
+    }
+
+    public function test_locale_selects_font_family_and_arabic_text_size(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(Settings::class)
+            ->assertElement('text', fn ($n) => ($n['props']['font_size'] ?? null) === 14.0);
+
+        $this->assertSame([
+            'default' => 'System',
+            'body' => 'System',
+            'heading' => 'System',
+            'label' => 'System',
+        ], \Native\Mobile\UI\Theme::all()['fonts']);
+
+        Native::visit('/')
+            ->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_font_name'] ?? null) === 'System'
+                && ($n['props']['font_name'] ?? null) === 'System');
+
+        Setting::set('locale', 'ar');
+
+        Native::test(Settings::class)
+            ->assertElement('text', fn ($n) => ($n['props']['font_size'] ?? null) === 15.0);
+
+        $this->assertSame('Amiri-Regular', AppFonts::font('default'));
+        $this->assertSame('Amiri-Bold', AppFonts::font('heading'));
+        $this->assertSame('Amiri-Bold', AppFonts::font('label'));
+
+        Native::visit('/')
+            ->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_font_name'] ?? null) === 'Amiri-Bold'
+                && ($n['props']['font_name'] ?? null) === 'Amiri-Bold');
+
+        Setting::set('locale', 'ar_fusha');
+
+        Native::test(Settings::class)
+            ->assertElement('text', fn ($n) => ($n['props']['font_size'] ?? null) === 15.0);
+
+        $this->assertSame('Amiri-Regular', AppFonts::font('default'));
     }
 
     public function test_every_route_renders_native_tab_chrome(): void
@@ -585,7 +629,7 @@ class RandevuScreensTest extends TestCase
 
         $this->assertSame('#5F53D0', $tree['props']['active_color'] ?? null);
         $this->assertSame('#69647D', $tree['props']['text_color'] ?? null);
-        $this->assertSame('label', $tree['props']['font_name'] ?? null);
+        $this->assertSame('System', $tree['props']['font_name'] ?? null);
         $this->assertSame('labeled', $tree['props']['label_visibility'] ?? null);
         $this->assertArrayNotHasKey('background_color', $tree['props']);
 
@@ -779,7 +823,7 @@ class RandevuScreensTest extends TestCase
 
         $screen->call('useFusha')
             ->assertSet('locale', 'ar_fusha')
-            ->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'العربية الفصحى'
+            ->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === __('randevu.lang_fusha')
                 && ($n['props']['variant'] ?? '') === 'primary');
 
         $this->assertSame('ar_fusha', Setting::get('locale'));
@@ -993,7 +1037,7 @@ class RandevuScreensTest extends TestCase
         return '';
     }
 
-    /** Type of the first child of the card row (holds the ring webview). */
+    /** Type of the first child of the card row (holds the ring stack). */
     private function cardRowFirstType(array $tree): string
     {
         foreach ($this->collectNodes($tree, 'row') as $row) {
@@ -1006,7 +1050,7 @@ class RandevuScreensTest extends TestCase
 
             $hasWebview = false;
             foreach ($children as $child) {
-                $hasWebview = $hasWebview || (($child['type'] ?? null) === 'webview');
+                $hasWebview = $hasWebview || $this->collectNodes($child, 'webview') !== [];
             }
 
             if ($hasWebview && count($children) > 0) {

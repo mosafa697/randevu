@@ -21,5 +21,5 @@
     @endif
 </native:row>
 @if(!empty($errors['period_units']))
-    <native:text class="text-sm text-theme-destructive">{{ $errors['period_units'] }}</native:text>
+    <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-destructive">{{ $errors['period_units'] }}</native:text>
 @endif

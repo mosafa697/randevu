@@ -1,4 +1,4 @@
-<native:text font="heading" class="text-sm text-theme-on-surface">{{ __('randevu.cover_label') }}</native:text>
+<native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} {{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface">{{ __('randevu.cover_label') }}</native:text>
 
 @php($coverSrc = \App\Services\CoverImage::src($cover_path ?? null))
 @if($coverSrc !== null)
@@ -13,5 +13,5 @@
 </native:row>
 
 @if(!empty($errors['cover']))
-    <native:text class="text-sm text-theme-destructive">{{ $errors['cover'] }}</native:text>
+    <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-destructive">{{ $errors['cover'] }}</native:text>
 @endif

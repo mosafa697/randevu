@@ -65,16 +65,16 @@ class ThemeTest extends TestCase
         $this->assertSame('#A19EC6', config('native-ui.authored-theme.dark.on-surface-variant'));
     }
 
-    public function test_amiri_is_body_font_with_amiri_bold_headings(): void
+    public function test_amiri_is_the_only_configured_arabic_font(): void
     {
         $fonts = config('native-ui.fonts');
 
         $this->assertSame('Amiri-Regular', $fonts['default']);
         $this->assertSame('Amiri-Regular', $fonts['body']);
         $this->assertSame('Amiri-Bold', $fonts['heading']);
-        $this->assertSame('Tajawal-Bold', $fonts['label']);
+        $this->assertSame('Amiri-Bold', $fonts['label']);
 
-        foreach (['Amiri-Regular', 'Amiri-Bold', 'Tajawal-Bold'] as $token) {
+        foreach (['Amiri-Regular', 'Amiri-Bold'] as $token) {
             $this->assertFileExists(
                 resource_path("fonts/{$token}.ttf"),
                 "Bundled font file [{$token}.ttf] missing"

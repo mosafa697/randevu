@@ -2,6 +2,7 @@
 
 namespace App\NativeComponents\Layouts;
 
+use App\Services\AppFonts;
 use App\Services\AppTheme;
 use Native\Mobile\Edge\Layouts\Builders\NavBar;
 use Native\Mobile\Edge\Layouts\Builders\Tab;
@@ -25,7 +26,7 @@ class RandevuLayout extends NativeLayout
         return NavBar::make()
             ->title($screen->navTitle())
             ->back()
-            ->font('heading')
+            ->font(AppFonts::font('heading'))
             ->backgroundColor((string) AppTheme::token('background', '#FBF9F4'))
             ->textColor((string) AppTheme::token('on-background', '#2B2740'));
     }
@@ -37,7 +38,7 @@ class RandevuLayout extends NativeLayout
             ->labelVisibility('labeled')
             ->textColor((string) AppTheme::token('on-surface-variant', '#69647D'))
             ->activeColor((string) AppTheme::token('primary', '#6F63DB'))
-            ->font('label')
+            ->font(AppFonts::font('label'))
             ->add(Tab::link(__('randevu.tab_dashboard'), '/', ios: 'chart.bar', android: 'bar_chart'))
             ->add(Tab::link(__('randevu.tab_follow'), '/follow', ios: 'calendar', android: 'calendar_month'))
             ->add(Tab::link(__('randevu.tab_new'), '/create', ios: 'plus', android: 'add'))

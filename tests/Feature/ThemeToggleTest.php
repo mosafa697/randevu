@@ -33,8 +33,8 @@ class ThemeToggleTest extends TestCase
         $this->assertSame('#2B2740', $this->chromeProp($tree, 'nav_text_color'));
         $this->assertSame('#5F53D0', $this->chromeProp($tree, 'active_color'));
         $this->assertSame('#69647D', $this->chromeProp($tree, 'text_color'));
-        $this->assertSame('label', $this->chromeProp($tree, 'font_name'));
-        $this->assertSame('heading', $this->chromeProp($tree, 'nav_font_name'));
+        $this->assertSame('Amiri-Bold', $this->chromeProp($tree, 'font_name'));
+        $this->assertSame('Amiri-Bold', $this->chromeProp($tree, 'nav_font_name'));
         $this->assertNull($this->chromeProp($tree, 'dark'));
         $this->assertNull($this->chromeProp($tree, 'background_color'));
 

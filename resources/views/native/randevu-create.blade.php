@@ -3,7 +3,7 @@
         <native:column class="w-full px-5 py-3 gap-4">
             <native:outlined-text-input :label="__('randevu.title_label')" :placeholder="__('randevu.title_placeholder')" native:model="title" class="min-h-14" />
             @if(!empty($errors['title']))
-                <native:text class="text-sm text-theme-destructive">{{ $errors['title'] }}</native:text>
+                <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-destructive">{{ $errors['title'] }}</native:text>
             @endif
 
             @include('native.partials.segmented', ['name' => 'calendar', 'selected' => $calendar_mode])
@@ -28,7 +28,7 @@
                 </native:row>
             @endif
             @if(!empty($errors['occurs_on']))
-                <native:text class="text-sm text-theme-destructive">{{ $errors['occurs_on'] }}</native:text>
+                <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-destructive">{{ $errors['occurs_on'] }}</native:text>
             @endif
 
             <native:row class="w-full gap-2">
@@ -36,7 +36,7 @@
                 <native:select :label="__('randevu.minute_label')" :options="$minuteOptions" native:model="minute" class="flex-1" />
             </native:row>
 
-            <native:text font="heading" class="text-sm text-theme-on-surface">{{ __('randevu.period_label') }}</native:text>
+            <native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} {{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface">{{ __('randevu.period_label') }}</native:text>
 
             @include('native.partials.period-chips')
 
@@ -44,14 +44,14 @@
 
             <native:outlined-text-input :label="__('randevu.note_label')" :placeholder="__('randevu.note_placeholder')" native:model="note" multiline :min-lines="2" class="min-h-24" />
             @if(!empty($errors['note']))
-                <native:text class="text-sm text-theme-destructive">{{ $errors['note'] }}</native:text>
+                <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-destructive">{{ $errors['note'] }}</native:text>
             @endif
 
             @include('native.partials.color-picker', ['selected' => $color, 'errors' => $errors])
 
             @include('native.partials.cover-picker')
 
-            <native:text class="text-sm text-theme-on-surface-variant leading-relaxed">{{ __('randevu.form_hint') }}</native:text>
+            <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant leading-relaxed">{{ __('randevu.form_hint') }}</native:text>
 
             <native:column class="w-full h-24" />
         </native:column>

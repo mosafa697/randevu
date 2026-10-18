@@ -33,6 +33,12 @@ class BrandAssetsTest extends TestCase
         $this->assertSame(1024, $size[0]);
         $this->assertSame(1024, $size[1]);
         $this->assertSame('image/png', $size['mime']);
+
+        $icon = imagecreatefrompng($path);
+        $topLeft = imagecolorsforindex($icon, imagecolorat($icon, 0, 0));
+        imagedestroy($icon);
+
+        $this->assertSame(127, $topLeft['alpha']);
     }
 
     public function test_splashes_match_theme_backgrounds(): void

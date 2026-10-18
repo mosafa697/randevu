@@ -1,6 +1,6 @@
 <native:column class="w-full h-full p-4 gap-4 bg-theme-background">
     @if($randevu === null)
-        <native:text class="text-base text-theme-on-surface-variant">{{ __('randevu.details_missing') }}</native:text>
+        <native:text class="{{ \App\Services\AppFonts::textClass('base') }} text-theme-on-surface-variant">{{ __('randevu.details_missing') }}</native:text>
     @elseif($show_full_cover && !empty($randevu['cover']))
         <native:column class="w-full h-full bg-theme-background">
             <native:scroll-view class="w-full h-full">
@@ -18,29 +18,29 @@
                 </native:pressable>
             @endif
             <native:row class="w-full items-center justify-between">
-                <native:text font="heading" class="text-lg font-semibold text-theme-on-surface">{{ $randevu['title'] }}</native:text>
+                <native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} {{ \App\Services\AppFonts::textClass('lg') }} font-semibold text-theme-on-surface">{{ $randevu['title'] }}</native:text>
                 @if($randevu['is_today'])
                     <native:badge :label="__('randevu.today')" variant="accent" />
                 @endif
             </native:row>
-            <native:text font="heading" class="text-2xl font-bold text-theme-on-surface">{{ $randevu['phrase'] }}</native:text>
+            <native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} {{ \App\Services\AppFonts::textClass('2xl') }} font-bold text-theme-on-surface">{{ $randevu['phrase'] }}</native:text>
             @php($detailsAccent = isset($randevu['color']) && is_string($randevu['color']) && preg_match('/^#[0-9A-Fa-f]{6}$/', $randevu['color']) ? $randevu['color'] : null)
             @if($detailsAccent !== null)
                 <native:row class="w-full items-center">
                     <native:column :bg="$detailsAccent" class="w-8 h-2 rounded-full" />
                 </native:row>
             @endif
-            <native:text class="text-sm text-theme-on-surface-variant">{{ __('randevu.exact_label') }}: {{ $randevu['exact'] }}</native:text>
+            <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant">{{ __('randevu.exact_label') }}: {{ $randevu['exact'] }}</native:text>
             <native:divider class="w-full" />
-            <native:text class="text-sm text-theme-on-surface">{{ __('randevu.gregorian_label') }}: {{ $randevu['absolute'] }}</native:text>
+            <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface">{{ __('randevu.gregorian_label') }}: {{ $randevu['absolute'] }}</native:text>
             @if(!empty($randevu['hijri']))
-                <native:text class="text-sm text-theme-on-surface">{{ __('randevu.hijri_label') }}: {{ $randevu['hijri'] }} {{ \App\Services\RandevuHijri::hijriSuffix() }}</native:text>
+                <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface">{{ __('randevu.hijri_label') }}: {{ $randevu['hijri'] }} {{ \App\Services\RandevuHijri::hijriSuffix() }}</native:text>
             @endif
-            <native:text class="text-sm text-theme-on-surface-variant">
+            <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant">
                 {{ $randevu['is_appointment'] ? __('randevu.kind_appointment') : __('randevu.kind_memory') }}
             </native:text>
             @if(!empty($randevu['note']))
-                <native:text class="text-sm text-theme-on-surface-variant">{{ $randevu['note'] }}</native:text>
+                <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant">{{ $randevu['note'] }}</native:text>
             @endif
         </native:column>
 

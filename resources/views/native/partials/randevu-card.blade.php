@@ -30,20 +30,20 @@
         @endif
         <native:column class="flex-1 gap-1">
             <native:row class="w-full items-center gap-2">
-                <native:text font="heading" class="flex-1 text-lg text-theme-on-surface leading-relaxed">{{ $item['title'] }}</native:text>
+                <native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} flex-1 {{ \App\Services\AppFonts::textClass('lg') }} text-theme-on-surface leading-relaxed">{{ $item['title'] }}</native:text>
                 @if($isToday && $showBadge)
                     <native:badge :label="__('randevu.today')" variant="accent" />
                 @endif
             </native:row>
-            <native:text class="text-sm text-theme-on-surface-variant leading-relaxed">{{ $item['absolute'] }}</native:text>
+            <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant leading-relaxed">{{ $item['absolute'] }}</native:text>
             @if(!empty($item['hijri']))
-                <native:text class="text-sm text-theme-on-surface-variant leading-relaxed">{{ $item['hijri'] }} {{ \App\Services\RandevuHijri::hijriSuffix() }}</native:text>
+                <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant leading-relaxed">{{ $item['hijri'] }} {{ \App\Services\RandevuHijri::hijriSuffix() }}</native:text>
             @endif
             @if(!empty($item['note']))
-                <native:text class="text-sm text-theme-on-surface-variant leading-relaxed">{{ $item['note'] }}</native:text>
+                <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant leading-relaxed">{{ $item['note'] }}</native:text>
             @endif
             @if(!$isToday)
-                <native:text class="text-base font-semibold px-3 py-1.5 rounded-full self-start {{ $pillClass }}">{{ $item['phrase'] }}</native:text>
+                <native:text class="{{ \App\Services\AppFonts::textClass('base') }} font-semibold px-3 py-1.5 rounded-full self-start {{ $pillClass }}">{{ $item['phrase'] }}</native:text>
             @endif
         </native:column>
         @include('native.components.ring', [

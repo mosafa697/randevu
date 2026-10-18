@@ -34,6 +34,7 @@ class AppLocale
     {
         $locale = self::current();
         App::setLocale($locale);
+        AppFonts::apply($locale);
 
         return $locale;
     }
@@ -47,6 +48,7 @@ class AppLocale
         }
 
         App::setLocale($locale);
+        AppFonts::apply($locale);
 
         return $locale;
     }
