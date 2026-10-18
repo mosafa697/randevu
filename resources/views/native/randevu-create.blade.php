@@ -1,9 +1,4 @@
 <native:column class="w-full h-full bg-theme-background">
-    @php($rtl = \App\Services\AppLocale::isRtl())
-    <native:row class="w-full px-5 pt-3">
-        <native:button :label="$rtl ? '› '.__('randevu.back') : '‹ '.__('randevu.back')" variant="ghost" @navigate.back class="min-h-12 min-w-24" />
-    </native:row>
-
     <native:scroll-view class="w-full flex-1">
         <native:column class="w-full px-5 py-3 gap-4">
             <native:outlined-text-input :label="__('randevu.title_label')" :placeholder="__('randevu.title_placeholder')" native:model="title" class="min-h-14" />

@@ -704,20 +704,20 @@ class RandevuScreensTest extends TestCase
             ->assertSee('AH');
     }
 
-    public function test_back_buttons_use_directional_chevron_per_language(): void
+    public function test_back_buttons_use_native_header_back_action(): void
     {
-        // Arabic (RTL): the back chevron points forward (truly directional).
-        Native::test(RandevuCreate::class)->assertSee('› رجوع');
+        // Header chrome owns the back affordance; the screen no longer renders an inline
+        // text-labelled ghost button.
+        Native::visit('/create')->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_back'] ?? null) === true);
 
         $randevu = Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDay()]);
-        Native::test(RandevuDetails::class, ['id' => $randevu->id])->assertSee('› رجوع');
+        Native::visit('/details/'.$randevu->id)->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_back'] ?? null) === true);
 
-        // English (LTR): same ghost button, chevron flipped.
         Setting::set('locale', 'en');
 
-        Native::test(RandevuCreate::class)->assertSee('‹ Back');
-        Native::test(RandevuEdit::class, ['id' => $randevu->id])->assertSee('‹ Back');
-        Native::test(RandevuDetails::class, ['id' => $randevu->id])->assertSee('‹ Back');
+        Native::visit('/create')->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_back'] ?? null) === true);
+        Native::visit('/edit/'.$randevu->id)->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_back'] ?? null) === true);
+        Native::visit('/details/'.$randevu->id)->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_back'] ?? null) === true);
     }
 
     public function test_action_buttons_are_full_width_with_touch_target(): void
@@ -740,17 +740,16 @@ class RandevuScreensTest extends TestCase
             && isset($n['layout']['min_height']));
     }
 
-    public function test_back_buttons_keep_minimum_width(): void
+    public function test_native_header_back_does_not_render_inline_text_button(): void
     {
-        // "‹ Back" vs "› رجوع" differ in length: min-w-24 (96pt) covers
-        // both, so the ghost back button never changes size per language.
-        Native::test(RandevuCreate::class)->assertElement('button', fn ($n) => ($n['layout']['min_width'] ?? 0) == 96
-            && isset($n['layout']['min_height']));
+        $screen = Native::visit('/create');
+
+        $screen->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_back'] ?? null) === true);
+        $screen->assertMissingElement('button', fn ($n) => in_array(($n['props']['label'] ?? null), ['Back', 'رجوع'], true));
 
         Setting::set('locale', 'en');
 
-        Native::test(RandevuCreate::class)->assertElement('button', fn ($n) => ($n['layout']['min_width'] ?? 0) == 96
-            && isset($n['layout']['min_height']));
+        Native::visit('/create')->assertMissingElement('button', fn ($n) => in_array(($n['props']['label'] ?? null), ['Back', 'رجوع'], true));
     }
 
     public function test_settings_switches_language_and_persists(): void

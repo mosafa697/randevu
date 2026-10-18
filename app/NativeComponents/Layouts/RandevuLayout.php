@@ -24,6 +24,7 @@ class RandevuLayout extends NativeLayout
         // Theme switching lives on the Settings screen — no header action.
         return NavBar::make()
             ->title($screen->navTitle())
+            ->back()
             ->font('heading')
             ->backgroundColor((string) AppTheme::token('background', '#FBF9F4'))
             ->textColor((string) AppTheme::token('on-background', '#2B2740'));

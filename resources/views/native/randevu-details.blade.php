@@ -1,11 +1,4 @@
 <native:column class="w-full h-full p-4 gap-4 bg-theme-background">
-    @php($rtl = \App\Services\AppLocale::isRtl())
-    @if($randevu === null || !($show_full_cover && !empty($randevu['cover'])))
-        <native:row class="w-full">
-            <native:button :label="$rtl ? '› '.__('randevu.back') : '‹ '.__('randevu.back')" variant="ghost" @navigate.back class="min-h-12 min-w-24" />
-        </native:row>
-    @endif
-
     @if($randevu === null)
         <native:text class="text-base text-theme-on-surface-variant">{{ __('randevu.details_missing') }}</native:text>
     @elseif($show_full_cover && !empty($randevu['cover']))

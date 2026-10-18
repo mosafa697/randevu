@@ -332,9 +332,9 @@ class CoverImageTest extends TestCase
         $cover = $this->tempImage();
         $randevu = Randevu::create(['title' => 'Covered', 'occurs_on' => today()->addDay(), 'cover_path' => $cover]);
 
-        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id])
+        $screen = Native::visit('/details/'.$randevu->id)
             ->assertSet('show_full_cover', false)
-            ->assertSee('Back')
+            ->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_back'] ?? null) === true)
             ->assertElement('image', fn ($n) => ($n['props']['fit'] ?? null) === 2)
             ->assertMissingElement('image', fn ($n) => ($n['props']['fit'] ?? null) === 1)
             ->press('openCover')
@@ -344,8 +344,8 @@ class CoverImageTest extends TestCase
         $screen->assertElement('image', fn ($n) => ($n['props']['src'] ?? null) === CoverImage::toFileUri($cover)
             && ($n['props']['fit'] ?? null) === 1
             && ($n['layout']['height'] ?? null) == 560);
-        // Single exit while viewing: the Back row hides, Close is the way out.
-        $screen->assertDontSee('Back');
+        // The header owns the back button; there is no inline ghost back row in the full-cover viewer.
+        $screen->assertMissingElement('button', fn ($n) => in_array(($n['props']['label'] ?? null), ['Back', 'رجوع'], true));
     }
 
     public function test_details_cover_viewer_closes(): void
