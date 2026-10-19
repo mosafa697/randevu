@@ -7,7 +7,9 @@ use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
 use App\Services\CoverImage;
 use App\Services\RandevuHijri;
+use App\Services\RandevuNotificationRules;
 use App\Services\RandevuTime;
+use App\Support\Bidi;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
 use Native\Mobile\Facades\Share;
@@ -62,14 +64,14 @@ class RandevuDetails extends NativeComponent
         }
 
         // Display state carries bidi isolates — strip them for plain-text share.
-        $lines = [\App\Support\Bidi::strip($this->randevu['title']), $this->randevu['phrase'].' — '.$this->randevu['absolute']];
+        $lines = [Bidi::strip($this->randevu['title']), $this->randevu['phrase'].' — '.$this->randevu['absolute']];
 
         if (! empty($this->randevu['hijri'])) {
             $lines[1] .= ' ('.$this->randevu['hijri'].' '.RandevuHijri::hijriSuffix().')';
         }
 
         if (! empty($this->randevu['note'])) {
-            $lines[] = \App\Support\Bidi::strip($this->randevu['note']);
+            $lines[] = Bidi::strip($this->randevu['note']);
         }
 
         // No URL exists in this serverless app — Share::file() with an
@@ -77,7 +79,7 @@ class RandevuDetails extends NativeComponent
         // with an empty URL is ignored on device, which is why the
         // button used to do nothing). Requires nativephp/mobile-share,
         // registered in NativeServiceProvider::plugins().
-        Share::file(\App\Support\Bidi::strip($this->randevu['title']), implode("\n", $lines), '');
+        Share::file(Bidi::strip($this->randevu['title']), implode("\n", $lines), '');
     }
 
     /** @press entry point — bare method only. */
@@ -100,7 +102,7 @@ class RandevuDetails extends NativeComponent
 
         $this->randevu = [
             'id' => $randevu->id,
-            'title' => \App\Support\Bidi::isolate($randevu->title),
+            'title' => Bidi::isolate($randevu->title),
             'occurs_on' => $randevu->occurs_on->toDateString(),
             'absolute' => RandevuTime::absolute($randevu->occurs_on),
             'hijri' => $randevu->hijriLabel(),
@@ -108,9 +110,11 @@ class RandevuDetails extends NativeComponent
             'exact' => RandevuTime::exactSuffix($randevu->exactDayCount()),
             'is_appointment' => $randevu->isAppointment(),
             'is_today' => $randevu->isToday(),
-            'note' => \App\Support\Bidi::isolate($randevu->note),
+            'note' => Bidi::isolate($randevu->note),
             'color' => $randevu->color,
             'cover' => CoverImage::src($randevu->cover_path),
+            'notification_armed' => RandevuNotificationRules::isArmed($randevu),
+            'notification_description' => RandevuNotificationRules::description($randevu),
         ];
     }
 

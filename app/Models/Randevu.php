@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Services\CoverImage;
 use App\Services\RandevuHijri;
+use App\Services\RandevuNotificationScheduler;
 use App\Services\RandevuTime;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,12 @@ use Illuminate\Support\Carbon;
  */
 class Randevu extends Model
 {
-    protected $fillable = ['title', 'occurs_on', 'occurs_time', 'occurs_time', 'note', 'color', 'cover_path', 'hijri_year', 'hijri_month', 'hijri_day', 'entered_in', 'show_years', 'show_months', 'show_days', 'show_hours', 'show_hours'];
+    protected $fillable = [
+        'title', 'occurs_on', 'occurs_time', 'note', 'color', 'cover_path',
+        'hijri_year', 'hijri_month', 'hijri_day', 'entered_in',
+        'show_years', 'show_months', 'show_days', 'show_hours',
+        'reminder_rule', 'anniversary_mode', 'anniversary_lead_days',
+    ];
 
     protected $casts = [
         'occurs_on' => 'date',
@@ -32,6 +38,7 @@ class Randevu extends Model
         'show_months' => 'boolean',
         'show_days' => 'boolean',
         'show_hours' => 'boolean',
+        'anniversary_lead_days' => 'integer',
     ];
 
     /** Tappable palette offered on the form. */
@@ -67,7 +74,16 @@ class Randevu extends Model
             'show_months' => 'boolean',
             'show_days' => 'boolean',
             'show_hours' => 'boolean',
+            'reminder_rule' => 'required|in:off,at_time,15m,1h,morning_of,1d,2d,1w',
+            'anniversary_mode' => 'required|in:none,yearly,monthly,both',
+            'anniversary_lead_days' => 'required|integer|in:0,1,7',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(static fn () => app(RandevuNotificationScheduler::class)->sync());
+        static::deleted(static fn () => app(RandevuNotificationScheduler::class)->sync());
     }
 
     /** At least one distance unit must stay on. */
@@ -225,6 +241,9 @@ class Randevu extends Model
             'show_months' => $this->show_months,
             'show_days' => $this->show_days,
             'show_hours' => $this->show_hours,
+            'reminder_rule' => $this->reminder_rule,
+            'anniversary_mode' => $this->anniversary_mode,
+            'anniversary_lead_days' => $this->anniversary_lead_days,
         ]));
     }
 }

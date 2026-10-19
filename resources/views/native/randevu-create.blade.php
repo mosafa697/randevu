@@ -36,6 +36,17 @@
                 <native:select :label="__('randevu.minute_label')" :options="$minuteOptions" native:model="minute" class="flex-1" />
             </native:row>
 
+            <native:select :label="__('randevu.reminder_label')" :options="$reminderOptions" native:model="reminderSelection" />
+            @if(!empty($errors['reminder_rule']))
+                <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-destructive">{{ $errors['reminder_rule'] }}</native:text>
+            @endif
+
+            <native:select :label="__('randevu.anniversary_label')" :options="$anniversaryOptions" native:model="anniversaryModeSelection" />
+            <native:select :label="__('randevu.anniversary_lead_label')" :options="$anniversaryLeadOptions" native:model="anniversaryLeadSelection" />
+            @if(!empty($errors['anniversary_mode']))
+                <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-destructive">{{ $errors['anniversary_mode'] }}</native:text>
+            @endif
+
             <native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} {{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface">{{ __('randevu.period_label') }}</native:text>
 
             @include('native.partials.period-chips')

@@ -1,0 +1,26 @@
+{
+    "name": "randevu/local-notifications",
+    "description": "Android local notification scheduling for Randevu",
+    "type": "nativephp-plugin",
+    "license": "MIT",
+    "version": "1.0.0",
+    "require": {
+        "php": "^8.3",
+        "nativephp/mobile": "^4.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Randevu\\LocalNotifications\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Randevu\\LocalNotifications\\LocalNotificationsServiceProvider"
+            ]
+        },
+        "nativephp": {
+            "manifest": "nativephp.json"
+        }
+    }
+}

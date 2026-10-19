@@ -1,0 +1,63 @@
+{
+    "namespace": "RandevuNotifications",
+    "platforms": [
+        "android"
+    ],
+    "bridge_functions": [
+        {
+            "name": "RandevuNotifications.Sync",
+            "android": "com.randevu.localnotifications.RandevuNotificationsFunctions.Sync",
+            "description": "Replace the device's local notification schedules"
+        },
+        {
+            "name": "RandevuNotifications.Status",
+            "android": "com.randevu.localnotifications.RandevuNotificationsFunctions.Status",
+            "description": "Read notification and exact alarm permission status"
+        },
+        {
+            "name": "RandevuNotifications.RequestPermission",
+            "android": "com.randevu.localnotifications.RandevuNotificationsFunctions.RequestPermission",
+            "description": "Request Android notification permission"
+        },
+        {
+            "name": "RandevuNotifications.OpenExactAlarmSettings",
+            "android": "com.randevu.localnotifications.RandevuNotificationsFunctions.OpenExactAlarmSettings",
+            "description": "Open Android exact alarm access settings"
+        }
+    ],
+    "android": {
+        "min_version": 26,
+        "permissions": [
+            "android.permission.POST_NOTIFICATIONS",
+            "android.permission.SCHEDULE_EXACT_ALARM",
+            "android.permission.RECEIVE_BOOT_COMPLETED"
+        ],
+        "receivers": [
+            {
+                "name": "com.randevu.localnotifications.LocalNotificationAlarmReceiver",
+                "exported": false
+            },
+            {
+                "name": "com.randevu.localnotifications.LocalNotificationRestoreReceiver",
+                "exported": false,
+                "intent_filters": [
+                    {
+                        "action": [
+                            "android.intent.action.BOOT_COMPLETED",
+                            "android.intent.action.MY_PACKAGE_REPLACED",
+                            "android.intent.action.TIME_SET",
+                            "android.intent.action.TIMEZONE_CHANGED",
+                            "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED"
+                        ]
+                    }
+                ]
+            }
+        ],
+        "dependencies": {
+            "implementation": []
+        }
+    },
+    "ios": {
+        "min_version": "18.2"
+    }
+}

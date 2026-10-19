@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Native\Mobile\Providers\CameraServiceProvider;
 use Native\Mobile\Providers\ShareServiceProvider;
 use Native\Mobile\UI\NativeUIServiceProvider;
+use Randevu\LocalNotifications\LocalNotificationsServiceProvider;
 
 class NativeServiceProvider extends ServiceProvider
 {
@@ -40,6 +41,7 @@ class NativeServiceProvider extends ServiceProvider
             NativeUIServiceProvider::class,
             CameraServiceProvider::class,
             ShareServiceProvider::class,
+            LocalNotificationsServiceProvider::class,
         ];
     }
 }

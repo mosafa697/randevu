@@ -39,6 +39,7 @@
             <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant">
                 {{ $randevu['is_appointment'] ? __('randevu.kind_appointment') : __('randevu.kind_memory') }}
             </native:text>
+            <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant">{{ $randevu['notification_description'] }}</native:text>
             @if(!empty($randevu['note']))
                 <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant">{{ $randevu['note'] }}</native:text>
             @endif

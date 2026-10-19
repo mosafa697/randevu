@@ -7,7 +7,10 @@ use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
 use App\NativeComponents\Concerns\FiltersEntries;
 use App\Services\CoverImage;
+use App\Services\RandevuNotificationRules;
 use App\Services\RandevuTime;
+use App\Support\Bidi;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Native\Mobile\Edge\NativeComponent;
 
@@ -44,17 +47,18 @@ class Memories extends NativeComponent
 
         return [
             'id' => $randevu->id,
-            'title' => \App\Support\Bidi::isolate($randevu->title),
+            'title' => Bidi::isolate($randevu->title),
             'occurs_on' => $randevu->occurs_on->toDateString(),
             'absolute' => RandevuTime::absolute($randevu->occurs_on),
             'hijri' => $randevu->hijriLabel(),
             'phrase' => $randevu->relativePhrase(),
-            'note' => \App\Support\Bidi::isolate($randevu->note === null ? null : \Illuminate\Support\Str::limit($randevu->note, 140)),
+            'note' => Bidi::isolate($randevu->note === null ? null : Str::limit($randevu->note, 140)),
             'color' => $randevu->color,
             'cover' => CoverImage::src($randevu->cover_path),
             'days' => $days,
             'pct' => max(0.08, min(1.0, 1 - abs($days) / 30)),
             'entered_in' => $randevu->entered_in,
+            'notification_armed' => RandevuNotificationRules::isArmed($randevu),
         ];
     }
 

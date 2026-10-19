@@ -275,6 +275,16 @@ class RandevuTime
         return self::fill($days >= 0 ? 'exact_future' : 'exact_past', $abs, self::unit('day', $abs));
     }
 
+    /** Localized elapsed phrase for a count in the given time unit. */
+    public static function ago(string $unit, int $count): string
+    {
+        if (! in_array($unit, ['month', 'year'], true) || $count < 1) {
+            throw new \InvalidArgumentException('Elapsed phrases require a positive month or year count.');
+        }
+
+        return self::fill("{$unit}s_ago", $count, self::unit($unit, $count));
+    }
+
     /**
      * Card urgency tier from the signed day distance: today renders in
      * the accent, the coming week in the primary, everything else

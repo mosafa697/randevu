@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\AppLocale;
+use App\Services\AppTheme;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,11 +23,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Device language for every request (validation messages included);
         // screens re-apply it on mount so in-app switches take effect at once.
-        \App\Services\AppLocale::apply();
+        AppLocale::apply();
 
         // Device theme mode (light/dark); screens re-apply on mount so
         // in-app toggles take effect at once. Must run AFTER the native-ui
         // provider has loaded the authored config tokens.
-        \App\Services\AppTheme::apply();
+        AppTheme::apply();
     }
 }

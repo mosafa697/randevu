@@ -31,6 +31,9 @@
         <native:column class="flex-1 gap-1">
             <native:row class="w-full items-center gap-2">
                 <native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} flex-1 {{ \App\Services\AppFonts::textClass('lg') }} text-theme-on-surface leading-relaxed">{{ $item['title'] }}</native:text>
+                @if((bool) ($item['notification_armed'] ?? false))
+                    <native:badge :label="__('randevu.notification_armed_badge')" variant="secondary" />
+                @endif
                 @if($isToday && $showBadge)
                     <native:badge :label="__('randevu.today')" variant="accent" />
                 @endif
