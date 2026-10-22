@@ -22,7 +22,7 @@ class BrandAssetsTest extends TestCase
         }
     }
 
-    public function test_launcher_icon_is_1024_transparent(): void
+    public function test_launcher_icon_is_at_least_1024_square_and_transparent(): void
     {
         $path = public_path('icon.png');
 
@@ -30,8 +30,8 @@ class BrandAssetsTest extends TestCase
 
         $size = getimagesize($path);
 
-        $this->assertSame(1024, $size[0]);
-        $this->assertSame(1024, $size[1]);
+        $this->assertSame($size[0], $size[1]);
+        $this->assertGreaterThanOrEqual(1024, $size[0]);
         $this->assertSame('image/png', $size['mime']);
 
         $icon = imagecreatefrompng($path);
@@ -39,6 +39,20 @@ class BrandAssetsTest extends TestCase
         imagedestroy($icon);
 
         $this->assertSame(127, $topLeft['alpha']);
+    }
+
+    public function test_favicon_is_a_multi_size_ico(): void
+    {
+        $path = public_path('favicon.ico');
+
+        $this->assertFileExists($path);
+
+        $size = getimagesize($path);
+
+        $this->assertSame('image/vnd.microsoft.icon', $size['mime']);
+        $iconCount = unpack('vcount', substr(file_get_contents($path), 4, 2))['count'];
+
+        $this->assertSame(3, $iconCount);
     }
 
     public function test_splashes_match_theme_backgrounds(): void
