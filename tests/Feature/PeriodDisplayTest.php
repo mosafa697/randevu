@@ -275,7 +275,7 @@ class PeriodDisplayTest extends TestCase
             'show_days' => true,
         ]);
 
-        Native::test(Memories::class)->assertSee('40 days ago');
+        Native::test(Memories::class)->assertSee('from 40 days');
     }
 
     public function test_hijri_entered_card_shows_both_dates_and_shared_difference(): void
@@ -577,7 +577,7 @@ class PeriodDisplayTest extends TestCase
 
         $screen = Native::test(Memories::class);
 
-        // Past items use the muted tier with an "ago" distance label.
+        // Past items use the muted tier with an "from" distance label.
         $mutedBg = AppTheme::token('surface-variant');
         $mutedFg = AppTheme::token('on-surface-variant');
 

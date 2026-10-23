@@ -31,7 +31,7 @@ class PeriodDisplayTest extends TestCase
         $today = Carbon::parse('2026-09-23');
 
         $this->assertSame('In 40 days', RandevuTime::phraseFor('2026-11-02', false, false, true, today: $today));
-        $this->assertSame('40 days ago', RandevuTime::phraseFor('2026-08-14', false, false, true, today: $today));
+        $this->assertSame('from 40 days', RandevuTime::phraseFor('2026-08-14', false, false, true, today: $today));
         $this->assertSame('In 400 days', RandevuTime::phraseFor('2027-10-28', false, false, true, today: $today));
     }
 
@@ -42,12 +42,12 @@ class PeriodDisplayTest extends TestCase
 
         $this->assertSame('In 1 month', RandevuTime::phraseFor('2026-09-28', false, true, false, today: $today));
         $this->assertSame('In 2 months', RandevuTime::phraseFor('2026-11-23', false, true, false, today: $today));
-        $this->assertSame('2 months ago', RandevuTime::phraseFor('2026-07-24', false, true, false, today: $today));
+        $this->assertSame('from 2 months', RandevuTime::phraseFor('2026-07-24', false, true, false, today: $today));
         $this->assertSame('In 1 year', RandevuTime::phraseFor('2026-11-02', true, false, false, today: $today));
         $this->assertSame('In 1 year', RandevuTime::phraseFor('2027-10-28', true, false, false, today: $today));
 
         $farPast = $today->copy()->subDays(800)->toDateString();
-        $this->assertSame('2 years ago', RandevuTime::phraseFor($farPast, true, false, false, today: $today));
+        $this->assertSame('from 2 years', RandevuTime::phraseFor($farPast, true, false, false, today: $today));
     }
 
     public function test_all_units_give_the_exact_calendar_breakdown(): void
@@ -61,10 +61,10 @@ class PeriodDisplayTest extends TestCase
             RandevuTime::phraseFor('2027-10-28', true, true, true, today: $today)
         );
         $this->assertSame('In 5 days', RandevuTime::phraseFor('2026-09-28', true, true, true, today: $today));
-        $this->assertSame('2 months ago', RandevuTime::phraseFor('2026-07-23', true, true, true, today: $today));
-        $this->assertSame('2 years ago', RandevuTime::phraseFor('2024-09-23', true, true, true, today: $today));
+        $this->assertSame('from 2 months', RandevuTime::phraseFor('2026-07-23', true, true, true, today: $today));
+        $this->assertSame('from 2 years', RandevuTime::phraseFor('2024-09-23', true, true, true, today: $today));
         $this->assertSame(
-            '1 year, 1 month, 4 days ago',
+            'from 1 year, 1 month, 4 days',
             RandevuTime::phraseFor('2025-08-19', true, true, true, today: $today)
         );
     }
@@ -138,7 +138,7 @@ class PeriodDisplayTest extends TestCase
         $this->assertSame('In 2 days, 14 hours', RandevuTime::phraseFor('2026-09-25', true, true, true, true, '14:30', $today));
 
         // Past: the afternoon lands closer, not further (midnight basis).
-        $this->assertSame('1 day, 9 hours ago', RandevuTime::phraseFor('2026-09-21', true, true, true, true, '14:30', $today));
+        $this->assertSame('from 1 day, 9 hours', RandevuTime::phraseFor('2026-09-21', true, true, true, true, '14:30', $today));
 
         // A switched-off month rolls down nominally (30 days + remainder hours).
         $this->assertSame(
@@ -159,7 +159,7 @@ class PeriodDisplayTest extends TestCase
         $today = Carbon::parse('2026-09-23');
 
         $this->assertSame('In 62 hours', RandevuTime::phraseFor('2026-09-25', false, false, false, true, '14:30', $today));
-        $this->assertSame('33 hours ago', RandevuTime::phraseFor('2026-09-21', false, false, false, true, '14:30', $today));
+        $this->assertSame('from 33 hours', RandevuTime::phraseFor('2026-09-21', false, false, false, true, '14:30', $today));
         $this->assertSame('In 2 hours', RandevuTime::phraseFor('2026-09-23', false, false, false, true, '02:00', $today));
 
         // Sub-hour spans floor to the minimum of 1.

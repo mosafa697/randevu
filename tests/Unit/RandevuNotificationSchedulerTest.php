@@ -110,13 +110,13 @@ class RandevuNotificationSchedulerTest extends TestCase
             Carbon::parse('2027-02-28 09:00:00')->getTimestamp() * 1000,
             $schedules[0]['fireAtMillis']
         );
-        $this->assertStringStartsWith('3 years ago', $schedules[0]['body']);
+        $this->assertStringStartsWith('from 3 years', $schedules[0]['body']);
         $this->assertSame('anniversary-1-monthly', $schedules[1]['id']);
         $this->assertSame(
             Carbon::parse('2026-03-29 09:00:00')->getTimestamp() * 1000,
             $schedules[1]['fireAtMillis']
         );
-        $this->assertStringStartsWith('25 months ago', $schedules[1]['body']);
+        $this->assertStringStartsWith('from 25 months', $schedules[1]['body']);
     }
 
     public function test_future_appointment_anniversary_starts_after_the_original_event(): void
@@ -140,7 +140,7 @@ class RandevuNotificationSchedulerTest extends TestCase
             Carbon::parse('2028-09-25 10:00:00')->getTimestamp() * 1000,
             $schedules[1]['fireAtMillis']
         );
-        $this->assertStringStartsWith('1 year ago', $schedules[1]['body']);
+        $this->assertStringStartsWith('from 1 year', $schedules[1]['body']);
     }
 
     public function test_hijri_yearly_anniversary_clamps_a_thirty_day_month(): void
@@ -205,6 +205,6 @@ class RandevuNotificationSchedulerTest extends TestCase
             $targetDate->copy()->setTime(9, 0)->getTimestamp() * 1000,
             $schedules[0]['fireAtMillis']
         );
-        $this->assertStringStartsWith('1 month ago', $schedules[0]['body']);
+        $this->assertStringStartsWith('from 1 month', $schedules[0]['body']);
     }
 }

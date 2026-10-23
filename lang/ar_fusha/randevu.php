@@ -116,7 +116,7 @@ return [
     'cover_open' => 'افتح الغلاف',
     'cover_alt' => 'الغلاف المختار',
 
-    // Relative phrases (Modern Standard Arabic)
+    // Relative phrases (Arabic)
     'phrase_today' => 'اليوم',
     'phrase_tomorrow' => 'غدًا',
     'phrase_yesterday' => 'أمس',

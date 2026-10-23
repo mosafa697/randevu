@@ -121,15 +121,15 @@ return [
     'phrase_tomorrow' => 'Tomorrow',
     'phrase_yesterday' => 'Yesterday',
     'in_days' => 'In :count days',
-    'days_ago' => ':count days ago',
+    'days_ago' => 'from :count days',
     'in_months' => 'In :count :unit',
-    'months_ago' => ':count :unit ago',
+    'months_ago' => 'from :count :unit',
     'in_years' => 'In :count :unit',
-    'years_ago' => ':count :unit ago',
+    'years_ago' => 'from :count :unit',
     'in_hours' => 'In :count :unit',
-    'hours_ago' => ':count :unit ago',
-    'exact_future' => ':count days',
-    'exact_past' => ':count days ago',
+    'hours_ago' => 'from :count :unit',
+    'exact_future' => 'In :count days',
+    'exact_past' => 'from :count days',
 
     // Unit nouns (English pluralization handled in code)
     'day_one' => 'day',
@@ -183,7 +183,7 @@ return [
     'period_hours' => 'Hours',
     'period_units_required' => 'Pick at least one unit.',
     'combined_future' => 'In :parts',
-    'combined_past' => ':parts ago',
+    'combined_past' => 'from :parts',
     'combined_separator' => ', ',
 
     // Dashboard
@@ -222,7 +222,7 @@ return [
     'notification_body_separator' => ' · ',
     'notifications_channel' => 'Randevu reminders',
     'lang_arabic' => 'Egyptian',
-    'lang_fusha' => 'Modern Standard Arabic',
+    'lang_fusha' => 'Arabic',
     'lang_english' => 'English',
 
     // Theme

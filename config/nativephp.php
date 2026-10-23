@@ -152,7 +152,7 @@ return [
     | picker and the iOS Preferred Language setting. (Native 4.6+ reads
     | this; kept here so the 4.5 build ignores it harmlessly until upgrade.)
     |
-    | NOTE: 'ar_fusha' (Modern Standard Arabic) is in-app only via Settings
+    | NOTE: 'ar_fusha' (Arabic) is in-app only via Settings
     | and intentionally absent here — it is not a valid BCP 47 tag, so the
     | OS-level picker cannot list it.
     |

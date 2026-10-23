@@ -25,11 +25,11 @@ class RandevuTimeTest extends TestCase
         $today = Carbon::parse('2026-09-23');
 
         $this->assertSame('In 5 days', RandevuTime::phrase('2026-09-28', $today));
-        $this->assertSame('5 days ago', RandevuTime::phrase('2026-09-18', $today));
+        $this->assertSame('from 5 days', RandevuTime::phrase('2026-09-18', $today));
         $this->assertSame('In 2 months', RandevuTime::phrase('2026-11-23', $today));
-        $this->assertSame('2 months ago', RandevuTime::phrase('2026-07-23', $today));
+        $this->assertSame('from 2 months', RandevuTime::phrase('2026-07-23', $today));
         $this->assertSame('In 1 year', RandevuTime::phrase('2027-09-23', $today));
-        $this->assertSame('2 years ago', RandevuTime::phrase('2024-09-23', $today));
+        $this->assertSame('from 2 years', RandevuTime::phrase('2024-09-23', $today));
     }
 
     public function test_phrases_arabic_egyptian(): void

@@ -14,7 +14,7 @@ Android-first NativePHP Mobile v4 app. Users track future appointments and past 
 - Rule: `occurs_on >= today` = appointment, `< today` = memory. Today counts as appointment and gets a Today badge.
 - Service `App\Services\RandevuTime`:
   - `dayCount($date, $today = null)` signed int (future +, past -).
-  - `phrase(...)`: Today / Tomorrow / Yesterday / `In N days` / `N days ago` (2-29) / `In N months` / `N months ago` (30-364) / `In N years` / `N years ago` (365+).
+  - `phrase(...)`: Today / Tomorrow / Yesterday / `In N days` / `from N days` (2-29) / `In N months` / `from N months` (30-364) / `In N years` / `from N years` (365+).
   - `phraseFor($date, $showYears, $showMonths, $showDays, $showHours = false, $occursTime = null, $today = null)`: per-randevu units — days-only keeps the exact count; a single shown unit rounds; all units give the exact calendar breakdown; switched-off middle units roll down; falls back to `phrase()` when no unit is on. Hours refines Today/Tomorrow/Yesterday into breakdowns when a time is set; hours-only rolls days into hours (min 1); time-less rows phrase exactly as before.
   - `MONTH_NAMES`, `monthNumber()` for the Gregorian picker.
 - Service `App\Services\RandevuHijri`: pure-PHP TABULAR Islamic calendar (no intl, runs in embedded PHP). `fromGregorian`, `toGregorian`, `valid`, `daysInMonth`, `isLeapYear`, `format` ("12 ربيع الثاني 1448"), `MONTH_NAMES` (Arabic), `yearOptions`. Caveat: ±1–2 days vs observed Umm al-Qura; Gregorian stays source of truth.

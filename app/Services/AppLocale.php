@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Applies the device-stored language, falling back to the configured default.
  * Fresh installs default to Egyptian Arabic (config), English is the fallback locale.
- * Modern Standard Arabic ('ar_fusha') sits alongside Egyptian ('ar').
+ * Arabic ('ar_fusha') sits alongside Egyptian ('ar').
  */
 class AppLocale
 {

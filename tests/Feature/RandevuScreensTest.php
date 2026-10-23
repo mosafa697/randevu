@@ -19,6 +19,7 @@ use App\Services\RandevuTime;
 use App\Support\Bidi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Native\Mobile\Testing\Native;
+use Native\Mobile\UI\Theme;
 use Tests\TestCase;
 
 class RandevuScreensTest extends TestCase
@@ -594,7 +595,7 @@ class RandevuScreensTest extends TestCase
             'body' => 'System',
             'heading' => 'System',
             'label' => 'System',
-        ], \Native\Mobile\UI\Theme::all()['fonts']);
+        ], Theme::all()['fonts']);
 
         Native::visit('/')
             ->assertElement('native_root_tabs', fn ($n) => ($n['props']['nav_font_name'] ?? null) === 'System'
@@ -912,7 +913,7 @@ class RandevuScreensTest extends TestCase
         $screen = Native::test(Settings::class);
 
         $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Egyptian');
-        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Modern Standard Arabic');
+        $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Arabic');
         $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'English');
         $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === 'Light'
             && ($n['props']['variant'] ?? '') === 'primary');
