@@ -1154,8 +1154,13 @@ class RandevuScreensTest extends TestCase
     {
         // No rows: the centered empty state renders directly — no scroll
         // container that would break its flex-1 centering.
-        Native::test(Follow::class)->assertMissingElement('scroll_view');
-        Native::test(Memories::class)->assertMissingElement('scroll_view');
+        foreach ([Follow::class, Memories::class] as $componentClass) {
+            Native::test($componentClass)
+                ->assertMissingElement('scroll_view')
+                ->assertMissingElement('outlined_text_input')
+                ->assertElement('pressable', fn ($node) => ($node['props']['a11y_label'] ?? null) === __('randevu.search_expand'))
+                ->assertElement('pressable', fn ($node) => ($node['props']['has_menu'] ?? false));
+        }
     }
 
     public function test_follow_search_filters_by_title(): void
@@ -1166,10 +1171,9 @@ class RandevuScreensTest extends TestCase
         Randevu::create(['title' => 'Birthday', 'occurs_on' => today()->addDays(10)]);
 
         $screen = Native::test(Follow::class)
-            ->assertSee('Search')
-            ->assertSee('Nearest')
-            ->assertSee('Newest')
-            ->assertSee('A–Z');
+            ->assertMissingElement('outlined_text_input')
+            ->press('toggleSearch')
+            ->assertElement('outlined_text_input');
 
         // One character is already enough to filter.
         $screen->set('search', 'b')->assertSee('Birthday')->assertDontSee('Dentist');
@@ -1186,6 +1190,7 @@ class RandevuScreensTest extends TestCase
         Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDays(5)]);
 
         $screen = Native::test(Follow::class)
+            ->press('toggleSearch')
             ->set('search', 'zzz');
 
         $screen
@@ -1255,7 +1260,7 @@ class RandevuScreensTest extends TestCase
         Randevu::create(['title' => 'apple', 'occurs_on' => today()->subDays(10)]);
         Randevu::create(['title' => 'Zebra', 'occurs_on' => today()->subDays(40)]);
 
-        $screen = Native::test(Memories::class);
+        $screen = Native::test(Memories::class)->press('toggleSearch');
 
         $titles = fn () => array_column($screen->get('memories'), 'title');
         $iso = fn (string ...$t) => array_map(Bidi::isolate(...), $t);
@@ -1272,6 +1277,9 @@ class RandevuScreensTest extends TestCase
 
         $screen->press('sortByAlpha');
         $this->assertSame($iso('apple', 'Mango', 'Zebra'), $titles());
+
+        $screen->press('sortByNearest');
+        $this->assertSame($iso('Mango', 'apple', 'Zebra'), $titles());
     }
 
     public function test_list_toolbar_renders_in_arabic(): void
@@ -1279,17 +1287,53 @@ class RandevuScreensTest extends TestCase
         Randevu::create(['title' => 'Dentist', 'occurs_on' => today()]);
         Randevu::create(['title' => 'Old', 'occurs_on' => today()->subDay()]);
 
-        Native::test(Follow::class)
-            ->assertSee('دوّر')
-            ->assertSee('الأقرب')
-            ->assertSee('الأجدد')
-            ->assertSee('أبجدي');
+        foreach ([Follow::class, Memories::class] as $componentClass) {
+            Native::test($componentClass)
+                ->assertElement('pressable', fn ($node) => ($node['props']['a11y_label'] ?? null) === 'إظهار البحث')
+                ->assertElement('pressable', fn ($node) => ($node['props']['a11y_label'] ?? null) === 'ترتيب المواعيد')
+                ->assertElement('top_bar_action', fn ($node) => ($node['props']['label'] ?? null) === 'الأقرب')
+                ->assertElement('top_bar_action', fn ($node) => ($node['props']['label'] ?? null) === 'الأجدد')
+                ->assertElement('top_bar_action', fn ($node) => ($node['props']['label'] ?? null) === 'أبجدي');
+        }
+    }
 
-        Native::test(Memories::class)
-            ->assertSee('دوّر')
-            ->assertSee('الأقرب')
-            ->assertSee('الأجدد')
-            ->assertSee('أبجدي');
+    public function test_list_toolbar_starts_icon_only_and_search_can_collapse_without_losing_query(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(['title' => 'Dentist', 'occurs_on' => today()->addDays(5)]);
+        Randevu::create(['title' => 'Birthday', 'occurs_on' => today()->addDays(10)]);
+        Randevu::create(['title' => 'Dentist memory', 'occurs_on' => today()->subDays(5)]);
+        Randevu::create(['title' => 'Birthday memory', 'occurs_on' => today()->subDays(10)]);
+
+        foreach ([Follow::class, Memories::class] as $componentClass) {
+            $screen = Native::test($componentClass)
+                ->assertMissingElement('outlined_text_input')
+                ->assertElement('pressable', fn ($node) => ($node['props']['a11y_label'] ?? null) === __('randevu.search_expand'))
+                ->assertElement('pressable', fn ($node) => ($node['props']['has_menu'] ?? false)
+                    && ($node['props']['a11y_label'] ?? null) === __('randevu.sort_label'));
+
+            $screen
+                ->press('toggleSearch')
+                ->assertSet('searchExpanded', true)
+                ->assertElement('outlined_text_input')
+                ->assertElement('pressable', fn ($node) => ($node['props']['a11y_label'] ?? null) === __('randevu.search_collapse'))
+                ->set('search', 'Dentist')
+                ->assertSee($componentClass === Follow::class ? 'Dentist' : 'Dentist memory')
+                ->assertDontSee($componentClass === Follow::class ? 'Birthday' : 'Birthday memory')
+                ->assertElement('pressable', fn ($node) => ($node['props']['a11y_label'] ?? null) === __('randevu.search_clear'))
+                ->press('toggleSearch')
+                ->assertSet('search', 'Dentist')
+                ->assertSet('searchExpanded', false)
+                ->assertMissingElement('outlined_text_input')
+                ->assertSee($componentClass === Follow::class ? 'Dentist' : 'Dentist memory')
+                ->press('toggleSearch')
+                ->assertElement('outlined_text_input')
+                ->press('clearSearch')
+                ->assertSet('search', '')
+                ->assertSet('searchExpanded', true)
+                ->assertSee($componentClass === Follow::class ? 'Birthday' : 'Birthday memory');
+        }
     }
 
     public function test_create_form_quick_set_chips_update_selects(): void

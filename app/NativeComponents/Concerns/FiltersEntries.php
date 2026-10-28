@@ -4,12 +4,48 @@ namespace App\NativeComponents\Concerns;
 
 use App\Models\Randevu;
 use Illuminate\Database\Eloquent\Builder;
+use Native\Mobile\Edge\Layouts\Builders\NavAction;
 
 trait FiltersEntries
 {
     public string $search = '';
 
+    public bool $searchExpanded = false;
+
     public string $sort = 'nearest';
+
+    public function toggleSearch(): void
+    {
+        $this->searchExpanded = ! $this->searchExpanded;
+    }
+
+    /**
+     * @return list<NavAction>
+     */
+    public function sortMenu(): array
+    {
+        $options = [
+            'nearest' => ['sort_nearest', 'sortByNearest'],
+            'newest' => ['sort_newest', 'sortByNewest'],
+            'alpha' => ['sort_alpha', 'sortByAlpha'],
+        ];
+
+        $menu = [];
+
+        foreach ($options as $sort => [$translation, $method]) {
+            $action = NavAction::make('sort-'.$sort)
+                ->label(__('randevu.'.$translation))
+                ->press($method);
+
+            if ($this->sort === $sort) {
+                $action->icon(ios: 'checkmark', android: 'check');
+            }
+
+            $menu[] = $action;
+        }
+
+        return $menu;
+    }
 
     public function sortByNearest(): void
     {
@@ -51,7 +87,7 @@ trait FiltersEntries
      * (upcoming/memories stay the source of truth for which rows belong
      * on the screen); only the title filter and the ordering change.
      *
-     * @param Builder<Randevu> $query
+     * @param  Builder<Randevu>  $query
      * @return Builder<Randevu>
      */
     protected function applyEntryFilters(Builder $query): Builder
@@ -69,7 +105,7 @@ trait FiltersEntries
      * case-insensitive for Latin titles (SQLite NOCASE is ASCII-only;
      * Arabic has no case so it orders by code point either way).
      *
-     * @param Builder<Randevu> $query
+     * @param  Builder<Randevu>  $query
      * @return Builder<Randevu>
      */
     public static function filterQuery(Builder $query, string $search, string $sort): Builder

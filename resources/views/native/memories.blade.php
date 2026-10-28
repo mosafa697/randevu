@@ -1,4 +1,5 @@
 <native:column class="w-full h-full bg-theme-background">
+    @include('native.partials.list-toolbar', ['sortMenu' => $this->sortMenu()])
     @if(count($memories) === 0 && trim($search) === '')
         <native:column class="w-full flex-1 items-center justify-center gap-3 p-8">
             <native:text class="text-5xl text-theme-on-surface-variant">🕰️</native:text>
@@ -8,10 +9,6 @@
             <native:button :label="__('randevu.empty_cta')" font="label" @navigate="'/create'" class="w-full min-h-12" />
         </native:column>
     @else
-        <native:column class="w-full px-5 pt-3 gap-2">
-            <native:outlined-text-input :label="__('randevu.search_label')" :placeholder="__('randevu.search_placeholder')" native:model="search" ios-leading-icon="magnifyingglass" android-leading-icon="search" />
-            @include('native.partials.segmented', ['name' => 'sort', 'selected' => $sort])
-        </native:column>
         @if(count($memories) === 0)
             <native:column class="w-full flex-1 items-center justify-center gap-3 p-8">
                 <native:text class="text-5xl text-theme-on-surface-variant">🔍</native:text>

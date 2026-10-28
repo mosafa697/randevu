@@ -28,8 +28,11 @@ return [
 
     // Search + sort
     'search_label' => 'دوّر',
+    'search_expand' => 'إظهار البحث',
+    'search_collapse' => 'إخفاء البحث',
     'search_placeholder' => 'دوّر بعنوان الميعاد…',
     'search_clear' => 'امسح البحث',
+    'sort_label' => 'ترتيب المواعيد',
     'sort_nearest' => 'الأقرب',
     'sort_newest' => 'الأجدد',
     'sort_alpha' => 'أبجدي',

@@ -28,8 +28,11 @@ return [
 
     // Search + sort
     'search_label' => 'Search',
+    'search_expand' => 'Show search',
+    'search_collapse' => 'Hide search',
     'search_placeholder' => 'Search by title…',
     'search_clear' => 'Clear search',
+    'sort_label' => 'Sort order',
     'sort_nearest' => 'Nearest',
     'sort_newest' => 'Newest',
     'sort_alpha' => 'A–Z',
