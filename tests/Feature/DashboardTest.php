@@ -62,7 +62,7 @@ class DashboardTest extends TestCase
     {
         Native::test(Dashboard::class)
             ->assertSee('ضيف ميعاد عشان تشوف الإحصائيات هنا')
-            ->assertDontSee('ضيف أول ميعاد');
+            ->assertMissingElement('button', fn ($node) => ($node['props']['label'] ?? null) === __('randevu.empty_cta'));
     }
 
     public function test_dashboard_route_reachable_without_breaking_follow(): void

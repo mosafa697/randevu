@@ -22,9 +22,9 @@
                     <native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} {{ \App\Services\AppFonts::textClass('lg') }} text-theme-on-surface leading-relaxed">{{ __('randevu.notifications_label') }}</native:text>
                     <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant leading-relaxed">{{ __('randevu.notifications_helper') }}</native:text>
                     @if($notificationsEnabled)
-                        <native:button :label="__('randevu.notifications_disable')" @press="disableNotifications" variant="secondary" class="w-full min-h-12" />
+                        <native:button :label="__('randevu.notifications_disable')" ios-icon="bell.slash" android-icon="notifications_off" @press="disableNotifications" variant="secondary" class="w-full min-h-12" />
                     @else
-                        <native:button :label="__('randevu.notifications_enable')" @press="enableNotifications" variant="primary" class="w-full min-h-12" />
+                        <native:button :label="__('randevu.notifications_enable')" ios-icon="bell" android-icon="notifications" @press="enableNotifications" variant="primary" class="w-full min-h-12" />
                     @endif
                     <native:select :label="__('randevu.notification_default_reminder_label')" :options="$reminderOptions" native:model="reminderDefaultSelection" />
                     <native:select :label="__('randevu.notification_default_anniversary_label')" :options="$anniversaryOptions" native:model="anniversaryDefaultSelection" />
@@ -35,11 +35,11 @@
                     <native:column class="w-full gap-2">
                         @if($notificationPermissionDenied)
                             <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant leading-relaxed">{{ __('randevu.notification_permission_denied') }}</native:text>
-                            <native:button :label="__('randevu.notification_request_permission')" @press="requestNotificationPermission" variant="ghost" class="w-full min-h-12" />
+                            <native:button :label="__('randevu.notification_request_permission')" ios-icon="bell.badge" android-icon="notifications_active" @press="requestNotificationPermission" variant="ghost" class="w-full min-h-12" />
                         @endif
                         @if($exactAlarmPermissionNeeded)
                             <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant leading-relaxed">{{ __('randevu.notification_exact_inexact') }}</native:text>
-                            <native:button :label="__('randevu.notification_open_exact_settings')" @press="openExactAlarmSettings" variant="ghost" class="w-full min-h-12" />
+                            <native:button :label="__('randevu.notification_open_exact_settings')" ios-icon="alarm" android-icon="schedule" @press="openExactAlarmSettings" variant="ghost" class="w-full min-h-12" />
                         @endif
                     </native:column>
                 @endif

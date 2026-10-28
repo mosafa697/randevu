@@ -29,7 +29,7 @@ class RandevuScreensTest extends TestCase
     public function test_follow_empty_state_shows_only_add_button(): void
     {
         Native::test(Follow::class)
-            ->assertSee('ضيف أول ميعاد')
+            ->assertSee(__('randevu.empty_cta'))
             ->assertSee('لسه مفيش مواعيد')
             ->assertSee('ضيف أول ميعاد عشان تتابعه هنا')
             ->assertSee('المواعيد اللي تاريخها النهاردة أو بعد كده بتظهر هنا.')
@@ -91,7 +91,7 @@ class RandevuScreensTest extends TestCase
     public function test_memories_empty_state_shows_only_add_button(): void
     {
         Native::visit('/memories')
-            ->assertSee('ضيف أول ميعاد')
+            ->assertSee(__('randevu.empty_cta'))
             ->assertSee('لسه مفيش ذكريات محفوظة')
             ->assertSee('ضيف ميعاد عشان يظهر هنا بعد ما يعدى')
             ->assertSee('المواعيد اللي عدت بتتحفظ هنا كذكريات.')
@@ -490,7 +490,7 @@ class RandevuScreensTest extends TestCase
     {
         $randevu = Randevu::create(['title' => 'Colorful', 'occurs_on' => today()->addDay(), 'color' => '#DB2777']);
 
-        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id], platform: 'android');
 
         $this->assertSame('#DB2777', $screen->get('randevu')['color']);
 
@@ -797,22 +797,76 @@ class RandevuScreensTest extends TestCase
 
     public function test_action_buttons_are_full_width_with_touch_target(): void
     {
+        Setting::set('locale', 'en');
         $randevu = Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDay()]);
 
         // Details actions stretch full width so AR/EN label lengths can't
         // change the button look; every button keeps the 48pt touch target.
-        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id], platform: 'android');
 
         foreach (['edit_cta', 'share_cta', 'duplicate_cta'] as $key) {
             $screen->assertElement('button', fn ($n) => ($n['props']['label'] ?? '') === __('randevu.'.$key)
+                && ! empty($n['props']['leading_icon'])
                 && ($n['layout']['width'] ?? '') === 'fill'
                 && isset($n['layout']['min_height']));
         }
 
         // Empty-state CTA (Memories is empty here): full width + touch
         // target, identical in both languages.
-        Native::test(Memories::class)->assertElement('button', fn ($n) => ($n['layout']['width'] ?? '') === 'fill'
+        Native::test(Memories::class, platform: 'android')->assertElement('button', fn ($n) => ($n['layout']['width'] ?? '') === 'fill'
+            && ($n['props']['label'] ?? '') === __('randevu.empty_cta')
+            && ! empty($n['props']['leading_icon'])
             && isset($n['layout']['min_height']));
+    }
+
+    public function test_form_action_buttons_use_concise_labels_with_platform_icons(): void
+    {
+        Setting::set('locale', 'en');
+
+        $platformIcons = [
+            'android' => [
+                'save' => 'check',
+                'quick_today' => 'today',
+                'quick_plus7' => 'date_range',
+                'quick_plus30' => 'calendar_month',
+            ],
+            'ios' => [
+                'save' => 'checkmark',
+                'quick_today' => 'calendar',
+                'quick_plus7' => 'calendar.badge.plus',
+                'quick_plus30' => 'calendar',
+            ],
+        ];
+
+        foreach ($platformIcons as $platform => $icons) {
+            $screen = Native::test(RandevuCreate::class, platform: $platform);
+            foreach ($icons as $key => $icon) {
+                $screen->assertElement('button', fn ($node) => ($node['props']['label'] ?? '') === __('randevu.'.$key)
+                    && ($node['props']['leading_icon'] ?? null) === $icon);
+            }
+        }
+
+        $randevu = Randevu::create(['title' => 'Trip', 'occurs_on' => today()->addDay()]);
+        Native::test(RandevuEdit::class, ['id' => $randevu->id], platform: 'android')
+            ->assertElement('button', fn ($node) => ($node['props']['label'] ?? '') === __('randevu.save_changes')
+                && ! empty($node['props']['leading_icon']));
+    }
+
+    public function test_theme_choice_buttons_use_platform_icons_and_keep_localized_labels(): void
+    {
+        Setting::set('locale', 'en');
+
+        $screen = Native::test(Settings::class, platform: 'android');
+        foreach (['theme_light', 'theme_dark'] as $key) {
+            $screen->assertElement('button', fn ($node) => ($node['props']['label'] ?? '') === __('randevu.'.$key)
+                && ! empty($node['props']['leading_icon']));
+        }
+
+        Native::test(Settings::class, platform: 'ios')
+            ->assertElement('button', fn ($node) => ($node['props']['label'] ?? '') === __('randevu.theme_light')
+                && ($node['props']['leading_icon'] ?? null) === 'sun.max')
+            ->assertElement('button', fn ($node) => ($node['props']['label'] ?? '') === __('randevu.theme_dark')
+                && ($node['props']['leading_icon'] ?? null) === 'moon.fill');
     }
 
     public function test_native_header_back_does_not_render_inline_text_button(): void
@@ -840,7 +894,7 @@ class RandevuScreensTest extends TestCase
         $this->assertSame('en', Setting::get('locale'));
 
         // A fresh mount picks up the stored language without restart.
-        Native::test(Follow::class)->assertSee('Add your first randevu');
+        Native::test(Follow::class)->assertSee(__('randevu.empty_cta'));
 
         $screen->call('useArabic')->assertSet('locale', 'ar');
         $this->assertSame('ar', Setting::get('locale'));
@@ -1197,7 +1251,7 @@ class RandevuScreensTest extends TestCase
             ->assertSee('No matches')
             ->assertSee('Try another word or clear the search')
             ->assertDontSee('Dentist')
-            ->assertDontSee('Add your first randevu');
+            ->assertDontSee(__('randevu.empty_cta'));
 
         $screen->set('search', '')->assertSee('Dentist')->assertDontSee('No matches');
     }
@@ -1247,7 +1301,7 @@ class RandevuScreensTest extends TestCase
 
         Native::test(Follow::class)
             ->set('search', '   ')
-            ->assertSee('Add your first randevu')
+            ->assertSee(__('randevu.empty_cta'))
             ->assertDontSee('No matches');
     }
 

@@ -117,11 +117,23 @@ class RandevuNotificationTest extends TestCase
         Setting::set('locale', 'en');
         $this->mockNotificationBridge(true, false, false);
 
-        Native::test(Settings::class)
+        Native::test(Settings::class, platform: 'android')
             ->assertSee(__('randevu.notification_permission_denied'))
             ->assertSee(__('randevu.notification_request_permission'))
             ->assertDontSee(__('randevu.notification_exact_inexact'))
             ->assertDontSee(__('randevu.notification_open_exact_settings'));
+    }
+
+    public function test_notification_toggle_buttons_are_concise_and_have_icons(): void
+    {
+        App::setLocale('en');
+        Setting::set('locale', 'en');
+        Setting::set('notifications_enabled', '1');
+        $this->mockNotificationBridge(true, true, true);
+
+        Native::test(Settings::class, platform: 'android')
+            ->assertElement('button', fn ($node) => ($node['props']['label'] ?? '') === __('randevu.notifications_disable')
+                && ! empty($node['props']['leading_icon']));
     }
 
     public function test_granted_notification_permission_has_no_permission_status_message(): void

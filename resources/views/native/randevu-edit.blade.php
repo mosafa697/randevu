@@ -9,9 +9,9 @@
             @include('native.partials.segmented', ['name' => 'calendar', 'selected' => $calendar_mode])
 
             <native:row class="w-full gap-2">
-                <native:button :label="__('randevu.quick_today')" variant="secondary" @press="setToday" class="flex-1 min-h-12" />
-                <native:button :label="__('randevu.quick_plus7')" variant="secondary" @press="setPlus7" class="flex-1 min-h-12" />
-                <native:button :label="__('randevu.quick_plus30')" variant="secondary" @press="setPlus30" class="flex-1 min-h-12" />
+                <native:button :label="__('randevu.quick_today')" ios-icon="calendar" android-icon="today" variant="secondary" @press="setToday" class="flex-1 min-h-12" />
+                <native:button :label="__('randevu.quick_plus7')" ios-icon="calendar.badge.plus" android-icon="date_range" variant="secondary" @press="setPlus7" class="flex-1 min-h-12" />
+                <native:button :label="__('randevu.quick_plus30')" ios-icon="calendar" android-icon="calendar_month" variant="secondary" @press="setPlus30" class="flex-1 min-h-12" />
             </native:row>
 
             @if($calendar_mode === 'hijri')
@@ -63,12 +63,12 @@
             @include('native.partials.cover-picker')
 
             @if(!$confirmingDelete)
-                <native:button :label="__('randevu.delete')" font="label" @press="askDelete" variant="destructive" class="w-full min-h-12" />
+                <native:button :label="__('randevu.delete')" ios-icon="trash" android-icon="delete" font="label" @press="askDelete" variant="destructive" class="w-full min-h-12" />
             @else
                 <native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} {{ \App\Services\AppFonts::textClass('base') }} text-theme-on-background leading-relaxed">{{ __('randevu.delete_confirm') }}</native:text>
                 <native:row class="w-full gap-2">
                     <native:button :label="__('randevu.keep')" font="label" @press="cancelDelete" variant="ghost" class="flex-1 min-h-12" />
-                    <native:button :label="__('randevu.delete')" font="label" @press="destroy" variant="destructive" class="flex-1 min-h-12" />
+                    <native:button :label="__('randevu.delete')" ios-icon="trash" android-icon="delete" font="label" @press="destroy" variant="destructive" class="flex-1 min-h-12" />
                 </native:row>
             @endif
 
@@ -77,6 +77,6 @@
     </native:scroll-view>
 
     <native:column class="w-full px-5 py-3 bg-theme-background safe-area-bottom">
-        <native:button :label="__('randevu.save_changes')" font="label" @press="update" variant="primary" class="w-full min-h-12" />
+        <native:button :label="__('randevu.save_changes')" ios-icon="checkmark" android-icon="check" font="label" @press="update" variant="primary" class="w-full min-h-12" />
     </native:column>
 </native:column>

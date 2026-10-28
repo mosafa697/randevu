@@ -7,7 +7,7 @@
             <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant text-center leading-relaxed">{{ __('randevu.follow_empty_support') }}</native:text>
             <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant text-center leading-relaxed">{{ __('randevu.follow_empty_classifier') }}</native:text>
             <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-on-surface-variant text-center leading-relaxed">{{ __('randevu.follow_empty_hint') }}</native:text>
-            <native:button :label="__('randevu.empty_cta')" font="label" @navigate="'/create'" class="w-full min-h-12" />
+            <native:button :label="__('randevu.empty_cta')" ios-icon="plus" android-icon="add" font="label" @navigate="'/create'" class="w-full min-h-12" />
         </native:column>
     @else
         @if(count($appointments) === 0)

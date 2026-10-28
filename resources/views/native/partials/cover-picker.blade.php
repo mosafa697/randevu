@@ -6,9 +6,9 @@
 @endif
 
 <native:row class="w-full gap-2">
-    <native:button :label="__('randevu.cover_pick')" variant="ghost" @press="pickCover" ios="photo" android="image" class="flex-1 min-h-12" />
+    <native:button :label="__('randevu.cover_pick')" variant="ghost" @press="pickCover" ios-icon="photo" android-icon="image" class="flex-1 min-h-12" />
     @if(!empty($cover_path))
-        <native:button :label="__('randevu.cover_remove')" variant="ghost" @press="removeCover" class="flex-1 min-h-12" />
+        <native:button :label="__('randevu.cover_remove')" variant="ghost" ios-icon="trash" android-icon="delete" @press="removeCover" class="flex-1 min-h-12" />
     @endif
 </native:row>
 
