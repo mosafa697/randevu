@@ -99,13 +99,83 @@ class RandevuNotificationTest extends TestCase
     {
         App::setLocale('en');
         Setting::set('locale', 'en');
+        $this->mockNotificationBridge(false, false, false);
 
         $screen = Native::test(Settings::class)
-            ->assertDontSee(__('randevu.notification_request_permission'));
+            ->assertDontSee(__('randevu.notification_request_permission'))
+            ->assertDontSee(__('randevu.notification_permission_denied'))
+            ->assertDontSee(__('randevu.notification_exact_inexact'));
 
         $this->assertFalse($screen->get('notificationsAvailable'));
         $screen->call('requestNotificationPermission');
-        $this->assertSame(__('randevu.notification_not_available'), $screen->get('notificationStatus'));
+        $this->assertFalse($screen->get('notificationPermissionDenied'));
+    }
+
+    public function test_denied_notification_permission_shows_guidance_and_request_action(): void
+    {
+        App::setLocale('en');
+        Setting::set('locale', 'en');
+        $this->mockNotificationBridge(true, false, false);
+
+        Native::test(Settings::class)
+            ->assertSee(__('randevu.notification_permission_denied'))
+            ->assertSee(__('randevu.notification_request_permission'))
+            ->assertDontSee(__('randevu.notification_exact_inexact'))
+            ->assertDontSee(__('randevu.notification_open_exact_settings'));
+    }
+
+    public function test_granted_notification_permission_has_no_permission_status_message(): void
+    {
+        App::setLocale('en');
+        Setting::set('locale', 'en');
+        $this->mockNotificationBridge(true, true, true);
+
+        Native::test(Settings::class)
+            ->assertDontSee(__('randevu.notification_permission_denied'))
+            ->assertDontSee(__('randevu.notification_exact_inexact'))
+            ->assertDontSee(__('randevu.notification_request_permission'))
+            ->assertDontSee(__('randevu.notification_open_exact_settings'));
+    }
+
+    public function test_exact_alarm_guidance_only_appears_when_permission_is_needed(): void
+    {
+        App::setLocale('en');
+        Setting::set('locale', 'en');
+        $this->mockNotificationBridge(true, true, false);
+
+        Native::test(Settings::class)
+            ->assertDontSee(__('randevu.notification_permission_denied'))
+            ->assertSee(__('randevu.notification_exact_inexact'))
+            ->assertSee(__('randevu.notification_open_exact_settings'));
+    }
+
+    public function test_notification_defaults_are_saved_as_each_selection_changes(): void
+    {
+        App::setLocale('en');
+        Setting::set('locale', 'en');
+        $this->mockNotificationBridge(false, false, false);
+
+        $screen = Native::test(Settings::class);
+        $screen->set('reminderDefaultSelection', RandevuNotificationRules::reminderLabel('1d'));
+
+        $this->assertSame('1d', Setting::get('reminder_default'));
+        $this->assertNull(Setting::get('anniversary_default'));
+
+        $screen->set('anniversaryDefaultSelection', RandevuNotificationRules::anniversaryLabel('yearly'));
+
+        $this->assertSame('yearly', Setting::get('anniversary_default'));
+    }
+
+    public function test_invalid_notification_default_selection_is_rejected(): void
+    {
+        App::setLocale('en');
+        Setting::set('locale', 'en');
+        $this->mockNotificationBridge(false, false, false);
+
+        $screen = Native::test(Settings::class);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $screen->set('reminderDefaultSelection', 'Invalid reminder');
     }
 
     public function test_native_notification_bridge_is_unavailable_to_console_commands(): void
@@ -117,5 +187,24 @@ class RandevuNotificationTest extends TestCase
         } finally {
             Platform::set(null);
         }
+    }
+
+    private function mockNotificationBridge(bool $available, bool $notificationsGranted, bool $exactAlarmsGranted): void
+    {
+        $status = [
+            'available' => $available,
+            'notifications_granted' => $notificationsGranted,
+            'exact_alarms_granted' => $exactAlarmsGranted,
+            'timezone' => 'UTC',
+        ];
+        $bridge = \Mockery::mock(RandevuNotificationBridge::class);
+        $bridge->shouldReceive('available')->andReturn($available);
+        $bridge->shouldReceive('status')->andReturn($status);
+
+        if ($available) {
+            $bridge->shouldReceive('sync')->once();
+        }
+
+        $this->app->instance(RandevuNotificationBridge::class, $bridge);
     }
 }

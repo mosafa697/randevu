@@ -24,13 +24,13 @@ class Settings extends NativeComponent
 
     public bool $notificationsAvailable = false;
 
+    public bool $notificationPermissionDenied = false;
+
+    public bool $exactAlarmPermissionNeeded = false;
+
     public string $reminderDefaultSelection = '';
 
     public string $anniversaryDefaultSelection = '';
-
-    public string $notificationStatus = '';
-
-    public string $exactAlarmStatus = '';
 
     /** @var list<string> */
     public array $reminderOptions = [];
@@ -104,16 +104,25 @@ class Settings extends NativeComponent
         app(RandevuNotificationScheduler::class)->sync();
     }
 
-    public function saveNotificationDefaults(): void
+    public function updatedReminderDefaultSelection(): void
     {
         $reminder = RandevuNotificationRules::reminderCode($this->reminderDefaultSelection);
-        $anniversary = RandevuNotificationRules::anniversaryCode($this->anniversaryDefaultSelection);
 
-        if ($reminder === null || $anniversary === null) {
-            throw new \InvalidArgumentException('The selected notification default is invalid.');
+        if ($reminder === null) {
+            throw new \InvalidArgumentException('The selected default reminder is invalid.');
         }
 
         Setting::set('reminder_default', $reminder);
+    }
+
+    public function updatedAnniversaryDefaultSelection(): void
+    {
+        $anniversary = RandevuNotificationRules::anniversaryCode($this->anniversaryDefaultSelection);
+
+        if ($anniversary === null) {
+            throw new \InvalidArgumentException('The selected default anniversary is invalid.');
+        }
+
         Setting::set('anniversary_default', $anniversary);
     }
 
@@ -140,20 +149,10 @@ class Settings extends NativeComponent
     {
         $status = app(RandevuNotificationBridge::class)->status();
         $this->notificationsAvailable = $status['available'];
-
-        if (! $status['available']) {
-            $this->notificationStatus = __('randevu.notification_not_available');
-            $this->exactAlarmStatus = '';
-
-            return;
-        }
-
-        $this->notificationStatus = __($status['notifications_granted']
-            ? 'randevu.notification_permission_granted'
-            : 'randevu.notification_permission_denied');
-        $this->exactAlarmStatus = __($status['exact_alarms_granted']
-            ? 'randevu.notification_exact_granted'
-            : 'randevu.notification_exact_inexact');
+        $this->notificationPermissionDenied = $status['available'] && ! $status['notifications_granted'];
+        $this->exactAlarmPermissionNeeded = $status['available']
+            && $status['notifications_granted']
+            && ! $status['exact_alarms_granted'];
     }
 
     public function render(): View
