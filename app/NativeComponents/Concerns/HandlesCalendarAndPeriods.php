@@ -8,6 +8,21 @@ use App\Services\RandevuTime;
 
 trait HandlesCalendarAndPeriods
 {
+    /**
+     * Give the month selector enough of the date row for its longest
+     * localized option while keeping the day and year fields usable.
+     *
+     * @param  list<string>  $monthOptions
+     */
+    public function monthSelectorFlexGrow(array $monthOptions): int
+    {
+        $longestMonthNameLength = $monthOptions === []
+            ? 0
+            : max(array_map(mb_strlen(...), $monthOptions));
+
+        return min(4, max(2, (int) ceil($longestMonthNameLength / 5)));
+    }
+
     public function useGregorian(): void
     {
         $this->calendar_mode = 'gregorian';
@@ -97,6 +112,7 @@ trait HandlesCalendarAndPeriods
 
         return RandevuHijri::daysInMonth($yearNumber, $monthNumber);
     }
+
     public function toggleYears(): void
     {
         $this->show_years = ! $this->show_years;

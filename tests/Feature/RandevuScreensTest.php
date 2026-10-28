@@ -207,34 +207,40 @@ class RandevuScreensTest extends TestCase
         $this->assertSame(0, $screen->get('calendarIndex'));
     }
 
-    public function test_date_selects_share_equal_width(): void
+    public function test_month_select_grows_for_localized_options_on_create_and_edit(): void
     {
-        Setting::set('locale', 'en');
-
-        // Balanced thirds on both forms: every date select is flex-1
-        // with no fixed width.
-        $third = fn ($n) => ($n['layout']['flex_grow'] ?? null) == 1
-            && ! isset($n['layout']['width']);
-
-        $screen = Native::test(RandevuCreate::class);
-
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $third($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $third($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $third($n));
-
-        $screen->press('useHijri');
-
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $third($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $third($n));
-        $screen->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $third($n));
-
         $randevu = Randevu::create(['title' => 'Weighted', 'occurs_on' => today()]);
 
-        $edit = Native::test(RandevuEdit::class, ['id' => $randevu->id]);
+        foreach (['ar', 'en'] as $locale) {
+            Setting::set('locale', $locale);
 
-        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Day' && $third($n));
-        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Month' && $third($n));
-        $edit->assertElement('select', fn ($n) => ($n['props']['label'] ?? '') === 'Year' && $third($n));
+            foreach ([RandevuCreate::class, RandevuEdit::class] as $componentClass) {
+                foreach (['gregorian', 'hijri'] as $calendar) {
+                    $screen = $componentClass === RandevuCreate::class
+                        ? Native::test($componentClass)
+                        : Native::test($componentClass, ['id' => $randevu->id]);
+
+                    if ($calendar === 'hijri') {
+                        $screen->press('useHijri');
+                    }
+
+                    $monthOptionsProperty = $calendar === 'hijri' ? 'hMonthOptions' : 'monthOptions';
+                    $monthOptions = $screen->get($monthOptionsProperty);
+                    $expectedMonthFlexGrow = min(4, max(2, (int) ceil(max(array_map(mb_strlen(...), $monthOptions)) / 5)));
+                    $monthLabel = __('randevu.month_label');
+                    $dayLabel = __('randevu.day_label');
+                    $yearLabel = __('randevu.year_label');
+
+                    $screen
+                        ->assertElement('select', fn ($node) => ($node['props']['label'] ?? '') === $dayLabel
+                            && ($node['layout']['flex_grow'] ?? null) == 1)
+                        ->assertElement('select', fn ($node) => ($node['props']['label'] ?? '') === $monthLabel
+                            && ($node['layout']['flex_grow'] ?? null) == $expectedMonthFlexGrow)
+                        ->assertElement('select', fn ($node) => ($node['props']['label'] ?? '') === $yearLabel
+                            && ($node['layout']['flex_grow'] ?? null) == 1);
+                }
+            }
+        }
     }
 
     public function test_create_chips_toggle_period_units(): void
