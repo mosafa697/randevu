@@ -67,6 +67,8 @@ return [
     'form_hint' => 'اليوم أو بعده موعد، وقبله ذكرى.',
     'preview_label' => 'ستعرض البطاقة',
     'preview_invalid' => 'اختر تاريخًا صحيحًا لعرض المدة',
+    'notification_use_defaults' => 'استخدم إعدادات الإشعارات الافتراضية',
+    'notification_settings' => 'إعدادات الإشعارات',
     'reminder_label' => 'تذكير الموعد',
     'anniversary_label' => 'ذكرى متكررة',
     'anniversary_lead_label' => 'التنبيه قبل الذكرى',

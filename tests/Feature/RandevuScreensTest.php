@@ -15,6 +15,7 @@ use App\Services\AppFonts;
 use App\Services\AppLocale;
 use App\Services\CoverImage;
 use App\Services\RandevuHijri;
+use App\Services\RandevuNotificationRules;
 use App\Services\RandevuTime;
 use App\Support\Bidi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -737,6 +738,67 @@ class RandevuScreensTest extends TestCase
         $randevu = Randevu::where('title', 'Safar night')->firstOrFail();
 
         $this->assertSame([1448, 2, 29], [$randevu->hijri_year, $randevu->hijri_month, $randevu->hijri_day]);
+    }
+
+    public function test_create_hides_notification_overrides_when_using_defaults(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)
+            ->assertSet('useNotificationDefaults', true)
+            ->assertElement('checkbox', fn ($node) => ($node['props']['value'] ?? false)
+                && ($node['props']['label'] ?? null) === 'Use notification defaults')
+            ->assertMissingElement('select', fn ($node) => ($node['props']['label'] ?? null) === 'Appointment reminder')
+            ->assertMissingElement('select', fn ($node) => ($node['props']['label'] ?? null) === 'Memory anniversary');
+    }
+
+    public function test_create_shows_notification_overrides_when_defaults_are_unchecked(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(RandevuCreate::class)
+            ->set('useNotificationDefaults', false)
+            ->assertSet('useNotificationDefaults', false)
+            ->assertElement('select', fn ($node) => ($node['props']['label'] ?? null) === 'Appointment reminder')
+            ->assertElement('select', fn ($node) => ($node['props']['label'] ?? null) === 'Memory anniversary')
+            ->assertElement('select', fn ($node) => ($node['props']['label'] ?? null) === 'Anniversary heads-up');
+    }
+
+    public function test_create_saves_configured_notification_defaults(): void
+    {
+        Setting::set('locale', 'en');
+        Setting::set('reminder_default', '1d');
+        Setting::set('anniversary_default', 'yearly');
+
+        Native::test(RandevuCreate::class)
+            ->set('title', 'Default notifications')
+            ->set('anniversaryLeadSelection', RandevuNotificationRules::leadLabel(7))
+            ->call('save');
+
+        $randevu = Randevu::where('title', 'Default notifications')->firstOrFail();
+        $this->assertSame('1d', $randevu->reminder_rule);
+        $this->assertSame('yearly', $randevu->anniversary_mode);
+        $this->assertSame(0, $randevu->anniversary_lead_days);
+    }
+
+    public function test_create_saves_notification_overrides_when_defaults_are_unchecked(): void
+    {
+        Setting::set('locale', 'en');
+        Setting::set('reminder_default', '1d');
+        Setting::set('anniversary_default', 'yearly');
+
+        Native::test(RandevuCreate::class)
+            ->set('useNotificationDefaults', false)
+            ->set('title', 'Custom notifications')
+            ->set('reminderSelection', RandevuNotificationRules::reminderLabel('2d'))
+            ->set('anniversaryModeSelection', RandevuNotificationRules::anniversaryLabel('monthly'))
+            ->set('anniversaryLeadSelection', RandevuNotificationRules::leadLabel(7))
+            ->call('save');
+
+        $randevu = Randevu::where('title', 'Custom notifications')->firstOrFail();
+        $this->assertSame('2d', $randevu->reminder_rule);
+        $this->assertSame('monthly', $randevu->anniversary_mode);
+        $this->assertSame(7, $randevu->anniversary_lead_days);
     }
 
     public function test_follow_shows_hijri_date(): void

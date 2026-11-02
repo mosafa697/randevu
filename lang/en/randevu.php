@@ -67,6 +67,8 @@ return [
     'form_hint' => 'Today or later becomes an appointment; earlier becomes a memory.',
     'preview_label' => 'The card will say',
     'preview_invalid' => 'Pick a valid date to see the distance',
+    'notification_use_defaults' => 'Use notification defaults',
+    'notification_settings' => 'Notification settings',
     'reminder_label' => 'Appointment reminder',
     'anniversary_label' => 'Memory anniversary',
     'anniversary_lead_label' => 'Anniversary heads-up',

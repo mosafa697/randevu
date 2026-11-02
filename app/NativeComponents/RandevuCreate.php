@@ -49,6 +49,8 @@ class RandevuCreate extends NativeComponent
 
     public string $minute = '';
 
+    public bool $useNotificationDefaults = true;
+
     public bool $show_years = true;
 
     public bool $show_months = true;
@@ -196,9 +198,17 @@ class RandevuCreate extends NativeComponent
         $cover = CoverImage::normalize($this->cover_path);
         $coverMime = CoverImage::normalizeMime($this->cover_mime);
         $coverError = CoverImage::validate($cover, $coverMime);
-        $reminderRule = RandevuNotificationRules::reminderCode($this->reminderSelection);
-        $anniversaryMode = RandevuNotificationRules::anniversaryCode($this->anniversaryModeSelection);
-        $anniversaryLeadDays = RandevuNotificationRules::leadDays($this->anniversaryLeadSelection);
+        $reminderSelection = $this->useNotificationDefaults
+            ? RandevuNotificationRules::reminderLabel(Setting::get('reminder_default', 'off') ?? 'off')
+            : $this->reminderSelection;
+        $anniversarySelection = $this->useNotificationDefaults
+            ? RandevuNotificationRules::anniversaryLabel(Setting::get('anniversary_default', 'none') ?? 'none')
+            : $this->anniversaryModeSelection;
+        $reminderRule = RandevuNotificationRules::reminderCode($reminderSelection);
+        $anniversaryMode = RandevuNotificationRules::anniversaryCode($anniversarySelection);
+        $anniversaryLeadDays = $this->useNotificationDefaults
+            ? 0
+            : RandevuNotificationRules::leadDays($this->anniversaryLeadSelection);
 
         $validator = Validator::make([
             'title' => $this->title,

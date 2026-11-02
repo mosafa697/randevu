@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Randevu;
 use App\Models\Setting;
 use App\NativeComponents\RandevuCreate;
+use App\NativeComponents\RandevuDetails;
 use App\NativeComponents\RandevuEdit;
 use App\NativeComponents\Settings;
 use App\Services\RandevuNotificationBridge;
@@ -43,6 +44,7 @@ class RandevuNotificationTest extends TestCase
 
         Native::test(RandevuCreate::class)
             ->set('title', 'Notification test')
+            ->set('useNotificationDefaults', false)
             ->set('reminderSelection', RandevuNotificationRules::reminderLabel('1d'))
             ->set('anniversaryModeSelection', RandevuNotificationRules::anniversaryLabel('yearly'))
             ->set('anniversaryLeadSelection', RandevuNotificationRules::leadLabel(7))
@@ -79,6 +81,88 @@ class RandevuNotificationTest extends TestCase
         $this->assertSame('1h', $randevu->reminder_rule);
         $this->assertSame('both', $randevu->anniversary_mode);
         $this->assertSame(1, $randevu->anniversary_lead_days);
+    }
+
+    public function test_edit_keeps_existing_notification_choices_visible_by_default(): void
+    {
+        App::setLocale('en');
+        Setting::set('locale', 'en');
+
+        $randevu = Randevu::create([
+            'title' => 'Existing reminder',
+            'occurs_on' => today(),
+            'reminder_rule' => '15m',
+            'anniversary_mode' => 'yearly',
+            'anniversary_lead_days' => 7,
+        ]);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->assertSet('useNotificationDefaults', false)
+            ->assertElement('checkbox', fn ($node) => ! ($node['props']['value'] ?? false)
+                && ($node['props']['label'] ?? null) === 'Use notification defaults')
+            ->assertElement('select', fn ($node) => ($node['props']['label'] ?? null) === 'Appointment reminder');
+    }
+
+    public function test_edit_hides_notification_overrides_when_defaults_are_selected(): void
+    {
+        App::setLocale('en');
+        Setting::set('locale', 'en');
+
+        $randevu = Randevu::create(['title' => 'Hidden overrides', 'occurs_on' => today()]);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->set('useNotificationDefaults', true)
+            ->assertMissingElement('select', fn ($node) => ($node['props']['label'] ?? null) === 'Appointment reminder')
+            ->assertMissingElement('select', fn ($node) => ($node['props']['label'] ?? null) === 'Memory anniversary');
+    }
+
+    public function test_edit_can_apply_current_notification_defaults(): void
+    {
+        App::setLocale('en');
+        Setting::set('locale', 'en');
+        Setting::set('reminder_default', '1d');
+        Setting::set('anniversary_default', 'yearly');
+
+        $randevu = Randevu::create([
+            'title' => 'Default edit',
+            'occurs_on' => today(),
+            'reminder_rule' => '15m',
+            'anniversary_mode' => 'monthly',
+            'anniversary_lead_days' => 7,
+        ]);
+
+        Native::test(RandevuEdit::class, ['id' => $randevu->id])
+            ->set('useNotificationDefaults', true)
+            ->call('update');
+
+        $randevu->refresh();
+        $this->assertSame('1d', $randevu->reminder_rule);
+        $this->assertSame('yearly', $randevu->anniversary_mode);
+        $this->assertSame(0, $randevu->anniversary_lead_days);
+    }
+
+    public function test_details_notification_summary_is_collapsed_under_its_section(): void
+    {
+        App::setLocale('en');
+        Setting::set('locale', 'en');
+
+        $randevu = Randevu::create([
+            'title' => 'Collapsed notification',
+            'occurs_on' => today(),
+            'reminder_rule' => '1d',
+            'anniversary_mode' => 'yearly',
+            'anniversary_lead_days' => 1,
+        ]);
+
+        $screen = Native::test(RandevuDetails::class, ['id' => $randevu->id]);
+        $notificationDescription = $screen->get('randevu')['notification_description'];
+
+        $screen
+            ->assertElement('accordion', fn ($node) => ($node['props']['expanded'] ?? false) === false
+                && collect($node['children'] ?? [])->contains(fn ($child) => ($child['type'] ?? null) === 'accordion_header')
+                && collect($node['children'] ?? [])->contains(fn ($child) => ($child['type'] ?? null) === 'accordion_content'))
+            ->assertSee(__('randevu.notification_settings'))
+            ->assertSee($notificationDescription);
     }
 
     public function test_notification_master_toggle_persists_and_renders_status(): void

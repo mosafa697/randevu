@@ -67,6 +67,8 @@ return [
     'form_hint' => 'النهاردة أو بعد كده يبقى ميعاد، وقبل كده يبقى ذكرى.',
     'preview_label' => 'البطاقة هتقول',
     'preview_invalid' => 'اختار تاريخ مظبوط عشان تشوف المدة',
+    'notification_use_defaults' => 'استخدم إعدادات التنبيه الافتراضية',
+    'notification_settings' => 'إعدادات التنبيه',
     'reminder_label' => 'تذكير الميعاد',
     'anniversary_label' => 'ذكرى متكررة',
     'anniversary_lead_label' => 'التنبيه قبل الذكرى',
