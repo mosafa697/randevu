@@ -3,21 +3,456 @@
 namespace App\NativeComponents\Concerns;
 
 use App\Models\Randevu;
+use App\NativeComponents\RandevuCreate;
+use App\Services\AppLocale;
 use App\Services\RandevuHijri;
 use App\Services\RandevuTime;
+use Illuminate\Support\Carbon;
 
 trait HandlesCalendarAndPeriods
 {
+    public int $calendarViewMonth = 1;
+
+    public int $calendarViewYear = 1;
+
+    public int $calendarSelectedDay = 1;
+
+    public string $calendarYearSelection = '';
+
+    public string $calendarMonthHeading = '';
+
+    public string $calendarYearLabel = '';
+
+    public string $calendarPreviousIosIcon = 'chevron.left';
+
+    public string $calendarPreviousAndroidIcon = 'chevron_left';
+
+    public string $calendarNextIosIcon = 'chevron.right';
+
+    public string $calendarNextAndroidIcon = 'chevron_right';
+
+    public string $calendarSelectedDateLabel = '';
+
+    public int $calendarHighlightedDay = 0;
+
+    public bool $showCalendarMonthPicker = false;
+
+    /** @var list<list<int|null>> */
+    public array $calendarWeeks = [];
+
+    /** @var list<string> */
+    public array $calendarWeekdayNames = [];
+
+    /** @var list<string> */
+    public array $calendarMonthNames = [];
+
+    /** @var list<string> */
+    public array $calendarYearOptions = [];
+
     public function useGregorian(): void
     {
         $this->calendar_mode = 'gregorian';
         $this->calendarIndex = 0;
+        $this->syncCalendarViewToSelection();
     }
 
     public function useHijri(): void
     {
         $this->calendar_mode = 'hijri';
         $this->calendarIndex = 1;
+        $this->syncCalendarViewToSelection();
+    }
+
+    public function toggleCalendarMonthPicker(): void
+    {
+        $this->showCalendarMonthPicker = ! $this->showCalendarMonthPicker;
+    }
+
+    public function previousCalendarMonth(): void
+    {
+        $this->moveCalendarMonth(-1);
+    }
+
+    public function nextCalendarMonth(): void
+    {
+        $this->moveCalendarMonth(1);
+    }
+
+    public function updatedCalendarYearSelection(): void
+    {
+        if (! ctype_digit($this->calendarYearSelection)
+            || ! in_array($this->calendarYearSelection, $this->calendarYearOptions, true)) {
+            return;
+        }
+
+        $this->calendarViewYear = (int) $this->calendarYearSelection;
+        $this->refreshCalendarWeeks();
+    }
+
+    public function selectCalendarMonth01(): void
+    {
+        $this->selectCalendarMonth(1);
+    }
+
+    public function selectCalendarMonth02(): void
+    {
+        $this->selectCalendarMonth(2);
+    }
+
+    public function selectCalendarMonth03(): void
+    {
+        $this->selectCalendarMonth(3);
+    }
+
+    public function selectCalendarMonth04(): void
+    {
+        $this->selectCalendarMonth(4);
+    }
+
+    public function selectCalendarMonth05(): void
+    {
+        $this->selectCalendarMonth(5);
+    }
+
+    public function selectCalendarMonth06(): void
+    {
+        $this->selectCalendarMonth(6);
+    }
+
+    public function selectCalendarMonth07(): void
+    {
+        $this->selectCalendarMonth(7);
+    }
+
+    public function selectCalendarMonth08(): void
+    {
+        $this->selectCalendarMonth(8);
+    }
+
+    public function selectCalendarMonth09(): void
+    {
+        $this->selectCalendarMonth(9);
+    }
+
+    public function selectCalendarMonth10(): void
+    {
+        $this->selectCalendarMonth(10);
+    }
+
+    public function selectCalendarMonth11(): void
+    {
+        $this->selectCalendarMonth(11);
+    }
+
+    public function selectCalendarMonth12(): void
+    {
+        $this->selectCalendarMonth(12);
+    }
+
+    public function selectCalendarDay01(): void
+    {
+        $this->selectCalendarDay(1);
+    }
+
+    public function selectCalendarDay02(): void
+    {
+        $this->selectCalendarDay(2);
+    }
+
+    public function selectCalendarDay03(): void
+    {
+        $this->selectCalendarDay(3);
+    }
+
+    public function selectCalendarDay04(): void
+    {
+        $this->selectCalendarDay(4);
+    }
+
+    public function selectCalendarDay05(): void
+    {
+        $this->selectCalendarDay(5);
+    }
+
+    public function selectCalendarDay06(): void
+    {
+        $this->selectCalendarDay(6);
+    }
+
+    public function selectCalendarDay07(): void
+    {
+        $this->selectCalendarDay(7);
+    }
+
+    public function selectCalendarDay08(): void
+    {
+        $this->selectCalendarDay(8);
+    }
+
+    public function selectCalendarDay09(): void
+    {
+        $this->selectCalendarDay(9);
+    }
+
+    public function selectCalendarDay10(): void
+    {
+        $this->selectCalendarDay(10);
+    }
+
+    public function selectCalendarDay11(): void
+    {
+        $this->selectCalendarDay(11);
+    }
+
+    public function selectCalendarDay12(): void
+    {
+        $this->selectCalendarDay(12);
+    }
+
+    public function selectCalendarDay13(): void
+    {
+        $this->selectCalendarDay(13);
+    }
+
+    public function selectCalendarDay14(): void
+    {
+        $this->selectCalendarDay(14);
+    }
+
+    public function selectCalendarDay15(): void
+    {
+        $this->selectCalendarDay(15);
+    }
+
+    public function selectCalendarDay16(): void
+    {
+        $this->selectCalendarDay(16);
+    }
+
+    public function selectCalendarDay17(): void
+    {
+        $this->selectCalendarDay(17);
+    }
+
+    public function selectCalendarDay18(): void
+    {
+        $this->selectCalendarDay(18);
+    }
+
+    public function selectCalendarDay19(): void
+    {
+        $this->selectCalendarDay(19);
+    }
+
+    public function selectCalendarDay20(): void
+    {
+        $this->selectCalendarDay(20);
+    }
+
+    public function selectCalendarDay21(): void
+    {
+        $this->selectCalendarDay(21);
+    }
+
+    public function selectCalendarDay22(): void
+    {
+        $this->selectCalendarDay(22);
+    }
+
+    public function selectCalendarDay23(): void
+    {
+        $this->selectCalendarDay(23);
+    }
+
+    public function selectCalendarDay24(): void
+    {
+        $this->selectCalendarDay(24);
+    }
+
+    public function selectCalendarDay25(): void
+    {
+        $this->selectCalendarDay(25);
+    }
+
+    public function selectCalendarDay26(): void
+    {
+        $this->selectCalendarDay(26);
+    }
+
+    public function selectCalendarDay27(): void
+    {
+        $this->selectCalendarDay(27);
+    }
+
+    public function selectCalendarDay28(): void
+    {
+        $this->selectCalendarDay(28);
+    }
+
+    public function selectCalendarDay29(): void
+    {
+        $this->selectCalendarDay(29);
+    }
+
+    public function selectCalendarDay30(): void
+    {
+        $this->selectCalendarDay(30);
+    }
+
+    public function selectCalendarDay31(): void
+    {
+        $this->selectCalendarDay(31);
+    }
+
+    private function syncCalendarViewToSelection(): void
+    {
+        if ($this->calendar_mode === 'hijri') {
+            $this->calendarViewYear = max(1, (int) $this->h_year);
+            $this->calendarViewMonth = RandevuHijri::monthNumber($this->h_month) ?? 1;
+            $this->calendarSelectedDay = max(1, (int) $this->h_day);
+            $this->calendarMonthNames = RandevuHijri::monthNames();
+            $this->calendarYearOptions = RandevuHijri::yearOptions();
+        } else {
+            $this->calendarViewYear = max(1, (int) $this->year);
+            $this->calendarViewMonth = RandevuTime::monthNumber($this->month) ?? 1;
+            $this->calendarSelectedDay = max(1, (int) $this->day);
+            $this->calendarMonthNames = RandevuTime::monthNames();
+            $this->calendarYearOptions = RandevuCreate::yearOptions();
+        }
+
+        $this->calendarYearSelection = (string) $this->calendarViewYear;
+        $this->calendarWeekdayNames = array_values((array) __('randevu.calendar_weekdays'));
+        $this->showCalendarMonthPicker = false;
+        $this->refreshCalendarWeeks();
+    }
+
+    private function selectCalendarMonth(int $month): void
+    {
+        if ($month < 1 || $month > 12) {
+            throw new \InvalidArgumentException('Calendar month must be between 1 and 12.');
+        }
+
+        $this->calendarViewMonth = $month;
+        $this->showCalendarMonthPicker = false;
+        $this->refreshCalendarWeeks();
+    }
+
+    private function moveCalendarMonth(int $offset): void
+    {
+        if ($this->calendar_mode === 'hijri') {
+            $month = $this->calendarViewMonth + $offset;
+
+            if ($month < 1) {
+                $this->calendarViewYear = max(1, $this->calendarViewYear - 1);
+                $month = 12;
+            } elseif ($month > 12) {
+                $this->calendarViewYear++;
+                $month = 1;
+            }
+
+            $this->calendarViewMonth = $month;
+        } else {
+            $month = Carbon::create($this->calendarViewYear, $this->calendarViewMonth, 1)
+                ->addMonthsNoOverflow($offset);
+
+            $this->calendarViewYear = max(1, min(9999, $month->year));
+            $this->calendarViewMonth = $month->month;
+        }
+
+        $this->calendarYearSelection = (string) $this->calendarViewYear;
+        $this->refreshCalendarWeeks();
+    }
+
+    private function refreshCalendarWeeks(): void
+    {
+        if ($this->calendar_mode === 'hijri') {
+            $dayCount = RandevuHijri::daysInMonth($this->calendarViewYear, $this->calendarViewMonth);
+            [$gregorianYear, $gregorianMonth, $gregorianDay] = RandevuHijri::toGregorian(
+                $this->calendarViewYear,
+                $this->calendarViewMonth,
+                1,
+            );
+        } else {
+            $dayCount = Carbon::create($this->calendarViewYear, $this->calendarViewMonth, 1)->daysInMonth;
+            $gregorianYear = $this->calendarViewYear;
+            $gregorianMonth = $this->calendarViewMonth;
+            $gregorianDay = 1;
+        }
+
+        $weekday = Carbon::create($gregorianYear, $gregorianMonth, $gregorianDay)->dayOfWeek;
+        $isRtl = AppLocale::isRtl();
+        $firstWeekday = $isRtl ? ($weekday + 1) % 7 : $weekday;
+        $this->calendarPreviousIosIcon = $isRtl ? 'chevron.right' : 'chevron.left';
+        $this->calendarPreviousAndroidIcon = $isRtl ? 'chevron_right' : 'chevron_left';
+        $this->calendarNextIosIcon = $isRtl ? 'chevron.left' : 'chevron.right';
+        $this->calendarNextAndroidIcon = $isRtl ? 'chevron_left' : 'chevron_right';
+        $days = array_fill(0, 42, null);
+
+        for ($day = 1; $day <= $dayCount; $day++) {
+            $days[$firstWeekday + $day - 1] = $day;
+        }
+
+        $this->calendarWeeks = array_chunk($days, 7);
+        $this->calendarMonthHeading = $this->calendarMonthNames[$this->calendarViewMonth - 1] ?? '';
+        $this->calendarYearLabel = (string) $this->calendarViewYear;
+
+        if ($this->calendar_mode === 'hijri') {
+            $this->calendarYearLabel .= ' '.RandevuHijri::hijriSuffix();
+            $this->calendarSelectedDateLabel = trim("{$this->h_day} {$this->h_month} {$this->h_year} ".RandevuHijri::hijriSuffix());
+            $this->calendarHighlightedDay = (int) $this->h_month === $this->calendarViewMonth
+                && (int) $this->h_year === $this->calendarViewYear
+                    ? (int) $this->h_day
+                    : 0;
+        } else {
+            $this->calendarSelectedDateLabel = trim("{$this->day} {$this->month} {$this->year}");
+            $this->calendarHighlightedDay = RandevuTime::monthNumber($this->month) === $this->calendarViewMonth
+                && (int) $this->year === $this->calendarViewYear
+                    ? (int) $this->day
+                    : 0;
+        }
+    }
+
+    private function selectCalendarDay(int $day): void
+    {
+        if ($this->calendar_mode === 'hijri') {
+            if (! RandevuHijri::valid($this->calendarViewYear, $this->calendarViewMonth, $day)) {
+                throw new \InvalidArgumentException('The selected day is not in this Hijri month.');
+            }
+
+            $this->h_day = (string) $day;
+            $this->h_month = RandevuHijri::monthName($this->calendarViewMonth);
+            $this->h_year = (string) $this->calendarViewYear;
+            [$year, $month, $gregorianDay] = RandevuHijri::toGregorian(
+                $this->calendarViewYear,
+                $this->calendarViewMonth,
+                $day,
+            );
+            $this->day = (string) $gregorianDay;
+            $this->month = RandevuTime::monthNames()[$month - 1];
+            $this->year = (string) $year;
+        } else {
+            if (! checkdate($this->calendarViewMonth, $day, $this->calendarViewYear)) {
+                throw new \InvalidArgumentException('The selected day is not in this Gregorian month.');
+            }
+
+            $this->day = (string) $day;
+            $this->month = RandevuTime::monthNames()[$this->calendarViewMonth - 1];
+            $this->year = (string) $this->calendarViewYear;
+            [$year, $month, $hijriDay] = RandevuHijri::fromGregorian(
+                $this->calendarViewYear,
+                $this->calendarViewMonth,
+                $day,
+            );
+            $this->h_day = (string) $hijriDay;
+            $this->h_month = RandevuHijri::monthName($month);
+            $this->h_year = (string) $year;
+        }
+
+        $this->calendarSelectedDay = $day;
+        $this->calendarYearSelection = (string) $this->calendarViewYear;
+        $this->clampGregorianDay();
+        $this->clampHijriDay();
+        $this->refreshCalendarWeeks();
     }
 
     /**
@@ -121,16 +556,19 @@ trait HandlesCalendarAndPeriods
     public function setToday(): void
     {
         $this->setDateChips(0);
+        $this->syncCalendarViewToSelection();
     }
 
     public function setPlus7(): void
     {
         $this->setDateChips(7);
+        $this->syncCalendarViewToSelection();
     }
 
     public function setPlus30(): void
     {
         $this->setDateChips(30);
+        $this->syncCalendarViewToSelection();
     }
 
     /**

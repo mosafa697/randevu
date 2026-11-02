@@ -159,6 +159,8 @@ class RandevuEdit extends NativeComponent
             $this->h_month = RandevuHijri::monthName($hm);
             $this->h_year = (string) $hy;
         }
+
+        $this->syncCalendarViewToSelection();
     }
 
     public function navTitle(): string

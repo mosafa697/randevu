@@ -122,6 +122,7 @@ class RandevuCreate extends NativeComponent
         $this->h_year = (string) $hy;
         $this->hour = __('randevu.time_none');
         $this->minute = __('randevu.time_none');
+        $this->syncCalendarViewToSelection();
     }
 
     public function navTitle(): string

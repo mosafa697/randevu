@@ -208,34 +208,173 @@ class RandevuScreensTest extends TestCase
         $this->assertSame(0, $screen->get('calendarIndex'));
     }
 
-    public function test_date_fields_use_full_width_for_localized_options_on_create_and_edit(): void
+    public function test_create_renders_a_localized_inline_calendar_in_each_locale(): void
+    {
+        foreach (['ar', 'ar_fusha', 'en'] as $locale) {
+            Setting::set('locale', $locale);
+
+            $screen = Native::test(RandevuCreate::class);
+            $calendarWeeks = $screen->get('calendarWeeks');
+
+            $this->assertCount(6, $calendarWeeks);
+
+            foreach ($calendarWeeks as $week) {
+                $this->assertCount(7, $week);
+            }
+
+            $selectedDate = today()->day.' '.RandevuTime::monthNames()[today()->month - 1].' '.today()->year;
+
+            $screen
+                ->assertSee(__('randevu.section_date_time'))
+                ->assertSee(__('randevu.calendar_selected', ['date' => $selectedDate]))
+                ->assertSet('calendarHighlightedDay', today()->day)
+                ->assertElement('pressable', fn ($node) => ($node['props']['a11y_label'] ?? null) === __('randevu.calendar_select_day', ['day' => today()->day]))
+                ->assertElement('button', fn ($node) => ($node['props']['a11y_label'] ?? null) === __('randevu.calendar_previous_month')
+                    && empty($node['props']['label']))
+                ->assertElement('button', fn ($node) => ($node['props']['a11y_label'] ?? null) === __('randevu.calendar_next_month')
+                    && empty($node['props']['label']))
+                ->assertElement('button', fn ($node) => ($node['props']['a11y_label'] ?? null) === __('randevu.calendar_choose_month_year'));
+
+            if ($locale === 'en') {
+                $this->assertSame('chevron.left', $screen->get('calendarPreviousIosIcon'));
+                $this->assertSame('chevron.right', $screen->get('calendarNextIosIcon'));
+            } else {
+                $this->assertSame('chevron.right', $screen->get('calendarPreviousIosIcon'));
+                $this->assertSame('chevron.left', $screen->get('calendarNextIosIcon'));
+            }
+        }
+    }
+
+    public function test_create_calendar_navigation_and_gregorian_day_selection_update_both_calendars(): void
+    {
+        Setting::set('locale', 'en');
+        $year = today()->year;
+
+        $screen = Native::test(RandevuCreate::class)
+            ->set('calendarViewYear', $year)
+            ->set('calendarViewMonth', 12)
+            ->press('nextCalendarMonth')
+            ->assertSet('calendarViewYear', $year + 1)
+            ->assertSet('calendarViewMonth', 1)
+            ->press('selectCalendarDay15')
+            ->assertSet('calendarSelectedDay', 15)
+            ->assertSet('day', '15')
+            ->assertSet('month', RandevuTime::monthNames()[0])
+            ->assertSet('year', (string) ($year + 1));
+
+        [$hijriYear, $hijriMonth, $hijriDay] = RandevuHijri::fromGregorian($year + 1, 1, 15);
+
+        $screen
+            ->assertSet('h_year', (string) $hijriYear)
+            ->assertSet('h_month', RandevuHijri::monthName($hijriMonth))
+            ->assertSet('h_day', (string) $hijriDay);
+    }
+
+    public function test_create_hijri_calendar_navigation_and_selection_saves_the_chosen_date(): void
+    {
+        Setting::set('locale', 'en');
+        $screen = Native::test(RandevuCreate::class)
+            ->press('useHijri')
+            ->press('nextCalendarMonth');
+        $year = $screen->get('calendarViewYear');
+        $month = $screen->get('calendarViewMonth');
+
+        $screen
+            ->press('selectCalendarDay15')
+            ->assertSet('h_day', '15')
+            ->assertSet('h_month', RandevuHijri::monthName($month))
+            ->assertSet('h_year', (string) $year)
+            ->set('title', 'Calendar-selected Hijri date')
+            ->call('save');
+
+        [$gregorianYear, $gregorianMonth, $gregorianDay] = RandevuHijri::toGregorian($year, $month, 15);
+        $randevu = Randevu::where('title', 'Calendar-selected Hijri date')->firstOrFail();
+
+        $this->assertSame('hijri', $randevu->entered_in);
+        $this->assertSame(
+            sprintf('%04d-%02d-%02d', $gregorianYear, $gregorianMonth, $gregorianDay),
+            $randevu->occurs_on->toDateString(),
+        );
+        $this->assertSame([$year, $month, 15], [
+            $randevu->hijri_year,
+            $randevu->hijri_month,
+            $randevu->hijri_day,
+        ]);
+    }
+
+    public function test_add_and_edit_share_the_inline_calendar_and_section_layout(): void
     {
         $randevu = Randevu::create(['title' => 'Weighted', 'occurs_on' => today()]);
 
-        foreach (['ar', 'en'] as $locale) {
+        foreach (['ar', 'ar_fusha', 'en'] as $locale) {
             Setting::set('locale', $locale);
 
-            foreach ([RandevuCreate::class, RandevuEdit::class] as $componentClass) {
-                foreach (['gregorian', 'hijri'] as $calendar) {
-                    $screen = $componentClass === RandevuCreate::class
-                        ? Native::test($componentClass)
-                        : Native::test($componentClass, ['id' => $randevu->id]);
+            foreach ([Native::test(RandevuCreate::class), Native::test(RandevuEdit::class, ['id' => $randevu->id])] as $screen) {
+                $screen
+                    ->assertSee(__('randevu.section_date_time'))
+                    ->assertSee(__('randevu.section_display_note'))
+                    ->assertSee(__('randevu.section_appearance'))
+                    ->assertSee(__('randevu.section_notifications'))
+                    ->assertElement('pressable', fn ($node) => ($node['props']['a11y_label'] ?? null) === __('randevu.calendar_select_day', ['day' => 1]))
+                    ->assertMissingElement('select', fn ($node) => in_array(
+                        $node['props']['label'] ?? null,
+                        [__('randevu.day_label'), __('randevu.month_label')],
+                        true,
+                    ));
 
-                    if ($calendar === 'hijri') {
-                        $screen->press('useHijri');
-                    }
-
-                    $monthLabel = __('randevu.month_label');
-                    $dayLabel = __('randevu.day_label');
-                    $yearLabel = __('randevu.year_label');
-
-                    foreach ([$dayLabel, $monthLabel, $yearLabel] as $label) {
-                        $screen->assertElement('select', fn ($node) => ($node['props']['label'] ?? '') === $label
-                            && ($node['layout']['width'] ?? null) === 'fill');
-                    }
+                if ($locale !== 'en') {
+                    $this->assertSame(
+                        ['س', 'أح', 'إث', 'ث', 'أر', 'خ', 'ج'],
+                        $screen->get('calendarWeekdayNames'),
+                    );
+                } else {
+                    $this->assertSame(['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'], $screen->get('calendarWeekdayNames'));
                 }
             }
         }
+    }
+
+    public function test_calendar_month_grid_and_year_picker_jump_to_selected_month_and_year(): void
+    {
+        Setting::set('locale', 'en');
+        $randevu = Randevu::create(['title' => 'Year picker', 'occurs_on' => today()]);
+
+        foreach ([
+            Native::test(RandevuCreate::class),
+            Native::test(RandevuEdit::class, ['id' => $randevu->id]),
+        ] as $screen) {
+            $year = today()->year + 3;
+            $originalDate = $screen->get('day');
+
+            $screen
+                ->press('toggleCalendarMonthPicker')
+                ->assertElement('select', fn ($node) => ($node['props']['label'] ?? null) === 'Year')
+                ->assertElement('button', fn ($node) => ($node['props']['label'] ?? null) === 'February')
+                ->set('calendarYearSelection', (string) $year)
+                ->assertSet('calendarViewYear', $year)
+                ->assertSet('day', $originalDate)
+                ->press('selectCalendarMonth02')
+                ->assertSet('calendarViewMonth', 2)
+                ->assertSet('calendarViewYear', $year)
+                ->assertSet('day', $originalDate)
+                ->assertSet('showCalendarMonthPicker', false)
+                ->assertElement('button', fn ($node) => ($node['props']['label'] ?? null) === 'February')
+                ->assertSet('calendarMonthHeading', 'February')
+                ->assertSet('calendarYearLabel', (string) $year)
+                ->assertSee((string) $year);
+        }
+    }
+
+    public function test_details_uses_the_same_section_card_headings(): void
+    {
+        Setting::set('locale', 'en');
+        $randevu = Randevu::create(['title' => 'Sectioned details', 'occurs_on' => today()]);
+
+        Native::test(RandevuDetails::class, ['id' => $randevu->id])
+            ->assertSee('Date & time')
+            ->assertSee('Details & display')
+            ->assertSee('Appearance')
+            ->assertSee('Notifications');
     }
 
     public function test_create_chips_toggle_period_units(): void
@@ -816,11 +955,25 @@ class RandevuScreensTest extends TestCase
     {
         Setting::set('locale', 'en');
 
-        Native::test(RandevuCreate::class)
+        $screen = Native::test(RandevuCreate::class)
             ->assertSet('hMonthOptions', RandevuHijri::monthNames())
-            ->call('useHijri')
-            ->assertSee('Ramadan')
-            ->assertSee("Rabi' al-Awwal");
+            ->press('useHijri');
+        $monthsUntilRamadan = (9 - $screen->get('calendarViewMonth') + 12) % 12;
+
+        for ($month = 0; $month < $monthsUntilRamadan; $month++) {
+            $screen->press('nextCalendarMonth');
+        }
+
+        $screen->assertSee('Ramadan');
+
+        $screen = Native::test(RandevuCreate::class)->press('useHijri');
+        $monthsUntilRabiAlAwwal = (3 - $screen->get('calendarViewMonth') + 12) % 12;
+
+        for ($month = 0; $month < $monthsUntilRabiAlAwwal; $month++) {
+            $screen->press('nextCalendarMonth');
+        }
+
+        $screen->assertSee("Rabi' al-Awwal");
 
         $randevu = Randevu::create(array_merge(
             ['title' => 'Trip', 'occurs_on' => today()->addDays(3)],
@@ -1045,20 +1198,14 @@ class RandevuScreensTest extends TestCase
         // Arabic (RTL): same canonical DOM order as English — structure
         // never mirrors, only text content changes. Labels hardcoded: the
         // test process locale is unreliable for __() here.
-        $this->assertSame(
-            ['اليوم', 'الشهر', 'السنة'],
-            $this->selectContainerLabels(Native::test(RandevuCreate::class)->tree(), 'column')
-        );
+        $this->assertSame(['س', 'أح', 'إث', 'ث', 'أر', 'خ', 'ج'], Native::test(RandevuCreate::class)->get('calendarWeekdayNames'));
         $this->assertSame('مصري', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
         $this->assertSame('column', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
 
         // English (LTR): identical order.
         Setting::set('locale', 'en');
 
-        $this->assertSame(
-            ['Day', 'Month', 'Year'],
-            $this->selectContainerLabels(Native::test(RandevuCreate::class)->tree(), 'column')
-        );
+        $this->assertSame(['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'], Native::test(RandevuCreate::class)->get('calendarWeekdayNames'));
         $this->assertSame('Egyptian', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
         $this->assertSame('column', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
     }
