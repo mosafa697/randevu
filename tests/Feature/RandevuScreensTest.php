@@ -207,7 +207,7 @@ class RandevuScreensTest extends TestCase
         $this->assertSame(0, $screen->get('calendarIndex'));
     }
 
-    public function test_month_select_grows_for_localized_options_on_create_and_edit(): void
+    public function test_date_fields_use_full_width_for_localized_options_on_create_and_edit(): void
     {
         $randevu = Randevu::create(['title' => 'Weighted', 'occurs_on' => today()]);
 
@@ -224,20 +224,14 @@ class RandevuScreensTest extends TestCase
                         $screen->press('useHijri');
                     }
 
-                    $monthOptionsProperty = $calendar === 'hijri' ? 'hMonthOptions' : 'monthOptions';
-                    $monthOptions = $screen->get($monthOptionsProperty);
-                    $expectedMonthFlexGrow = min(4, max(2, (int) ceil(max(array_map(mb_strlen(...), $monthOptions)) / 5)));
                     $monthLabel = __('randevu.month_label');
                     $dayLabel = __('randevu.day_label');
                     $yearLabel = __('randevu.year_label');
 
-                    $screen
-                        ->assertElement('select', fn ($node) => ($node['props']['label'] ?? '') === $dayLabel
-                            && ($node['layout']['flex_grow'] ?? null) == 1)
-                        ->assertElement('select', fn ($node) => ($node['props']['label'] ?? '') === $monthLabel
-                            && ($node['layout']['flex_grow'] ?? null) == $expectedMonthFlexGrow)
-                        ->assertElement('select', fn ($node) => ($node['props']['label'] ?? '') === $yearLabel
-                            && ($node['layout']['flex_grow'] ?? null) == 1);
+                    foreach ([$dayLabel, $monthLabel, $yearLabel] as $label) {
+                        $screen->assertElement('select', fn ($node) => ($node['props']['label'] ?? '') === $label
+                            && ($node['layout']['width'] ?? null) === 'fill');
+                    }
                 }
             }
         }
@@ -991,7 +985,7 @@ class RandevuScreensTest extends TestCase
         // test process locale is unreliable for __() here.
         $this->assertSame(
             ['اليوم', 'الشهر', 'السنة'],
-            $this->selectRowLabels(Native::test(RandevuCreate::class)->tree())
+            $this->selectContainerLabels(Native::test(RandevuCreate::class)->tree(), 'column')
         );
         $this->assertSame('مصري', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
         $this->assertSame('column', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
@@ -1001,7 +995,7 @@ class RandevuScreensTest extends TestCase
 
         $this->assertSame(
             ['Day', 'Month', 'Year'],
-            $this->selectRowLabels(Native::test(RandevuCreate::class)->tree())
+            $this->selectContainerLabels(Native::test(RandevuCreate::class)->tree(), 'column')
         );
         $this->assertSame('Egyptian', $this->firstButtonLabel(Native::test(Settings::class)->tree()));
         $this->assertSame('column', $this->cardRowFirstType(Native::test(Follow::class)->tree()));
@@ -1014,7 +1008,7 @@ class RandevuScreensTest extends TestCase
         // unreliable for __() here.
         $this->assertSame(
             ['الساعة', 'الدقيقة'],
-            $this->selectRowLabels(Native::test(RandevuCreate::class)->tree(), 2)
+            $this->selectContainerLabels(Native::test(RandevuCreate::class)->tree(), 'row', 2)
         );
 
         // English (LTR): same order.
@@ -1022,7 +1016,7 @@ class RandevuScreensTest extends TestCase
 
         $this->assertSame(
             ['Hour', 'Minute'],
-            $this->selectRowLabels(Native::test(RandevuCreate::class)->tree(), 2)
+            $this->selectContainerLabels(Native::test(RandevuCreate::class)->tree(), 'row', 2)
         );
     }
 
@@ -1070,12 +1064,12 @@ class RandevuScreensTest extends TestCase
         return [];
     }
 
-    /** Labels of the first row holding exactly the given selects count. */
-    private function selectRowLabels(array $tree, int $count = 3): array
+    /** Labels of the first container holding exactly the given selects count. */
+    private function selectContainerLabels(array $tree, string $containerType, int $count = 3): array
     {
-        foreach ($this->collectNodes($tree, 'row') as $row) {
+        foreach ($this->collectNodes($tree, $containerType) as $container) {
             $children = [];
-            foreach ($row['children'] ?? [] as $child) {
+            foreach ($container['children'] ?? [] as $child) {
                 if (is_array($child)) {
                     $children[] = $child;
                 }
@@ -1091,7 +1085,7 @@ class RandevuScreensTest extends TestCase
             }
         }
 
-        $this->fail("No {$count}-select row found in the rendered tree.");
+        $this->fail("No {$count}-select {$containerType} found in the rendered tree.");
 
         return [];
     }
@@ -1365,7 +1359,10 @@ class RandevuScreensTest extends TestCase
                 ->assertMissingElement('outlined_text_input')
                 ->assertElement('pressable', fn ($node) => ($node['props']['a11y_label'] ?? null) === __('randevu.search_expand'))
                 ->assertElement('pressable', fn ($node) => ($node['props']['has_menu'] ?? false)
-                    && ($node['props']['a11y_label'] ?? null) === __('randevu.sort_label'));
+                    && ($node['props']['a11y_label'] ?? null) === __('randevu.sort_label'))
+                ->assertElement('row', fn ($node) => ($node['layout']['align_items'] ?? null) === 1
+                    && ($node['layout']['justify_content'] ?? null) === 1
+                    && array_filter($node['children'] ?? [], fn ($child) => ($child['type'] ?? null) === 'icon') !== []);
 
             $screen
                 ->press('toggleSearch')

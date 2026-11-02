@@ -15,17 +15,17 @@
             </native:row>
 
             @if($calendar_mode === 'hijri')
-                <native:row class="w-full gap-2">
-                    <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="flex-1" />
-                    <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="flex-1" :flexGrow="$this->monthSelectorFlexGrow($hMonthOptions)" />
-                    <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="flex-1" />
-                </native:row>
+                <native:column class="w-full gap-2">
+                    <native:select :label="__('randevu.day_label')" :options="$hDayOptions" native:model="h_day" class="w-full" />
+                    <native:select :label="__('randevu.month_label')" :options="$hMonthOptions" native:model="h_month" class="w-full" />
+                    <native:select :label="__('randevu.year_label')" :options="$hYearOptions" native:model="h_year" class="w-full" />
+                </native:column>
             @else
-                <native:row class="w-full gap-2">
-                    <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="flex-1" />
-                    <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="flex-1" :flexGrow="$this->monthSelectorFlexGrow($monthOptions)" />
-                    <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="flex-1" />
-                </native:row>
+                <native:column class="w-full gap-2">
+                    <native:select :label="__('randevu.day_label')" :options="$dayOptions" native:model="day" class="w-full" />
+                    <native:select :label="__('randevu.month_label')" :options="$monthOptions" native:model="month" class="w-full" />
+                    <native:select :label="__('randevu.year_label')" :options="$yearOptions" native:model="year" class="w-full" />
+                </native:column>
             @endif
             @if(!empty($errors['occurs_on']))
                 <native:text class="{{ \App\Services\AppFonts::textClass('sm') }} text-theme-destructive">{{ $errors['occurs_on'] }}</native:text>

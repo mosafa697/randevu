@@ -3,8 +3,10 @@
         <native:pressable @press="toggleSearch" :a11y-label="$searchExpanded ? __('randevu.search_collapse') : __('randevu.search_expand')" class="w-11 h-11 items-center justify-center rounded-full bg-theme-surface">
             <native:icon ios="magnifyingglass" android="search" size="20" class="text-theme-on-surface" />
         </native:pressable>
-        <native:pressable :menu="$sortMenu" :a11y-label="__('randevu.sort_label')" class="w-11 h-11 items-center justify-center rounded-full bg-theme-surface">
-            <native:icon ios="arrow.up.arrow.down" android="sort" size="20" class="text-theme-on-surface" />
+        <native:pressable :menu="$sortMenu" :a11y-label="__('randevu.sort_label')" class="w-11 h-11 rounded-full bg-theme-surface">
+            <native:row class="w-full h-full items-center justify-center">
+                <native:icon ios="arrow.up.arrow.down" android="sort" size="20" class="text-theme-on-surface" />
+            </native:row>
         </native:pressable>
     </native:row>
     @if($searchExpanded)
