@@ -5,8 +5,12 @@ namespace App\NativeComponents;
 use App\Models\Randevu;
 use App\NativeComponents\Concerns\AppliesLocale;
 use App\NativeComponents\Concerns\AppliesTheme;
+use App\Services\RandevuHijri;
+use App\Services\RandevuNotificationBridge;
+use App\Services\RandevuTime;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
+use Native\Mobile\Attributes\Poll;
 use Native\Mobile\Edge\NativeComponent;
 
 class Dashboard extends NativeComponent
@@ -18,13 +22,26 @@ class Dashboard extends NativeComponent
     public array $stats = [];
 
     public int $gregorianCount = 0;
+
     public int $hijriCount = 0;
+
     public bool $hasData = false;
+
+    public string $todayGregorianDate = '';
+
+    public string $todayHijriDate = '';
+
+    public string $deviceTimezone = 'UTC';
+
+    /** @var list<array{id: int, title: string}> */
+    public array $todayEvents = [];
 
     public function mount(): void
     {
         $this->applyLocale();
         $this->applyTheme();
+        $this->deviceTimezone = app(RandevuNotificationBridge::class)->status()['timezone']
+            ?? (string) config('app.timezone', 'UTC');
         $this->refresh();
     }
 
@@ -33,18 +50,36 @@ class Dashboard extends NativeComponent
         return __('randevu.dashboard_title');
     }
 
+    #[Poll(60_000)]
     public function refresh(): void
     {
-        $today = Carbon::today();
+        $today = Carbon::now($this->deviceTimezone)->startOfDay();
+        $this->todayGregorianDate = RandevuTime::absolute($today);
+        [$hijriYear, $hijriMonth, $hijriDay] = RandevuHijri::fromGregorian(
+            (int) $today->year,
+            (int) $today->month,
+            (int) $today->day,
+        );
+        $this->todayHijriDate = RandevuHijri::format($hijriYear, $hijriMonth, $hijriDay)
+            .' '.RandevuHijri::hijriSuffix();
+        $this->todayEvents = Randevu::whereDate('occurs_on', $today->toDateString())
+            ->orderBy('occurs_time')
+            ->orderBy('id')
+            ->get(['id', 'title'])
+            ->map(static fn (Randevu $randevu): array => [
+                'id' => (int) $randevu->getKey(),
+                'title' => $randevu->title,
+            ])
+            ->all();
 
-        $upcoming = Randevu::upcoming()->count();
-        $memories = Randevu::memories()->count();
+        $upcoming = Randevu::whereDate('occurs_on', '>=', $today->toDateString())->count();
+        $memories = Randevu::whereDate('occurs_on', '<', $today->toDateString())->count();
 
         $this->stats = [
             'total' => $upcoming + $memories,
             'upcoming' => $upcoming,
             'memories' => $memories,
-            'today' => Randevu::today()->count(),
+            'today' => count($this->todayEvents),
             'this_month' => Randevu::whereBetween('occurs_on', [
                 $today->copy()->startOfMonth()->toDateString(),
                 $today->copy()->endOfMonth()->toDateString(),

@@ -203,6 +203,8 @@ return [
 
     // Dashboard
     'dashboard_title' => 'Dashboard',
+    'dash_date_section' => 'Today',
+    'dash_today_events' => "Today's events",
     'dash_total' => 'Total',
     'dash_upcoming' => 'Upcoming',
     'dash_memories' => 'Memories',

@@ -1,6 +1,27 @@
 <native:column class="w-full h-full bg-theme-background">
     <native:scroll-view class="w-full h-full">
         <native:column class="w-full px-5 py-3 gap-6">
+            <native:column class="w-full p-5 gap-4 rounded-2xl bg-theme-surface border border-theme-outline-variant">
+                <native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} {{ \App\Services\AppFonts::textClass('lg') }} text-theme-on-surface">{{ __('randevu.dash_date_section') }}</native:text>
+                <native:row class="w-full items-center gap-3">
+                    <native:column class="flex-1 gap-1">
+                        <native:text class="{{ \App\Services\AppFonts::textClass('xs') }} text-theme-on-surface-variant">{{ __('randevu.gregorian_label') }}</native:text>
+                        <native:text class="{{ \App\Services\AppFonts::textClass('base') }} font-semibold text-theme-on-surface">{{ $todayGregorianDate }}</native:text>
+                        <native:text class="{{ \App\Services\AppFonts::textClass('xs') }} text-theme-on-surface-variant">{{ __('randevu.hijri_label') }}</native:text>
+                        <native:text class="{{ \App\Services\AppFonts::textClass('base') }} font-semibold text-theme-on-surface">{{ $todayHijriDate }}</native:text>
+                    </native:column>
+                </native:row>
+                @if(!empty($todayEvents))
+                    <native:divider class="w-full" />
+                    <native:text font="heading" class="{{ \App\Services\AppFonts::headingClass() }} {{ \App\Services\AppFonts::textClass('base') }} text-theme-on-surface">{{ __('randevu.dash_today_events') }}</native:text>
+                    @foreach($todayEvents as $todayEvent)
+                        <native:pressable ref="today-event-{{ $todayEvent['id'] }}" @navigate="'/details/'.$todayEvent['id']" class="w-full p-3 rounded-xl bg-theme-surface-variant">
+                            <native:text class="{{ \App\Services\AppFonts::textClass('base') }} font-semibold text-theme-on-surface">{{ $todayEvent['title'] }}</native:text>
+                        </native:pressable>
+                    @endforeach
+                @endif
+            </native:column>
+
             @if(!$hasData)
                 <native:column class="w-full flex-1 items-center justify-center gap-3 p-8">
                     <native:text class="text-5xl text-theme-on-surface-variant">📊</native:text>

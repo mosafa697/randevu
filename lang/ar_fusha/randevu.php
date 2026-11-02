@@ -203,6 +203,8 @@ return [
 
     // Dashboard
     'dashboard_title' => 'نظرة عامة',
+    'dash_date_section' => 'اليوم',
+    'dash_today_events' => 'مواعيد اليوم',
     'dash_total' => 'الإجمالي',
     'dash_upcoming' => 'القادم',
     'dash_memories' => 'ذكريات',
