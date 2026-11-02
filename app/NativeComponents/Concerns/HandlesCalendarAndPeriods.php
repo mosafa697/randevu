@@ -399,7 +399,7 @@ trait HandlesCalendarAndPeriods
         if ($this->calendar_mode === 'hijri') {
             $this->calendarYearLabel .= ' '.RandevuHijri::hijriSuffix();
             $this->calendarSelectedDateLabel = trim("{$this->h_day} {$this->h_month} {$this->h_year} ".RandevuHijri::hijriSuffix());
-            $this->calendarHighlightedDay = (int) $this->h_month === $this->calendarViewMonth
+            $this->calendarHighlightedDay = RandevuHijri::monthNumber($this->h_month) === $this->calendarViewMonth
                 && (int) $this->h_year === $this->calendarViewYear
                     ? (int) $this->h_day
                     : 0;

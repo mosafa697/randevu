@@ -302,6 +302,22 @@ class RandevuScreensTest extends TestCase
         ]);
     }
 
+    public function test_hijri_calendar_highlights_the_selected_day(): void
+    {
+        Setting::set('locale', 'ar');
+
+        $screen = Native::test(RandevuCreate::class)
+            ->press('useHijri');
+
+        $selectedDay = (int) $screen->get('h_day');
+
+        $screen
+            ->assertSet('calendarHighlightedDay', $selectedDay)
+            ->press('selectCalendarDay15')
+            ->assertSet('h_day', '15')
+            ->assertSet('calendarHighlightedDay', 15);
+    }
+
     public function test_add_and_edit_share_the_inline_calendar_and_section_layout(): void
     {
         $randevu = Randevu::create(['title' => 'Weighted', 'occurs_on' => today()]);
