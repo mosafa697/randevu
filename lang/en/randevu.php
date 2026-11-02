@@ -205,6 +205,8 @@ return [
     'dashboard_title' => 'Dashboard',
     'dash_date_section' => 'Today',
     'dash_today_events' => "Today's events",
+    'dash_next_title' => 'Next appointment',
+    'dash_next_empty' => 'No upcoming appointments',
     'dash_total' => 'Total',
     'dash_upcoming' => 'Upcoming',
     'dash_memories' => 'Memories',

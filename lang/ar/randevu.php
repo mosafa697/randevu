@@ -205,6 +205,8 @@ return [
     'dashboard_title' => 'نظرة عامة',
     'dash_date_section' => 'النهاردة',
     'dash_today_events' => 'مواعيد النهاردة',
+    'dash_next_title' => 'الميعاد الجاي',
+    'dash_next_empty' => 'مفيش مواعيد جاية',
     'dash_total' => 'الإجمالي',
     'dash_upcoming' => 'اللي جاي',
     'dash_memories' => 'ذكريات',

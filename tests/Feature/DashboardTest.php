@@ -64,7 +64,125 @@ class DashboardTest extends TestCase
     {
         Native::test(Dashboard::class)
             ->assertSee('ضيف ميعاد عشان تشوف الإحصائيات هنا')
-            ->assertMissingElement('button', fn ($node) => ($node['props']['label'] ?? null) === __('randevu.empty_cta'));
+            ->assertSee(__('randevu.dash_next_empty'))
+            ->assertElement('button', fn ($node) => ($node['props']['label'] ?? null) === __('randevu.empty_cta'));
+    }
+
+    public function test_dashboard_shows_the_nearest_upcoming_appointment_and_links_to_details(): void
+    {
+        Setting::set('locale', 'en');
+
+        Randevu::create(['title' => 'Later appointment', 'occurs_on' => today()->addDays(8)]);
+        $nearest = Randevu::create(['title' => 'Nearest appointment', 'occurs_on' => today()->addDays(2)]);
+        Randevu::create(['title' => 'Past memory', 'occurs_on' => today()->subDay()]);
+
+        $screen = Native::test(Dashboard::class)
+            ->assertSet('nextAppointment', [
+                'id' => $nearest->id,
+                'title' => 'Nearest appointment',
+                'phrase' => $nearest->relativePhrase(),
+                'absolute' => RandevuTime::absolute($nearest->occurs_on),
+                'is_today' => false,
+            ])
+            ->assertSee(__('randevu.dash_next_title'))
+            ->assertSee('Nearest appointment')
+            ->assertSee($nearest->relativePhrase())
+            ->assertSee(RandevuTime::absolute($nearest->occurs_on));
+
+        $screen
+            ->press('next-appointment-'.$nearest->id)
+            ->followNavigation()
+            ->assertSee('Nearest appointment');
+    }
+
+    public function test_dashboard_marks_a_today_appointment_with_a_today_badge(): void
+    {
+        Setting::set('locale', 'en');
+        $today = Randevu::create(['title' => 'Today appointment', 'occurs_on' => today()]);
+
+        $screen = Native::test(Dashboard::class)
+            ->assertSet('nextAppointment', [
+                'id' => $today->id,
+                'title' => 'Today appointment',
+                'phrase' => __('randevu.phrase_today'),
+                'absolute' => RandevuTime::absolute($today->occurs_on),
+                'is_today' => true,
+            ])
+            ->assertSee('Today appointment');
+
+        $screen->assertElement(
+            'badge',
+            fn ($node) => (($node['props']['label'] ?? null) === __('randevu.today')),
+        );
+    }
+
+    public function test_dashboard_shows_countdown_phrase_and_today_badge_for_timed_today_appointment(): void
+    {
+        Setting::set('locale', 'en');
+
+        $this->travelTo(Carbon::parse('2026-11-02 12:00:00'), function (): void {
+            $today = Randevu::create([
+                'title' => 'Timed today appointment',
+                'occurs_on' => today(),
+                'occurs_time' => '18:00',
+                'show_years' => false,
+                'show_months' => false,
+                'show_days' => false,
+                'show_hours' => true,
+            ]);
+            $screen = Native::test(Dashboard::class);
+            $phrase = $screen->get('nextAppointment')['phrase'];
+
+            $this->assertNotSame(__('randevu.phrase_today'), $phrase);
+
+            $screen
+                ->assertSee($phrase)
+                ->assertElement(
+                    'badge',
+                    fn ($node) => (($node['props']['label'] ?? null) === __('randevu.today')),
+                );
+        });
+    }
+
+    public function test_dashboard_empty_next_appointment_state_links_to_create(): void
+    {
+        Setting::set('locale', 'en');
+
+        Native::test(Dashboard::class)
+            ->assertSet('nextAppointment', null)
+            ->assertSee(__('randevu.dash_next_empty'))
+            ->assertSee(__('randevu.empty_cta'))
+            ->press('next-appointment-add')
+            ->followNavigation()
+            ->assertSee(__('randevu.title_label'));
+    }
+
+    public function test_dashboard_memories_only_state_has_no_stale_next_appointment(): void
+    {
+        Setting::set('locale', 'en');
+        Randevu::create(['title' => 'Past memory', 'occurs_on' => today()->subDays(10)]);
+
+        Native::test(Dashboard::class)
+            ->assertSet('nextAppointment', null)
+            ->assertSee(__('randevu.dash_next_empty'))
+            ->assertSee(__('randevu.empty_cta'))
+            ->assertMissingElement(
+                'pressable',
+                fn ($node) => str_starts_with((string) ($node['ref'] ?? ''), 'next-appointment-'),
+            );
+    }
+
+    public function test_dashboard_next_appointment_heading_is_localized(): void
+    {
+        Randevu::create(['title' => 'Appointment', 'occurs_on' => today()->addDay()]);
+
+        foreach (['ar', 'ar_fusha', 'en'] as $locale) {
+            Setting::set('locale', $locale);
+
+            Native::test(Dashboard::class)
+                ->assertSee(__('randevu.dash_next_title'))
+                ->assertSee('Appointment');
+        }
     }
 
     public function test_dashboard_shows_current_dates_in_each_locale(): void

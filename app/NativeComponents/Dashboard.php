@@ -36,6 +36,9 @@ class Dashboard extends NativeComponent
     /** @var list<array{id: int, title: string}> */
     public array $todayEvents = [];
 
+    /** @var array{id: int, title: string, phrase: string, absolute: string, is_today: bool}|null */
+    public ?array $nextAppointment = null;
+
     public function mount(): void
     {
         $this->applyLocale();
@@ -71,6 +74,15 @@ class Dashboard extends NativeComponent
                 'title' => $randevu->title,
             ])
             ->all();
+
+        $nearestUpcoming = Randevu::upcoming()->first();
+        $this->nextAppointment = $nearestUpcoming === null ? null : [
+            'id' => (int) $nearestUpcoming->getKey(),
+            'title' => $nearestUpcoming->title,
+            'phrase' => $nearestUpcoming->relativePhrase(),
+            'absolute' => RandevuTime::absolute($nearestUpcoming->occurs_on),
+            'is_today' => $nearestUpcoming->isToday(),
+        ];
 
         $upcoming = Randevu::whereDate('occurs_on', '>=', $today->toDateString())->count();
         $memories = Randevu::whereDate('occurs_on', '<', $today->toDateString())->count();

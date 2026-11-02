@@ -205,6 +205,8 @@ return [
     'dashboard_title' => 'نظرة عامة',
     'dash_date_section' => 'اليوم',
     'dash_today_events' => 'مواعيد اليوم',
+    'dash_next_title' => 'الموعد القادم',
+    'dash_next_empty' => 'لا توجد مواعيد قادمة',
     'dash_total' => 'الإجمالي',
     'dash_upcoming' => 'القادم',
     'dash_memories' => 'ذكريات',
